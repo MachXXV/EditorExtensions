@@ -5,10 +5,10 @@ using System.Runtime.CompilerServices;
 // Change them to the values specific to your project.
 
 [assembly: AssemblyTitle("EditorExtensions")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Kerbal Space Program Plugin : Editor Extensions")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
+[assembly: AssemblyProduct("Editor Extensions")]
 [assembly: AssemblyCopyright("MachXXV")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

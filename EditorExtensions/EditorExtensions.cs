@@ -9,6 +9,9 @@ public class EditorExtensions : MonoBehaviour
     const string launchSiteName_LaunchPad = "LaunchPad";
     const string launchSiteName_Runway = "Runway";
 	const string degreesSymbol = "\u00B0";
+	const string VABGameObjectName = "interior_vehicleassembly";
+	const string SPHGameObjectName = "xport_sph3";
+	
 
     //static int[] symmetryModes = { -1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30 };
 
@@ -56,6 +59,45 @@ public class EditorExtensions : MonoBehaviour
 		editor.shipNameField.commitOnLostFocus = true;
 		editor.shipNameField.AddCommitDelegate((IKeyFocusable _) => { ignoreHotKeys = false; });
 		editor.shipNameField.AddFocusDelegate((UITextField _) => { ignoreHotKeys = true; });
+    }
+
+	public void OnLevelWasLoaded()
+	{
+		DebugMessage ("Entering OnLevelWasLoaded()");
+
+		EditorLogic editor = EditorLogic.fetch;
+		if (editor)
+		{
+			editor.maxHeight = 2000;
+
+			// Modify cameras/available interior space
+			if (HighLogic.LoadedScene == GameScenes.EDITOR)
+			{
+				DebugMessage ("Updating VAB dimensions and camera");
+
+				VABCamera VABcam = Camera.mainCamera.GetComponent<VABCamera>();
+				VABcam.maxHeight = 2000;
+				VABcam.maxDistance = 2000;
+
+				GameObject interior = GameObject.Find(VABGameObjectName);
+				interior.transform.localScale = new Vector3(2.2f, 1.8f, 1.8f);
+				interior.transform.position = new Vector3(59f, 51.5f, 12);
+			}
+			else if (HighLogic.LoadedScene == GameScenes.SPH)
+			{
+				DebugMessage ("Updating SPH dimensions and camera");
+
+				SPHCamera SPHcam = Camera.mainCamera.GetComponent<SPHCamera>();
+				SPHcam.maxHeight = 2000;
+				SPHcam.maxDistance = 2000;
+				SPHcam.maxDisplaceX = 2000;
+				SPHcam.maxDisplaceZ = 2000;
+
+				GameObject interior = GameObject.Find(SPHGameObjectName);
+				interior.transform.localScale = new Vector3(12, 6, 12);
+				interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
+			}
+		}
     }
 
     public void Update()
