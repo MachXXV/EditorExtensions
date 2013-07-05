@@ -21,7 +21,7 @@
     <ConsolePause>false</ConsolePause>
     <CustomCommands>
       <CustomCommands>
-        <Command type="AfterBuild" command="" />
+        <Command type="AfterBuild" command="deploy.bat" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>

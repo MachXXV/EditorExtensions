@@ -1,1 +1,1 @@
-copy /Y C:\Users\sysop\Documents\Projects\EditorExtensions\EditorExtensions\bin\Debug\EditorExtensions.dll C:\KSP_Test\GameData\EditorExtensions\
+copy /Y "%~dp0bin\Debug\EditorExtensions.dll" C:\KSP_Test\GameData\EditorExtensions\
