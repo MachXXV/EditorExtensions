@@ -17,7 +17,7 @@ public class EditorExtensions : MonoBehaviour
 
 	int _symmetryMode = 0;
     int maxSymmetryMode = 50;
-    static float[] angle = { 0, 5, 15, 30, 45, 90 };
+    static float[] angle = { 0, 1, 5, 15, 30, 45, 90 };
 
     bool ignoreHotKeys = false;
 
@@ -35,6 +35,12 @@ public class EditorExtensions : MonoBehaviour
 	{
 		if (debug)
 			print ("EditorExtensions: " + message);
+	}
+
+	void DebugMessage(string message, bool boolValue)
+	{
+		if (debug)
+			print (String.Format("EditorExtensions: {0} {1}", message, boolValue.ToString()));
 	}
 
     public void Awake()
@@ -109,30 +115,92 @@ public class EditorExtensions : MonoBehaviour
         // V - Vertical alignment toggle
         if (Input.GetKeyDown(KeyCode.V))
         {
-			DebugMessage ("Toggling vertical snap");
+			//DebugMessage ("Toggling vertical snap");
             GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ^= true;
+
+			//if normal radial angle snap is currently off, vertical snap will have no effect unless it is re-enabled
+			//automatically set aangle snap to minimum - some people thought vert snap was broken in this situation, the game doesn't appear to allow it
+			if (GameSettings.VAB_USE_ANGLE_SNAP == false && GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL == true)
+			{
+				DebugMessage ("Enabling angle snap to allow vertical snap to work");
+				//angle snap needs be > 0, otherwise log is spammed with DivideByZero errors
+				if(editor.srfAttachAngleSnap == 0)
+					editor.srfAttachAngleSnap = 1;
+				GameSettings.VAB_USE_ANGLE_SNAP = true;
+			}
+
+			DebugMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
             return;
         }
 
-        altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.AltGr);        
+		//check for the various alt/mod etc keypresses
+        altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.AltGr);
 
-        // ALT+R : Toggle radial attachment
-        if (altKeyPressed && EditorLogic.SelectedPart && Input.GetKeyDown(KeyCode.R))
+		//check for shift key
+		shiftKeyPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+		// ALT+R : Toggle radial attachment globally
+		if (altKeyPressed && !shiftKeyPressed && Input.GetKeyDown(KeyCode.R))
+		{
+			editor.allowSrfAttachment ^= true;
+			DebugMessage("Allow surface attachment is globally " + (editor.allowSrfAttachment ? "enabled" : "disabled"));
+
+			DebugMessage (
+				String.Format("after toggle = Part: {0} allowSrfAttach: {1} srfAttach: {2} allowSrfAttachment: {3} allowNodeAttachment: {4}"
+			              , EditorLogic.SelectedPart.name
+			              ,EditorLogic.SelectedPart.attachRules.allowSrfAttach.ToString()
+			              ,EditorLogic.SelectedPart.attachRules.srfAttach.ToString()
+			              ,editor.allowSrfAttachment.ToString()
+			              ,editor.allowNodeAttachment.ToString()
+			              ));
+
+			return;
+		}
+
+		// Shift+ALT+R : Toggle radial attachment for selected part, also allows radial attachment for parts that do not usually allow it.
+        if (altKeyPressed && shiftKeyPressed && EditorLogic.SelectedPart && Input.GetKeyDown(KeyCode.R))
         {
-			DebugMessage ("Toggling allowSrfAttach for " + EditorLogic.SelectedPart.name);
-            EditorLogic.SelectedPart.attachRules.allowSrfAttach ^= true;
+			DebugMessage (
+				String.Format("before toggle = Part: {0} allowSrfAttach: {1} srfAttach: {2} allowSrfAttachment: {3} allowNodeAttachment: {4}"
+			              ,EditorLogic.SelectedPart.name
+			              ,EditorLogic.SelectedPart.attachRules.allowSrfAttach.ToString()
+			              ,EditorLogic.SelectedPart.attachRules.srfAttach.ToString()
+			              ,editor.allowSrfAttachment.ToString()
+			              ,editor.allowNodeAttachment.ToString()
+				));
+
+			DebugMessage ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
+			//EditorLogic.SelectedPart.attachRules.allowSrfAttach no longer seems to have an effect
+            //EditorLogic.SelectedPart.attachRules.allowSrfAttach ^= true;
+			EditorLogic.SelectedPart.attachRules.srfAttach ^= true;
+
+			//set the global radial attachment setting to the same
+			//otherwise this can get confusing when the two settings don't match, since the global will override the part-specific setting, 
+			//which can make this toggle appear to be nto working correctly
+			editor.allowSrfAttachment = EditorLogic.SelectedPart.attachRules.srfAttach;
+
+
+				DebugMessage (
+				String.Format("after toggle = Part: {0} allowSrfAttach: {1} srfAttach: {2} allowSrfAttachment: {3} allowNodeAttachment: {4}"
+			              , EditorLogic.SelectedPart.name
+			              ,EditorLogic.SelectedPart.attachRules.allowSrfAttach.ToString()
+			              ,EditorLogic.SelectedPart.attachRules.srfAttach.ToString()
+			              ,editor.allowSrfAttachment.ToString()
+			              ,editor.allowNodeAttachment.ToString()
+			              ));
+
             return;
         }
 
 		// ALT+Z : Toggle part clipping (From cheat options)
-		if (altKeyPressed && Input.GetKeyDown(KeyCode.Z))
+		if(altKeyPressed && Input.GetKeyDown(KeyCode.Z))
 		{
 			CheatOptions.AllowPartClipping ^= true;
 			DebugMessage("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 			return;
 		}
 
-        shiftKeyPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        
 
         inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
 
@@ -159,9 +227,9 @@ public class EditorExtensions : MonoBehaviour
 
 			DebugMessage ("Setting srfAttachAngleSnap to " + newAngle.ToString());
 			editor.srfAttachAngleSnap = newAngle;
-			DebugMessage ("Current srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString());
 
-			if (editor.srfAttachAngleSnap == 0) {
+			if (editor.srfAttachAngleSnap == 0)
+			{
 				GameSettings.VAB_USE_ANGLE_SNAP = false;
 				editor.angleSnapSprite.PlayAnim (0);
 			}
@@ -171,6 +239,7 @@ public class EditorExtensions : MonoBehaviour
 			}
 
 			DebugMessage ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString());
+			return;
 
         }
 

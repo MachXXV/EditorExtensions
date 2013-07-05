@@ -1,9 +1,8 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="EditorExtensions\EditorExtensions.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="EditorExtensions/EditorExtensions.cs">
     <Files>
-      <File FileName="EditorExtensions\EditorExtensions.cs" Line="58" Column="22" />
-      <File FileName="EditorExtensions\Readme.html" Line="16" Column="58" />
+      <File FileName="EditorExtensions/EditorExtensions.cs" Line="5" Column="27" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
