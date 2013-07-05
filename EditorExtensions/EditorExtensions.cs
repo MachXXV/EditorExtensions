@@ -44,6 +44,8 @@ public class EditorExtensions : MonoBehaviour
 
 		editor = EditorLogic.fetch;
 
+		AlterEditorSpace(editor);
+
 		editor.symmetrySprite.Hide(true);
 		editor.mirrorSprite.Hide(true);
 
@@ -61,44 +63,38 @@ public class EditorExtensions : MonoBehaviour
 		editor.shipNameField.AddFocusDelegate((UITextField _) => { ignoreHotKeys = true; });
     }
 
-	public void OnLevelWasLoaded()
+	void AlterEditorSpace(EditorLogic editor)
 	{
-		DebugMessage ("Entering OnLevelWasLoaded()");
+		editor.maxHeight = 2000;
 
-		EditorLogic editor = EditorLogic.fetch;
-		if (editor)
+		// Modify cameras/available interior space
+		if (HighLogic.LoadedScene == GameScenes.EDITOR)
 		{
-			editor.maxHeight = 2000;
+			DebugMessage ("Updating VAB dimensions and camera");
 
-			// Modify cameras/available interior space
-			if (HighLogic.LoadedScene == GameScenes.EDITOR)
-			{
-				DebugMessage ("Updating VAB dimensions and camera");
+			VABCamera VABcam = Camera.mainCamera.GetComponent<VABCamera>();
+			VABcam.maxHeight = 2000;
+			VABcam.maxDistance = 2000;
 
-				VABCamera VABcam = Camera.mainCamera.GetComponent<VABCamera>();
-				VABcam.maxHeight = 2000;
-				VABcam.maxDistance = 2000;
-
-				GameObject interior = GameObject.Find(VABGameObjectName);
-				interior.transform.localScale = new Vector3(2.2f, 1.8f, 1.8f);
-				interior.transform.position = new Vector3(59f, 51.5f, 12);
-			}
-			else if (HighLogic.LoadedScene == GameScenes.SPH)
-			{
-				DebugMessage ("Updating SPH dimensions and camera");
-
-				SPHCamera SPHcam = Camera.mainCamera.GetComponent<SPHCamera>();
-				SPHcam.maxHeight = 2000;
-				SPHcam.maxDistance = 2000;
-				SPHcam.maxDisplaceX = 2000;
-				SPHcam.maxDisplaceZ = 2000;
-
-				GameObject interior = GameObject.Find(SPHGameObjectName);
-				interior.transform.localScale = new Vector3(12, 6, 12);
-				interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
-			}
+			GameObject interior = GameObject.Find(VABGameObjectName);
+			interior.transform.localScale = new Vector3(2.2f, 1.8f, 1.8f);
+			interior.transform.position = new Vector3(59f, 51.5f, 12);
 		}
-    }
+		else if (HighLogic.LoadedScene == GameScenes.SPH)
+		{
+			DebugMessage ("Updating SPH dimensions and camera");
+
+			SPHCamera SPHcam = Camera.mainCamera.GetComponent<SPHCamera>();
+			SPHcam.maxHeight = 2000;
+			SPHcam.maxDistance = 2000;
+			SPHcam.maxDisplaceX = 2000;
+			SPHcam.maxDisplaceZ = 2000;
+
+			GameObject interior = GameObject.Find(SPHGameObjectName);
+			interior.transform.localScale = new Vector3(12, 6, 12);
+			interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
+		}
+	}
 
     public void Update()
     {
@@ -195,41 +191,6 @@ public class EditorExtensions : MonoBehaviour
 			DebugMessage ("Setting symmetry to " + _symmetryMode.ToString());
 			editor.symmetryMode = _symmetryMode;
 		}
-
-
-		/*
-        // "X", "Shift X" Symmetry level/"Mode"
-        if (inVAB && Input.GetKeyDown(KeyCode.X))
-        {
-			//disable sprite to avoid out of bounds animation calls
-			editor.symmetrySprite.enabled = false;
-
-			DebugMessage ("A Symmetry mode starting at " + editor.symmetryMode.ToString());
-
-            if (altKeyPressed || (editor.symmetryMode > maxSymmetryMode && !shiftKeyPressed))
-			{
-				DebugMessage ("B Symmetry " + editor.symmetryMode.ToString());
-                editor.symmetryMode = -1;
-				DebugMessage ("C Symmetry " + editor.symmetryMode.ToString());
-			}
-			else if (editor.symmetryMode == 7 && !shiftKeyPressed)
-			{
-				DebugMessage ("D Symmetry " + editor.symmetryMode.ToString());
-				editor.symmetryMode = 8;
-				DebugMessage ("E Symmetry " + editor.symmetryMode.ToString());
-			}
-
-			if (editor.symmetryMode > 7)
-			{
-				DebugMessage ("F Symmetry " + editor.symmetryMode.ToString());
-                editor.symmetryMode = editor.symmetryMode + (shiftKeyPressed ? -1 : 1);
-				DebugMessage ("G Symmetry  " + editor.symmetryMode.ToString());
-			}
-        }
-        */
-
-
-        //idea-delete single part from group?
     }
 
 	GUIStyle labelStyle;
