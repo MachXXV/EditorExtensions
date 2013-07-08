@@ -4,6 +4,8 @@ using UnityEngine;
 [KSPAddon(KSPAddon.Startup.EditorAny, false)]
 public class EditorExtensions : MonoBehaviour
 {
+	#region member vars
+
     bool debug = true;
 
     const string launchSiteName_LaunchPad = "LaunchPad";
@@ -11,9 +13,6 @@ public class EditorExtensions : MonoBehaviour
 	const string degreesSymbol = "\u00B0";
 	const string VABGameObjectName = "interior_vehicleassembly";
 	const string SPHGameObjectName = "xport_sph3";
-	
-
-    //static int[] symmetryModes = { -1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30 };
 
 	int _symmetryMode = 0;
     int maxSymmetryMode = 50;
@@ -31,6 +30,10 @@ public class EditorExtensions : MonoBehaviour
 	Rect symLabelRect;
 	Rect angleSnapLabelRect;
 
+	#endregion
+
+	#region logging
+
 	void DebugMessage(string message)
 	{
 		if (debug)
@@ -43,6 +46,14 @@ public class EditorExtensions : MonoBehaviour
 			print (String.Format("EditorExtensions: {0} {1}", message, boolValue.ToString()));
 	}
 
+	#endregion
+
+	public EditorExtensions()
+	{
+		DebugMessage("Class constructor");
+	}
+
+	//Unity initialization call
     public void Awake()
     {
         //DontDestroyOnLoad(this);
@@ -104,6 +115,8 @@ public class EditorExtensions : MonoBehaviour
 
     public void Update()
     {
+		//Idea: change root part. 
+
         //need to verify the EditorLogic state - do we need to fetch it every time?
         editor = EditorLogic.fetch;
         if (editor == null)
@@ -111,6 +124,46 @@ public class EditorExtensions : MonoBehaviour
 
         if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
             return;
+
+		//may need to go away from this and do explicit editor.editorType calls 
+		inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
+
+		//check for the various alt/mod etc keypresses
+		altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.AltGr);
+		//check for shift key
+		shiftKeyPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+		//Space - when no part is selected, reset camera
+		if (Input.GetKeyDown(KeyCode.Space) && !editor.PartSelected)
+		{
+			if (HighLogic.LoadedScene == GameScenes.EDITOR)
+			{
+				VABCamera VABcam = Camera.mainCamera.GetComponent<VABCamera>();
+				//VABcam.camPitch = 0;
+				//VABcam.camHdg = 0;
+				VABcam.ResetCamera();
+			}
+			else if (HighLogic.LoadedScene == GameScenes.SPH)
+			{
+				SPHCamera SPHcam = Camera.mainCamera.GetComponent<SPHCamera>();
+				SPHcam.ResetCamera();
+			}
+		}
+
+		// Alt+M - Toggle VAB/SPH editor mode (while staying in the same hangar)
+		if (Input.GetKeyDown(KeyCode.Tab))
+		{
+			if (editor.editorType == EditorLogic.EditorMode.SPH){
+				editor.editorType = EditorLogic.EditorMode.VAB;
+				editor.launchSiteName = launchSiteName_LaunchPad;
+			}
+			else{
+				editor.editorType = EditorLogic.EditorMode.SPH;
+				editor.launchSiteName = launchSiteName_Runway;
+				editor.symmetryMode = 1;
+			}
+			return;
+		}
 
         // V - Vertical alignment toggle
         if (Input.GetKeyDown(KeyCode.V))
@@ -133,12 +186,6 @@ public class EditorExtensions : MonoBehaviour
             return;
         }
 
-		//check for the various alt/mod etc keypresses
-        altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.AltGr);
-
-		//check for shift key
-		shiftKeyPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
 		// ALT+R : Toggle radial attachment globally
 		if (altKeyPressed && !shiftKeyPressed && Input.GetKeyDown(KeyCode.R))
 		{
@@ -160,6 +207,7 @@ public class EditorExtensions : MonoBehaviour
 		// Shift+ALT+R : Toggle radial attachment for selected part, also allows radial attachment for parts that do not usually allow it.
         if (altKeyPressed && shiftKeyPressed && EditorLogic.SelectedPart && Input.GetKeyDown(KeyCode.R))
         {
+			//some excessive loggeration to figure out the surface attachment stuff
 			DebugMessage (
 				String.Format("before toggle = Part: {0} allowSrfAttach: {1} srfAttach: {2} allowSrfAttachment: {3} allowNodeAttachment: {4}"
 			              ,EditorLogic.SelectedPart.name
@@ -200,10 +248,6 @@ public class EditorExtensions : MonoBehaviour
 			return;
 		}
 
-        
-
-        inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
-
         // C, Shift+C : Increment/Decrement Angle snap
 		if (Input.GetKeyDown (KeyCode.C)) {
 
@@ -231,6 +275,9 @@ public class EditorExtensions : MonoBehaviour
 			if (editor.srfAttachAngleSnap == 0)
 			{
 				GameSettings.VAB_USE_ANGLE_SNAP = false;
+				//Vertical snap doesn't work when angle snap is disabled.
+				//Resetting it here so that the toggle logic for vert snap maintains state
+				GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL = false;
 				editor.angleSnapSprite.PlayAnim (0);
 			}
 			else
@@ -299,6 +346,3 @@ public class EditorExtensions : MonoBehaviour
         }
     }
 }
-
-
-
