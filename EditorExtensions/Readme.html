@@ -15,7 +15,7 @@
 			<li>Toggle part clipping (Use with caution, from the cheat options)</li>
 			<li>Expands usable area of VAB/SPH and camera movement</li>
 			<li>Toggle radial attachment of parts</li>
-			<li>Toggle between SPH/VAB editor modes</li>
+			<li>Toggle between SPH/Runway and VAB/Launchpad editor modes</li>
 			<li>Reset hangar camera</li>
 		</ul>
 </p>
@@ -25,11 +25,12 @@
 	<ul>
 		<li>V			- Toggle vertical snap</li>
 		<li>X, Shift+X	- Increase/Decrease symmetry level</li>
+		<li>Alt+X		- Reset symmetry level</li>
 		<li>C, Shift+C	- Increase/Decrease angle snap</li>
-		<li>Alt+R		- Toggle radial/surface attachment for all parts, except those parts that have it explicitly disabled in their config)</li>
-		<li>Shift+Alt+R - Toggle radial/surface attachment for the currently selected part, including those that have normally have it disabled</li>
+		<li>Alt+C		- Reset angle snap</li>
+		<li>Alt+R		- Toggle radial/surface attachment. For all parts, and when a part is selected, will toggle surface attachment even when that part's config usually does not allow it</li>
 		<li>Alt+Z		- Toggle part clipping (CAUTION: This is a cheat option)</li>
-		<li>Space		- When no part is selected, resets camera</li>
+		<li>Space		- When no part is selected, resets camera pitch and heading (straight ahead and level)</li>
 		<li>Tab			- Toggles between VAB/SPH editor modes, and toggles launching to runway or launchpad.</li>
 	</ul>
 </p>
@@ -37,10 +38,13 @@
 <p>
 <h2>Version History</h2>
 
-<h3>0.4 Alpha - 6 July 2013</h3>
+<h3>0.4 Alpha - 8 July 2013</h3>
 <ul>
+	<li>Added on-screen messages when settings are toggled.</li>
 	<li>Space resets camera when no part is selected</li>
-	<li>Tab toggles between VAB and SPH editor modes while staying in the same building, and toggles launching to runway/launchpad. The part behavior may be weird when you use this.</li>
+	<li>Tab toggles between VAB and SPH editor modes while staying in the same building, and toggles launching to runway/launchpad.</li>
+	<li>Alt+C resets angle snap</li>
+	<li>Consolidated surface/radial attachment toggle to just use Alt+R and be context aware for when a part is selected</li>
 </ul>
 
 <h3>0.3 Alpha - 5 July 2013</h3>

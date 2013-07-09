@@ -70,9 +70,7 @@ public class EditorExtensions : MonoBehaviour
 		symLabelRect = new Rect (70, Screen.height - 104, 50, 50);
 		angleSnapLabelRect = new Rect (137, Screen.height - 104, 50, 50);
 
-		//init styles
-		if (labelStyle == null)
-			InitLabelStyle ();
+		InitStyles ();
 
 		//Disable shortcut keys when ship name textarea has focus
 		editor.shipNameField.commitOnLostFocus = true;
@@ -139,14 +137,16 @@ public class EditorExtensions : MonoBehaviour
 			if (HighLogic.LoadedScene == GameScenes.EDITOR)
 			{
 				VABCamera VABcam = Camera.mainCamera.GetComponent<VABCamera>();
-				//VABcam.camPitch = 0;
-				//VABcam.camHdg = 0;
-				VABcam.ResetCamera();
+				VABcam.camPitch = 0;
+				VABcam.camHdg = 0;
+				//VABcam.ResetCamera();
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPH)
 			{
 				SPHCamera SPHcam = Camera.mainCamera.GetComponent<SPHCamera>();
-				SPHcam.ResetCamera();
+				SPHcam.camPitch = 0;
+				SPHcam.camHdg = 0;
+				//SPHcam.ResetCamera();
 			}
 		}
 
@@ -156,11 +156,13 @@ public class EditorExtensions : MonoBehaviour
 			if (editor.editorType == EditorLogic.EditorMode.SPH){
 				editor.editorType = EditorLogic.EditorMode.VAB;
 				editor.launchSiteName = launchSiteName_LaunchPad;
+				OSDMessage ("VAB/Launchpad Mode");
 			}
 			else{
 				editor.editorType = EditorLogic.EditorMode.SPH;
 				editor.launchSiteName = launchSiteName_Runway;
 				editor.symmetryMode = 1;
+				OSDMessage ("SPH/Runway Mode");
 			}
 			return;
 		}
@@ -181,15 +183,41 @@ public class EditorExtensions : MonoBehaviour
 					editor.srfAttachAngleSnap = 1;
 				GameSettings.VAB_USE_ANGLE_SNAP = true;
 			}
-
+			OSDMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
 			DebugMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
             return;
         }
 
+		// ALT+R : Toggle radial/surface attachment globally
+		// When part is selected, also toggles surface attachment for that part, even if that part's cfg has it disabled.
+		if (altKeyPressed && Input.GetKeyDown(KeyCode.R))
+		{
+			if (EditorLogic.SelectedPart)
+			{
+				//Toggle surface attachment for selected part, set global surface attachment toggle to match
+				EditorLogic.SelectedPart.attachRules.srfAttach ^= true;
+				editor.allowSrfAttachment = EditorLogic.SelectedPart.attachRules.srfAttach;
+				DebugMessage ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
+				OSDMessage(String.Format("Surface attachment {0}, and for {1}"
+				                         ,EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"
+				                         ,EditorLogic.SelectedPart.name
+				                         ));
+			}
+			else
+			{
+				//just toggle global surface attachment, parts whose config do not allow it are unaffected
+				editor.allowSrfAttachment ^= true;
+				OSDMessage("Allow surface attachment is globally " + (editor.allowSrfAttachment ? "enabled" : "disabled"));
+				DebugMessage("Allow surface attachment is globally " + (editor.allowSrfAttachment ? "enabled" : "disabled"));
+			}
+		}
+
+		/****consolidating this to just Alt+R to simplify things
 		// ALT+R : Toggle radial attachment globally
 		if (altKeyPressed && !shiftKeyPressed && Input.GetKeyDown(KeyCode.R))
 		{
 			editor.allowSrfAttachment ^= true;
+			OSDMessage("Allow surface attachment is globally " + (editor.allowSrfAttachment ? "enabled" : "disabled"));
 			DebugMessage("Allow surface attachment is globally " + (editor.allowSrfAttachment ? "enabled" : "disabled"));
 
 			DebugMessage (
@@ -203,6 +231,7 @@ public class EditorExtensions : MonoBehaviour
 
 			return;
 		}
+
 
 		// Shift+ALT+R : Toggle radial attachment for selected part, also allows radial attachment for parts that do not usually allow it.
         if (altKeyPressed && shiftKeyPressed && EditorLogic.SelectedPart && Input.GetKeyDown(KeyCode.R))
@@ -222,6 +251,11 @@ public class EditorExtensions : MonoBehaviour
             //EditorLogic.SelectedPart.attachRules.allowSrfAttach ^= true;
 			EditorLogic.SelectedPart.attachRules.srfAttach ^= true;
 
+			OSDMessage(String.Format("Surface attachment {0} for {1}"
+			                         ,EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"
+			                         ,EditorLogic.SelectedPart.name
+			                         ));
+
 			//set the global radial attachment setting to the same
 			//otherwise this can get confusing when the two settings don't match, since the global will override the part-specific setting, 
 			//which can make this toggle appear to be nto working correctly
@@ -239,38 +273,45 @@ public class EditorExtensions : MonoBehaviour
 
             return;
         }
+        */
 
 		// ALT+Z : Toggle part clipping (From cheat options)
 		if(altKeyPressed && Input.GetKeyDown(KeyCode.Z))
 		{
 			CheatOptions.AllowPartClipping ^= true;
 			DebugMessage("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
+			OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 			return;
 		}
 
         // C, Shift+C : Increment/Decrement Angle snap
 		if (Input.GetKeyDown (KeyCode.C)) {
 
-			//GameSettings.VAB_USE_ANGLE_SNAP = false;
-			DebugMessage ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
-
-			int currentAngleIndex = Array.IndexOf(angle, editor.srfAttachAngleSnap);
-
-			DebugMessage ("currentAngleIndex: " + currentAngleIndex.ToString());
-
-			float newAngle;
-			if (shiftKeyPressed)
+			if (!altKeyPressed)
 			{
-				newAngle = angle[currentAngleIndex == 0 ? angle.Length - 1 : currentAngleIndex - 1];
-			}
-            else
-			{
-				DebugMessage ("new AngleIndex: " + (currentAngleIndex == angle.Length - 1 ? 0 : currentAngleIndex + 1).ToString());
-				newAngle = angle[currentAngleIndex == angle.Length - 1 ? 0 : currentAngleIndex + 1];
-			}
+				//GameSettings.VAB_USE_ANGLE_SNAP = false;
+				DebugMessage ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 
-			DebugMessage ("Setting srfAttachAngleSnap to " + newAngle.ToString());
-			editor.srfAttachAngleSnap = newAngle;
+				int currentAngleIndex = Array.IndexOf (angle, editor.srfAttachAngleSnap);
+
+				DebugMessage ("currentAngleIndex: " + currentAngleIndex.ToString ());
+
+				float newAngle;
+				if (shiftKeyPressed) {
+					newAngle = angle [currentAngleIndex == 0 ? angle.Length - 1 : currentAngleIndex - 1];
+				} else {
+					DebugMessage ("new AngleIndex: " + (currentAngleIndex == angle.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
+					newAngle = angle [currentAngleIndex == angle.Length - 1 ? 0 : currentAngleIndex + 1];
+				}
+
+				DebugMessage ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
+				editor.srfAttachAngleSnap = newAngle;
+			}
+			else
+			{
+				DebugMessage ("Resetting srfAttachAngleSnap to 0");
+				editor.srfAttachAngleSnap = 0;
+			}
 
 			if (editor.srfAttachAngleSnap == 0)
 			{
@@ -309,9 +350,23 @@ public class EditorExtensions : MonoBehaviour
 		}
     }
 
-	GUIStyle labelStyle;
-	void InitLabelStyle()
+	#region GUI
+
+	GUIStyle windowStyle, osdLabelStyle, labelStyle;
+	void InitStyles()
 	{
+		//windowStyle = new GUIStyle(HighLogic.Skin.Window);
+
+		windowStyle = new GUIStyle();
+		windowStyle.fixedWidth = 250f;		
+
+		osdLabelStyle = new GUIStyle();
+		osdLabelStyle.stretchWidth = true;
+		osdLabelStyle.alignment = TextAnchor.MiddleCenter;
+		osdLabelStyle.fontSize = 24;
+		osdLabelStyle.fontStyle = FontStyle.Bold;
+		osdLabelStyle.normal.textColor = Color.yellow;
+
 		labelStyle = new GUIStyle ("Label");
 		labelStyle.alignment = TextAnchor.MiddleCenter;
 		labelStyle.fontSize = 22;
@@ -319,12 +374,47 @@ public class EditorExtensions : MonoBehaviour
 		labelStyle.normal.textColor = XKCDColors.DarkYellow;
 	}
 
+	float messageCutoff = 0;
+	string messageText = "";
+	void OSDMessage(string message, float delay = 1)
+	{
+		messageCutoff = Time.time + delay;
+		messageText = message;
+		DebugMessage (String.Format ("messageCutoff = {0}, messageText = {1}", messageCutoff.ToString (), messageText));
+	}
+
+	void DisplayOSD()
+	{
+		//DebugMessage ("DisplayOSD()");
+		if(Time.time < messageCutoff)
+		{
+			//DebugMessage("Displaying OSD");
+			GUILayout.BeginArea(new Rect (0, (Screen.height/4), Screen.width, 200), osdLabelStyle);
+			//GUI.Label(new Rect(200,200,50,50), messageText);
+			GUILayout.Label(messageText, osdLabelStyle);
+			GUILayout.EndArea();			
+		}
+		//DebugMessage("end displaying OSD");
+	}
+
+	/*
+	void OnWindow(int windowId)
+	{
+		GUILayout.BeginHorizontal(GUILayout.Width(250f));
+		GUILayout.Label("this is the label");
+		GUILayout.EndHorizontal();
+		GUI.DragWindow();
+	}
+	*/
+
     public void OnGUI()
     {
 		//need to verify the EditorLogic state - do we need to fetch it every time?
 		editor = EditorLogic.fetch;
 		if (editor == null)
 			return;
+
+		DisplayOSD();
 
         // Show Symmetry level
         string sym = (editor.symmetryMode + 1) + "x";
@@ -345,4 +435,6 @@ public class EditorExtensions : MonoBehaviour
 			GUI.Label(angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, labelStyle);
         }
     }
+
+	#endregion
 }
