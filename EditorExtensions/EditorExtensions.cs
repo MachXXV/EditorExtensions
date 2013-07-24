@@ -61,7 +61,8 @@ public class EditorExtensions : MonoBehaviour
 
 		editor = EditorLogic.fetch;
 
-		AlterEditorSpace(editor);
+		//skipping this for 0.21
+		//AlterEditorSpace(editor);
 
 		editor.symmetrySprite.Hide(true);
 		editor.mirrorSprite.Hide(true);
@@ -73,14 +74,16 @@ public class EditorExtensions : MonoBehaviour
 		InitStyles ();
 
 		//Disable shortcut keys when ship name textarea has focus
-		editor.shipNameField.commitOnLostFocus = true;
-		editor.shipNameField.AddCommitDelegate((IKeyFocusable _) => { ignoreHotKeys = false; });
-		editor.shipNameField.AddFocusDelegate((UITextField _) => { ignoreHotKeys = true; });
+		//shipNameField gone in 0.21
+		//editor.shipNameField.commitOnLostFocus = true;
+		//editor.shipNameField.AddCommitDelegate((IKeyFocusable _) => { ignoreHotKeys = false; });
+		//editor.shipNameField.AddFocusDelegate((UITextField _) => { ignoreHotKeys = true; });
     }
 
 	void AlterEditorSpace(EditorLogic editor)
 	{
-		editor.maxHeight = 2000;
+		//maxheight gone in 0.21
+		//editor.maxHeight = 2000;
 
 		// Modify cameras/available interior space
 		if (HighLogic.LoadedScene == GameScenes.EDITOR)
