@@ -337,14 +337,19 @@ public class EditorExtensions : MonoBehaviour
 		// X, Shift+X : Increment/decrement symmetry mode
 		if (inVAB && Input.GetKeyDown(KeyCode.X))
 		{
-			if (altKeyPressed
-			    || (_symmetryMode > maxSymmetryMode - 2 && !shiftKeyPressed)
-			    || (_symmetryMode < 2 && shiftKeyPressed))
+			if (altKeyPressed || (_symmetryMode < 2 && shiftKeyPressed))
 			{
+				//Alt+X or Symmetry is at 1(index 2) or lower
 				_symmetryMode = 0;
+			}
+			else if (_symmetryMode > maxSymmetryMode - 2 && !shiftKeyPressed)
+			{
+				//Stop adding at max symmetry
+				_symmetryMode = maxSymmetryMode - 1;
 			}
 			else
 			{
+				//inc/dec symmetry
 				_symmetryMode = _symmetryMode + (shiftKeyPressed ? -1 : 1);
 			}
 
