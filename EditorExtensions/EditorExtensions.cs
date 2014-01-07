@@ -80,6 +80,7 @@ public class EditorExtensions : MonoBehaviour
 		//editor.shipNameField.AddFocusDelegate((UITextField _) => { ignoreHotKeys = true; });
     }
 
+	/* removed for 0.21
 	void AlterEditorSpace(EditorLogic editor)
 	{
 		//maxheight gone in 0.21
@@ -113,6 +114,7 @@ public class EditorExtensions : MonoBehaviour
 			interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
 		}
 	}
+	*/
 
     public void Update()
     {
