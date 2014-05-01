@@ -1,0 +1,14 @@
+{
+  "NAME": "EditorExtensions",
+  "URL": "https://raw.githubusercontent.com/MachXXV/EditorExtensions/master/EditorExtensions.version",
+  "VERSION": {
+    "MAJOR": 1,
+    "MINOR": 1,
+    "PATCH": 0
+  },
+  "KSP_VERSION": {
+    "MAJOR": 0,
+    "MINOR": 23,
+    "PATCH": 5
+  }
+}
