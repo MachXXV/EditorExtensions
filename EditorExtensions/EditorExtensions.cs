@@ -102,8 +102,8 @@ namespace EditorExtensions
 			editor.mirrorSprite.Hide(true);
 	
 			//Rects for symmetry/angle snap labels
-			symLabelRect = new Rect (70, Screen.height - 104, 50, 50);
-			angleSnapLabelRect = new Rect (137, Screen.height - 104, 50, 50);
+			symLabelRect = new Rect (143, Screen.height - 65, 57, 57);
+			angleSnapLabelRect = new Rect (201, Screen.height - 63, 46, 46);
 	
 			InitStyles ();
 	
