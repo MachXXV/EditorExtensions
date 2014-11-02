@@ -188,7 +188,7 @@ namespace EditorExtensions
 			}
 	
 			// Alt+M - Toggle VAB/SPH editor mode (while staying in the same hangar)
-			if (Input.GetKeyDown(KeyCode.Tab))
+			if (Input.GetKeyDown(KeyCode.Y))
 			{
 				if (editor.editorType == EditorLogic.EditorMode.SPH){
 					editor.editorType = EditorLogic.EditorMode.VAB;
