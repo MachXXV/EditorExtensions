@@ -1,1 +1,1 @@
-copy /Y "%~dp0bin\Debug\EditorExtensions.dll" C:\KSP_Test\GameData\EditorExtensions\
+copy /Y "%~dp0bin\Debug\EditorExtensions.dll" "C:\SteamLibrary\SteamApps\common\Kerbal Space Program\GameData\EditorExtensions"

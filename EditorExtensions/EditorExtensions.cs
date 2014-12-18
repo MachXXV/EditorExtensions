@@ -52,12 +52,12 @@ namespace EditorExtensions
 	    int maxSymmetryMode = 99;
 	    static float[] angle = { 0, 1, 5, 15, 30, 45, 90 };
 	
-	    bool ignoreHotKeys = false;
+	    //bool ignoreHotKeys = false;
 	
 	    bool altKeyPressed;
 	    bool shiftKeyPressed;
 	
-	    bool inVAB;
+		bool inVAB = false;
 	
 	    EditorLogic editor;
 	
@@ -84,14 +84,14 @@ namespace EditorExtensions
 	
 		public EditorExtensions()
 		{
-			DebugMessage("Class constructor");
+			DebugMessage("constructor");
 		}
 	
 		//Unity initialization call
 	    public void Awake()
 	    {
 	        //DontDestroyOnLoad(this);
-			DebugMessage ("initializing");
+			DebugMessage ("Awake() initializing");
 	
 			editor = EditorLogic.fetch;
 	
@@ -132,24 +132,25 @@ namespace EditorExtensions
 				interior.transform.localScale = new Vector3(2.2f, 1.8f, 1.8f);
 				interior.transform.position = new Vector3(59f, 51.5f, 12);
 			}
-			else if (HighLogic.LoadedScene == GameScenes.SPH)
-			{
-				DebugMessage ("Updating SPH dimensions and camera");
-	
-				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera>();
-				SPHcam.maxHeight = 2000;
-				SPHcam.maxDistance = 2000;
-				SPHcam.maxDisplaceX = 2000;
-				SPHcam.maxDisplaceZ = 2000;
-	
-				GameObject interior = GameObject.Find(SPHGameObjectName);
-				interior.transform.localScale = new Vector3(12, 6, 12);
-				interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
-			}
+//			else if (HighLogic.LoadedScene == GameScenes.SPH)
+//			{
+//				DebugMessage ("Updating SPH dimensions and camera");
+//	
+//				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera>();
+//				SPHcam.maxHeight = 2000;
+//				SPHcam.maxDistance = 2000;
+//				SPHcam.maxDisplaceX = 2000;
+//				SPHcam.maxDisplaceZ = 2000;
+//	
+//				GameObject interior = GameObject.Find(SPHGameObjectName);
+//				interior.transform.localScale = new Vector3(12, 6, 12);
+//				interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
+//			}
 		}
 	
 	    public void Update()
 	    {
+
 			//Idea: change root part. 
 	
 	        //need to verify the EditorLogic state - do we need to fetch it every time?
@@ -157,11 +158,11 @@ namespace EditorExtensions
 	        if (editor == null)
 	            return;
 	
-	        if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
-	            return;
+	        //if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
+	        //    return;
 	
 			//may need to go away from this and do explicit editor.editorType calls 
-			inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
+			//inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
 	
 			//check for the various alt/mod etc keypresses
 			altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.AltGr);
@@ -169,40 +170,40 @@ namespace EditorExtensions
 			shiftKeyPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 	
 			//Space - when no part is selected, reset camera
-			if (Input.GetKeyDown(KeyCode.Space) && !editor.PartSelected)
-			{
-				if (HighLogic.LoadedScene == GameScenes.EDITOR)
-				{
-					VABCamera VABcam = Camera.main.GetComponent<VABCamera>();
-					VABcam.camPitch = 0;
-					VABcam.camHdg = 0;
-					//VABcam.ResetCamera();
-				}
-				else if (HighLogic.LoadedScene == GameScenes.SPH)
-				{
-					SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera>();
-					SPHcam.camPitch = 0;
-					SPHcam.camHdg = 0;
-					//SPHcam.ResetCamera();
-				}
-			}
+//			if (Input.GetKeyDown(KeyCode.Space) && !editor.PartSelected)
+//			{
+//				if (HighLogic.LoadedScene == GameScenes.EDITOR)
+//				{
+//					VABCamera VABcam = Camera.main.GetComponent<VABCamera>();
+//					VABcam.camPitch = 0;
+//					VABcam.camHdg = 0;
+//					//VABcam.ResetCamera();
+//				}
+//				else if (HighLogic.LoadedScene == GameScenes.SPH)
+//				{
+//					SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera>();
+//					SPHcam.camPitch = 0;
+//					SPHcam.camHdg = 0;
+//					//SPHcam.ResetCamera();
+//				}
+//			}
 	
 			// Alt+M - Toggle VAB/SPH editor mode (while staying in the same hangar)
-			if (Input.GetKeyDown(KeyCode.Tab))
-			{
-				if (editor.editorType == EditorLogic.EditorMode.SPH){
-					editor.editorType = EditorLogic.EditorMode.VAB;
-					editor.launchSiteName = launchSiteName_LaunchPad;
-					OSDMessage ("VAB/Launchpad Mode", 1);
-				}
-				else{
-					editor.editorType = EditorLogic.EditorMode.SPH;
-					editor.launchSiteName = launchSiteName_Runway;
-					editor.symmetryMode = 1;
-					OSDMessage ("SPH/Runway Mode", 1);
-				}
-				return;
-			}
+//			if (Input.GetKeyDown(KeyCode.Tab))
+//			{
+//				if (editor.editorType == EditorLogic.EditorMode.SPH){
+//					editor.editorType = EditorLogic.EditorMode.VAB;
+//					editor.launchSiteName = launchSiteName_LaunchPad;
+//					OSDMessage ("VAB/Launchpad Mode", 1);
+//				}
+//				else{
+//					editor.editorType = EditorLogic.EditorMode.SPH;
+//					editor.launchSiteName = launchSiteName_Runway;
+//					editor.symmetryMode = 1;
+//					OSDMessage ("SPH/Runway Mode", 1);
+//				}
+//				return;
+//			}
 	
 	        // V - Vertical alignment toggle
 	        if (Input.GetKeyDown(KeyCode.V))
@@ -335,6 +336,7 @@ namespace EditorExtensions
 		void InitStyles()
 		{
 			//windowStyle = new GUIStyle(HighLogic.Skin.Window);
+			DebugMessage ("InitStyles()");
 	
 			windowStyle = new GUIStyle();
 			windowStyle.fixedWidth = 250f;		
@@ -397,8 +399,8 @@ namespace EditorExtensions
 	
 	        // Show Symmetry level
 	        string sym = (editor.symmetryMode + 1) + "x";
-	        if (editor.editorType == EditorLogic.EditorMode.SPH)
-	            sym = (editor.symmetryMode == 0) ? "M" : "MM";
+//	        if (editor.editorType == EditorLogic.EditorMode.SPH)
+//	            sym = (editor.symmetryMode == 0) ? "M" : "MM";
 	
 	        GUI.Label(symLabelRect, sym, labelStyle);
 	
