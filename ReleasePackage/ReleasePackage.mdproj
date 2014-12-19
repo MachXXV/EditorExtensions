@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ItemType>PackagingProject</ItemType>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{160233B9-C072-4542-B37A-E0B1379F04BF}</ProjectGuid>
+    <Packages>
+      <Packages>
+        <Package name="Release">
+          <Builder targetFile="..\Releases\EditorExtensions.zip" platform="Windows" configuration="Release" ctype="BinariesZipPackageBuilder">
+            <ChildEntries>
+              <SolutionItemReference path="..\EditorExtensions\EditorExtensions.csproj" />
+            </ChildEntries>
+            <RootEntry path="..\EditorExtensions.sln" id=":root:" />
+          </Builder>
+        </Package>
+      </Packages>
+    </Packages>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug Beta Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ReleaseVersion>2.0</ReleaseVersion>
+  </PropertyGroup>
+</Project>

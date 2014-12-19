@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<EditorExtenstionsSettings>
+	<DebugMode>True</DebugMode>
+	<KeyBindings>
+		<ResetCamera>Space</ResetCamera>
+		<SurfaceAttachment>Alt+R</SurfaceAttachment>
+		<HangarToggle>Tab</HangarToggle>
+	</KeyBindings>
+</EditorExtenstionsSettings>
+

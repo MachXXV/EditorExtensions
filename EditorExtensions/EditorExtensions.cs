@@ -4,7 +4,6 @@ using KSP.IO;
 using System.Reflection;
 using System.IO;
 
-
 namespace EditorExtensions
 {
 	[KSPAddon (KSPAddon.Startup.EditorAny, false)]
@@ -13,14 +12,14 @@ namespace EditorExtensions
 		#region member vars
 
 		//current vars
-		string pluginDirectory;
+		//string pluginDirectory;
 		KeyCode keyMapResetCamera = KeyCode.Space;
 		KeyCode keyMapSurfaceAttachment = KeyCode.T;
 		//look into loading game keymaps for applying alt+shift modifiers
 		const string degreesSymbol = "\u00B0";	
 		int _symmetryMode = 0;
 		int maxSymmetryMode = 99;
-		static float[] angleSnapValues = { 0, 1, 5, 15, 30, 45, 60, 90 };
+		static float[] angleSnapValues = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f };
 
 		//old vars
 		//const string launchSiteName_LaunchPad = "LaunchPad";
@@ -29,36 +28,11 @@ namespace EditorExtensions
 		//bool inVAB = false;
 	
 		EditorLogic editor;
-	
-		Rect symmetryLabelRect;
-		Rect angleSnapLabelRect;
-
-		#endregion
-
-		#region logging
-
-		//set debug flag to toggle debugging messages
-		#if DEBUG
-		const bool debug = true;
-		#else
-		const bool debug = false;
-		#endif
-
-		void DebugMsg (string message)
-		{
-			if (debug)
-				print ("EditorExtensions: " + message);
-		}
-
-		void ErrorMsg (string message)
-		{
-			print ("EditorExtensions: " + message);
-		}
 
 		#endregion
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="EditorExtensions.EditorExtensions"/> class.
+		/// ctor
 		/// </summary>
 		public EditorExtensions ()
 		{
@@ -66,14 +40,18 @@ namespace EditorExtensions
 			try {
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
 				string assemblyVersion = execAssembly.GetName ().Version.ToString ();
-				pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
+				//pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
 
-				DebugMsg ("Initializing version " + assemblyVersion);
+				Log.Debug ("Initializing version " + assemblyVersion);
 			} catch (Exception ex) {
-				DebugMsg ("Unable to get assembly version: " + ex.Message);
+				Log.Debug ("Unable to get assembly version: " + ex.Message);
 			}
 		}
 
+
+		/// <summary>
+		/// experimenting with config files for future version
+		/// </summary>
 		void InitConfig(){
 			PluginConfiguration cfg = PluginConfiguration.CreateForType<EditorExtensions> ();
 			try {
@@ -86,15 +64,15 @@ namespace EditorExtensions
 
 				//Check to see what is returned when config isnt there
 				if (cfg == null) {
-					DebugMsg ("cfg is null");
+					Log.Debug ("cfg is null");
 				} else {
-					DebugMsg ("cfg is not null");
+					Log.Debug ("cfg is not null");
 				}
 
-				DebugMsg ("Loaded Config: typeof" + cfg.GetType ().ToString ());
+				Log.Debug ("Loaded Config: typeof" + cfg.GetType ().ToString ());
 
 			} catch (Exception ex) {
-				ErrorMsg ("Error loading config: " + ex.Message);
+				Log.Error ("Error loading config: " + ex.Message);
 			}
 
 			try {
@@ -104,10 +82,10 @@ namespace EditorExtensions
 				cfg.SetValue ("testarray2", new int[]{ 11, 22, 33 });
 				cfg.save ();
 
-				DebugMsg ("Saved config");
+				Log.Debug ("Saved config");
 
 			} catch (Exception ex) {
-				ErrorMsg ("Error saving config: " + ex.Message);
+				Log.Error ("Error saving config: " + ex.Message);
 			}
 
 			try {
@@ -116,31 +94,29 @@ namespace EditorExtensions
 				val = cfg.GetValue<string> ("notthere");
 
 				if (val == null) {
-					DebugMsg ("Val is null");
+					Log.Debug ("Val is null");
 				} else {
-					DebugMsg ("Get value: '" + val + "' type: " + val.GetType ().ToString ());
+					Log.Debug ("Get value: '" + val + "' type: " + val.GetType ().ToString ());
 				}
 
 
 
 			} catch (Exception ex) {
-				ErrorMsg ("Error getting config value: " + ex.Message);
+				Log.Error ("Error getting config value: " + ex.Message);
 			}
 		}
 	
 		//Unity initialization call
 		public void Awake ()
 		{
-			DebugMsg ("Awake() initializing");
-	
+			//Log.Debug ("Awake() initializing");
+
+			//get current editor instance
 			editor = EditorLogic.fetch;
 	
-			editor.symmetrySprite.Hide (true);
-			editor.mirrorSprite.Hide (true);
-	
-			//Rects for symmetry/angle snap labels
-			symmetryLabelRect = new Rect (150, Screen.height - 65, 57, 57);
-			angleSnapLabelRect = new Rect (206, Screen.height - 63, 46, 46);
+			//hide snap sprites
+			//editor.symmetrySprite.Hide (true);
+			//editor.mirrorSprite.Hide (true);
 	
 			InitStyles ();
 	
@@ -151,11 +127,16 @@ namespace EditorExtensions
 		const string VABGameObjectName = "interior_vehicleassembly";
 		const string SPHGameObjectName = "xport_sph3";
 
+		/// <summary>
+		/// embiggen the hangar space
+		/// currently broken
+		/// </summary>
+		/// <param name="editor">Editor.</param>
 		void AlterEditorSpace (EditorLogic editor)
 		{	
 			// Modify cameras/available interior space
 			if (HighLogic.LoadedScene == GameScenes.EDITOR) {
-				DebugMsg ("Updating VAB dimensions and camera");
+				Log.Debug ("Updating VAB dimensions and camera");
 	
 				VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
 				VABcam.maxHeight = 2000;
@@ -167,7 +148,7 @@ namespace EditorExtensions
 			}
 //			else if (HighLogic.LoadedScene == GameScenes.SPH)
 //			{
-//				DebugMsg ("Updating SPH dimensions and camera");
+//				Log.Debug ("Updating SPH dimensions and camera");
 //	
 //				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera>();
 //				SPHcam.maxHeight = 2000;
@@ -184,6 +165,9 @@ namespace EditorExtensions
 		bool altKeyDown;
 		bool shiftKeyDown;
 
+		/// <summary>
+		/// Fired by Unity event loop
+		/// </summary>
 		public void Update ()
 		{		
 			//if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
@@ -219,20 +203,20 @@ namespace EditorExtensions
 			//Broken, api doesnt respond
 			// V - Vertical alignment toggle
 //			if (Input.GetKeyDown (KeyCode.V)) {
-//				//DebugMsg ("Toggling vertical snap");
+//				//Log.Debug ("Toggling vertical snap");
 //				GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ^= true;
 //	
 //				//if normal radial angle snap is currently off, vertical snap will have no effect unless it is re-enabled
 //				//automatically set aangle snap to minimum - some people thought vert snap was broken in this situation, the game doesn't appear to allow it
 //				if (GameSettings.VAB_USE_ANGLE_SNAP == false && GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL == true) {
-//					DebugMsg ("Enabling angle snap to allow vertical snap to work");
+//					Log.Debug ("Enabling angle snap to allow vertical snap to work");
 //					//angle snap needs be > 0, otherwise log is spammed with DivideByZero errors
 //					if (editor.srfAttachAngleSnap == 0)
 //						editor.srfAttachAngleSnap = 1;
 //					GameSettings.VAB_USE_ANGLE_SNAP = true;
 //				}
 //				OSDMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"), 1);
-//				DebugMsg ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
+//				Log.Debug ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
 //				return;
 //			}
 	
@@ -252,7 +236,7 @@ namespace EditorExtensions
 					editor.allowSrfAttachment = selectedPart.attachRules.srfAttach;
 					editor.allowNodeAttachment = !selectedPart.attachRules.srfAttach;
 
-					DebugMsg ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
+					Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
 					OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1} \n for {2}"
 						, selectedPart.attachRules.srfAttach ? "enabled" : "disabled"
 						, editor.allowNodeAttachment ? "enabled" : "disabled"
@@ -272,7 +256,7 @@ namespace EditorExtensions
 			// ALT+Z : Toggle part clipping (From cheat options)
 			if (altKeyDown && Input.GetKeyDown (KeyCode.Z)) {
 				CheatOptions.AllowPartClipping ^= true;
-				DebugMsg ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
+				Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 				OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"), 1);
 				return;
 			}
@@ -282,24 +266,24 @@ namespace EditorExtensions
 	
 				if (!altKeyDown) {
 					//GameSettings.VAB_USE_ANGLE_SNAP = false;
-					DebugMsg ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
+					Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 	
 					int currentAngleIndex = Array.IndexOf (angleSnapValues, editor.srfAttachAngleSnap);
 	
-					DebugMsg ("currentAngleIndex: " + currentAngleIndex.ToString ());
+					Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
 	
 					float newAngle;
 					if (shiftKeyDown) {
 						newAngle = angleSnapValues [currentAngleIndex == 0 ? angleSnapValues.Length - 1 : currentAngleIndex - 1];
 					} else {
-						DebugMsg ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
+						Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
 						newAngle = angleSnapValues [currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1];
 					}
 	
-					DebugMsg ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
+					Log.Debug ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
 					editor.srfAttachAngleSnap = newAngle;
 				} else {
-					DebugMsg ("Resetting srfAttachAngleSnap to 0");
+					Log.Debug ("Resetting srfAttachAngleSnap to 0");
 					editor.srfAttachAngleSnap = 0;
 				}
 	
@@ -313,7 +297,7 @@ namespace EditorExtensions
 					GameSettings.VAB_USE_ANGLE_SNAP = true;
 				}
 	
-				DebugMsg ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
+				Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 				return;
 	
 			}
@@ -334,7 +318,7 @@ namespace EditorExtensions
 						_symmetryMode = _symmetryMode + (shiftKeyDown ? -1 : 1);
 					}
 					editor.symmetryMode = _symmetryMode;
-					DebugMsg ("Setting symmetry to " + _symmetryMode.ToString ());
+					Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
 				} else {
 					//editor.symmetryMethod == SymmetryMethod.Mirror
 					//update var with stock action's result
@@ -345,15 +329,14 @@ namespace EditorExtensions
 
 		#region GUI
 
-		GUIStyle windowStyle, osdLabelStyle, labelStyle;
+		GUIStyle osdLabelStyle, labelStyle;
 
+		/// <summary>
+		/// Init styles for GUI items
+		/// </summary>
 		void InitStyles ()
 		{
-			//windowStyle = new GUIStyle(HighLogic.Skin.Window);
-			DebugMsg ("InitStyles()");
-	
-			windowStyle = new GUIStyle ();
-			windowStyle.fixedWidth = 250f;		
+			//Log.Debug ("InitStyles()");	
 	
 			osdLabelStyle = new GUIStyle ();
 			osdLabelStyle.stretchWidth = true;
@@ -364,9 +347,21 @@ namespace EditorExtensions
 	
 			labelStyle = new GUIStyle ("Label");
 			labelStyle.alignment = TextAnchor.MiddleCenter;
-			labelStyle.fontSize = 22;
+			labelStyle.fontSize = 18;
 			//labelStyle.fontStyle = FontStyle.Bold;
 			labelStyle.normal.textColor = XKCDColors.DarkYellow;
+		}
+
+		/// <summary>
+		/// Unity GUI paint event, fired every screen refresh
+		/// </summary>
+		public void OnGUI ()
+		{	
+			//show on-screen messages
+			DisplayOSD ();
+
+			//show and update the angle snap and symmetry mode labels
+			ShowSnapLabels ();
 		}
 
 		float messageCutoff = 0;
@@ -381,7 +376,7 @@ namespace EditorExtensions
 		{
 			messageCutoff = Time.time + delay;
 			messageText = message;
-			DebugMsg (String.Format ("OSD messageCutoff = {0}, messageText = {1}", messageCutoff.ToString (), messageText));
+			Log.Debug (String.Format ("OSD messageCutoff = {0}, messageText = {1}", messageCutoff.ToString (), messageText));
 		}
 
 		/// <summary>
@@ -396,67 +391,73 @@ namespace EditorExtensions
 			}
 		}
 	
-		/*
-		void OnWindow(int windowId)
-		{
-			GUILayout.BeginHorizontal(GUILayout.Width(250f));
-			GUILayout.Label("this is the label");
-			GUILayout.EndHorizontal();
-			GUI.DragWindow();
-		}
-		*/
-	
 		string symmetryLabelValue = string.Empty;
 
-		public void OnGUI ()
-		{	
-			DisplayOSD ();
+		//symmetry & angle sprite/label size and position
+		const int advancedModeOffset = 34;
+		const int angleSnapLabelSize = 46;
+		const int angleSnapLabelLeftOffset = 207;
+		const int angleSnapLabelBottomOffset = 63;
+		const int symmetryLabelSize = 57;
+		const int symmetryLabelLeftOffset = 150;
+		const int symmetryLabelBottomOffset = 65;
+		Rect angleSnapLabelRect = new Rect () {
+			xMin = angleSnapLabelLeftOffset,
+			xMax = angleSnapLabelLeftOffset + angleSnapLabelSize,
+			yMin = Screen.height - angleSnapLabelBottomOffset,
+			yMax = Screen.height - angleSnapLabelBottomOffset + angleSnapLabelSize
+		};
+		Rect symmetryLabelRect = new Rect () {
+			xMin = symmetryLabelLeftOffset,
+			xMax = symmetryLabelLeftOffset + symmetryLabelSize,
+			yMin = Screen.height - symmetryLabelBottomOffset,
+			yMax = Screen.height - symmetryLabelBottomOffset + symmetryLabelSize
+		};
 
+		/// <summary>
+		/// Hides the stock angle & symmetry sprites and replaces with textual labels
+		/// </summary>
+		private void ShowSnapLabels()
+		{
 			//Only show angle/symmetry sprites on parts tab
 			if (editor.editorScreen == EditorScreen.Parts) {
-
-				//symmetryLabelRect = new Rect (150, Screen.height - 65, 57, 57);
-				//angleSnapLabelRect = new Rect (206, Screen.height - 63, 46, 46);
-
-//				angleSnapLabelRect = new Rect () {
-//					xMin = 206,
-//					xMax = 206 + 46,
-//					yMin = Screen.height - 63,
-//					yMax = Screen.height - 63 + 46
-//				};
-
-				//need to shift labels in advanced mode to the right
 				if (EditorLogic.Mode == EditorLogic.EditorModes.ADVANCED) {
-					symmetryLabelRect.xMin = 184;
-					symmetryLabelRect.xMax = 184 + 57;
-					angleSnapLabelRect.xMin = 241;
-					angleSnapLabelRect.xMax = 241 + 46;
+					//in advanced mode, shift labels to the right
+					angleSnapLabelRect.xMin = angleSnapLabelLeftOffset + advancedModeOffset;
+					angleSnapLabelRect.xMax = angleSnapLabelLeftOffset + angleSnapLabelSize + advancedModeOffset;
+					symmetryLabelRect.xMin = symmetryLabelLeftOffset + advancedModeOffset;
+					symmetryLabelRect.xMax = symmetryLabelLeftOffset + symmetryLabelSize + advancedModeOffset;
 				} else {
 					//EditorLogic.EditorModes.SIMPLE
-					symmetryLabelRect.xMin = 150;
-					symmetryLabelRect.xMax = 150 + 57;
-					angleSnapLabelRect.xMin = 207;
-					angleSnapLabelRect.xMax = 207 + 46;
+					//in simple mode, set back to left position
+					angleSnapLabelRect.xMin = angleSnapLabelLeftOffset;
+					angleSnapLabelRect.xMax = angleSnapLabelLeftOffset + angleSnapLabelSize;
+					symmetryLabelRect.xMin = symmetryLabelLeftOffset;
+					symmetryLabelRect.xMax = symmetryLabelLeftOffset + symmetryLabelSize;
 				}
 
-				//Radial mode number+R, mirror mode is M/MM
+				//always hide stock symmetry sprite
+				editor.symmetrySprite.Hide (true);
+
+				//Radial mode 'number+R', mirror mode is 'M'/'MM'
 				if (editor.symmetryMethod == SymmetryMethod.Radial) {
 					symmetryLabelValue = (editor.symmetryMode + 1) + "R";
 				} else if (editor.symmetryMethod == SymmetryMethod.Mirror) {
 					symmetryLabelValue = (editor.symmetryMode == 0) ? "M" : "MM";
 				}
 
-				// Show Symmetry level
+				// Show Symmetry label
 				GUI.Label (symmetryLabelRect, symmetryLabelValue, labelStyle);
-	
-				// Show angle snap amount
-				editor.angleSnapSprite.Hide (GameSettings.VAB_USE_ANGLE_SNAP);
-				editor.symmetrySprite.Hide (true);
 
 				//show stock circle sprite when angle snap is off (0 degrees)
 				if (GameSettings.VAB_USE_ANGLE_SNAP) {
+					//if angle snap is on hide stock sprite
+					editor.angleSnapSprite.Hide (true);
 					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, labelStyle);
 				}
+				//else {
+				//	editor.angleSnapSprite.Hide (false);
+				//}
 			}
 		}
 

@@ -1,0 +1,1 @@
+cp bin/Debug/EditorExtensions.dll /Applications/KSP_osx/GameData/EditorExtensions/
