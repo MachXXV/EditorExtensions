@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		VersionHistory.md = VersionHistory.md
 	EndProjectSection
 EndProject
-Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "ReleasePackage", "ReleasePackage\ReleasePackage.mdproj", "{160233B9-C072-4542-B37A-E0B1379F04BF}"
+Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "BetaPackage", "Packagers\BetaPackage.mdproj", "{B4D5E5A2-8B35-4CF3-BDFF-0DF9A687AE20}"
 EndProject
-Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "BetaPackage", "BetaPackage\BetaPackage.mdproj", "{B4D5E5A2-8B35-4CF3-BDFF-0DF9A687AE20}"
+Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "ReleasePackage", "Packagers\ReleasePackage.mdproj", "{160233B9-C072-4542-B37A-E0B1379F04BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
