@@ -25,15 +25,17 @@ namespace EditorExtensions
 			}
 		}
 			
-		public static void SaveConfig (ConfigData configData, string configFilePath)
+		public static bool SaveConfig (ConfigData configData, string configFilePath)
 		{
 			try {
 				XmlSerializer serializer = new XmlSerializer (typeof(ConfigData));
 				using (TextWriter writer = new StreamWriter (configFilePath)) {
 					serializer.Serialize (writer, configData); 
-				} 
+				}
+				return true;
 			} catch (Exception ex) {
 				Log.Error ("Error saving config file: " + ex.Message);
+				return false;
 			}
 		}
 

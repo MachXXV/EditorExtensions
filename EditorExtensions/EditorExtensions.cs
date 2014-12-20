@@ -12,28 +12,27 @@ namespace EditorExtensions
 		#region member vars
 
 		//look into loading game keymaps for applying alt+shift modifiers
-		const string degreesSymbol = "\u00B0";
-		int _symmetryMode = 0;
 
 		//old vars
 		//const string launchSiteName_LaunchPad = "LaunchPad";
 		//const string launchSiteName_Runway = "Runway";
 		//bool ignoreHotKeys = false;
 		//bool inVAB = false;
-	
-		EditorLogic editor;
 
-		Version pluginVersion;
-
-		ConfigData cfg;
-		string pluginDirectory;
-		string configFilePath;
 		const string ConfigFileName = "config.xml";
+		const string degreesSymbol = "\u00B0";
+
+		EditorLogic editor;
+		Version pluginVersion;
+		ConfigData cfg;
+		string _pluginDirectory;
+		string _configFilePath;
+		int _symmetryMode = 0;
+
+		//bool _abort = false;
 
 		#endregion
 
-
-		//bool abort = false;
 		/// <summary>
 		/// ctor - gets plugin info and initializes config
 		/// </summary>
@@ -43,13 +42,13 @@ namespace EditorExtensions
 				//get location and version info of the plugin
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
 				pluginVersion = execAssembly.GetName ().Version;
-				pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
+				_pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
 
 				//dll's path + filename for the config file
-				configFilePath = Path.Combine (pluginDirectory, ConfigFileName);
+				_configFilePath = Path.Combine (_pluginDirectory, ConfigFileName);
 
 				//check if the config file is there and create if its missing
-				if (ModConfig.FileExists (configFilePath)) {
+				if (ModConfig.FileExists (_configFilePath)) {
 
 					cfg = LoadConfig ();
 
@@ -93,15 +92,15 @@ namespace EditorExtensions
 
 				Log.Debug ("Initializing version " + pluginVersion.ToString ());
 			} catch (Exception ex) {
-				//abort = true;
 				Log.Debug ("FATAL ERROR - Unable to initialize: " + ex.Message);
+				//_abort = true;
 				return;
 			}
 		}
 
 		private ConfigData LoadConfig ()
 		{
-			return ModConfig.LoadConfig (configFilePath);
+			return ModConfig.LoadConfig (_configFilePath);
 		}
 
 		/// <summary>
@@ -112,7 +111,7 @@ namespace EditorExtensions
 		private ConfigData CreateDefaultConfig ()
 		{
 			try {
-				Log.Debug ("configFilePath: " + configFilePath);
+				Log.Debug ("_configFilePath: " + _configFilePath);
 
 				ConfigData defaultConfig = new ConfigData () {
 					AngleSnapValues = new float[]{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
@@ -130,7 +129,7 @@ namespace EditorExtensions
 				};
 				defaultConfig.KeyMap = defaultKeys;
 
-				ModConfig.SaveConfig (defaultConfig, configFilePath);
+				ModConfig.SaveConfig (defaultConfig, _configFilePath);
 				Log.Debug ("Created default config");
 				return defaultConfig;
 			} catch (Exception ex) {
