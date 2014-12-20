@@ -16,7 +16,7 @@
 
 ### Features
 * Allows levels of radial symmetry from 1 to 99
-* Adds radial/angle snapping at 1,5,15,30,45,60, and 90 degrees.
+* Adds radial/angle snapping at 1,5,15,22.5,30,45,60, and 90 degrees.
 * Toggle part clipping (From the cheat options)
 * Toggle radial and node attachment of parts
 * Reset hangar camera view
@@ -29,6 +29,10 @@
 * **T** 			- Attachment mode: Toggle between surface and node attachment modes for all parts, and when a part is selected, will toggle surface attachment even when that part's config usually does not allow it.
 * **Alt+Z** 		- Toggle part clipping (CAUTION: This is a cheat option)
 * **Space** 		- When no part is selected, resets camera pitch and heading (straight ahead and level)
+
+###Installation
+In your KSP GameData folder, delete any existing EditorExtensions folder.
+Download the zip file to your KSP GameData folder and unzip.
 
 Released under MIT license.
 Source available at GitHub: [https://github.com/MachXXV/EditorExtensions](https://github.com/MachXXV/EditorExtensions)

@@ -265,18 +265,20 @@ namespace EditorExtensions
 			if (Input.GetKeyDown (KeyCode.C)) {
 	
 				if (!altKeyDown) {
-					//GameSettings.VAB_USE_ANGLE_SNAP = false;
 					Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 	
 					int currentAngleIndex = Array.IndexOf (angleSnapValues, editor.srfAttachAngleSnap);
 	
 					Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
 	
+					//rotate through the angle snap values
 					float newAngle;
 					if (shiftKeyDown) {
+						//lower snap
 						newAngle = angleSnapValues [currentAngleIndex == 0 ? angleSnapValues.Length - 1 : currentAngleIndex - 1];
 					} else {
-						Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
+						//higher snap
+						//Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
 						newAngle = angleSnapValues [currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1];
 					}
 	
@@ -287,14 +289,16 @@ namespace EditorExtensions
 					editor.srfAttachAngleSnap = 0;
 				}
 	
+				//at angle snap 0, turn off angle snap and show stock circle sprite
 				if (editor.srfAttachAngleSnap == 0) {
 					GameSettings.VAB_USE_ANGLE_SNAP = false;
-					//Vertical snap doesn't work when angle snap is disabled.
-					//Resetting it here so that the toggle logic for vert snap maintains state
-					GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL = false;
-					editor.angleSnapSprite.PlayAnim (0);
+					//set playanim index and unhide stock sprite
+					//editor.angleSnapSprite.PlayAnim (0);
+					//editor.angleSnapSprite.Hide (false);
 				} else {
 					GameSettings.VAB_USE_ANGLE_SNAP = true;
+					//angle snap is on, re-hide stock sprite
+					//editor.angleSnapSprite.Hide (true);
 				}
 	
 				Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
@@ -436,8 +440,7 @@ namespace EditorExtensions
 					symmetryLabelRect.xMax = symmetryLabelLeftOffset + symmetryLabelSize;
 				}
 
-				//always hide stock symmetry sprite
-				editor.symmetrySprite.Hide (true);
+
 
 				//Radial mode 'number+R', mirror mode is 'M'/'MM'
 				if (editor.symmetryMethod == SymmetryMethod.Radial) {
@@ -446,18 +449,24 @@ namespace EditorExtensions
 					symmetryLabelValue = (editor.symmetryMode == 0) ? "M" : "MM";
 				}
 
+				//always hide stock symmetry and mirror sprites
+				editor.symmetrySprite.Hide (true);
+				editor.mirrorSprite.Hide (true);
+
 				// Show Symmetry label
 				GUI.Label (symmetryLabelRect, symmetryLabelValue, labelStyle);
 
-				//show stock circle sprite when angle snap is off (0 degrees)
+				//if angle snap is on hide stock sprite
 				if (GameSettings.VAB_USE_ANGLE_SNAP) {
-					//if angle snap is on hide stock sprite
 					editor.angleSnapSprite.Hide (true);
 					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, labelStyle);
+
 				}
-				//else {
-				//	editor.angleSnapSprite.Hide (false);
-				//}
+				else {
+					//angle snap is off, show stock sprite
+					editor.angleSnapSprite.PlayAnim (0);
+					editor.angleSnapSprite.Hide (false);
+				}
 			}
 		}
 
