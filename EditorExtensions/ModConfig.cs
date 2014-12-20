@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 namespace EditorExtensions
 {
+
 	public static class ModConfig
 	{
 
 		static ModConfig ()
 		{
-
 		}
-
+			
 		public static bool FileExists (string filePath)
 		{
 			try {
@@ -24,7 +24,7 @@ namespace EditorExtensions
 				return false;
 			}
 		}
-
+			
 		public static void SaveConfig (ConfigData configData, string configFilePath)
 		{
 			try {

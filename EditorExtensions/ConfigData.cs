@@ -7,6 +7,9 @@ namespace EditorExtensions
 	[XmlRoot("ConfigData")]
 	public class ConfigData
 	{
+		[XmlElement("FileVersion")]
+		public string FileVersion { get; set; }
+
 		[XmlElement("KeyMap")]
 		public KeyMaps KeyMap { get; set; }
 

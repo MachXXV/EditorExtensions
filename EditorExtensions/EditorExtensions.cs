@@ -13,82 +13,128 @@ namespace EditorExtensions
 
 		//current vars
 
-		KeyCode keyMapResetCamera = KeyCode.Space;
-		KeyCode keyMapSurfaceAttachment = KeyCode.T;
+		//KeyCode keyMapResetCamera = KeyCode.Space;
+		//KeyCode keyMapSurfaceAttachment = KeyCode.T;
 		//look into loading game keymaps for applying alt+shift modifiers
-		const string degreesSymbol = "\u00B0";	
+		const string degreesSymbol = "\u00B0";
 		int _symmetryMode = 0;
-		int maxSymmetryMode = 99;
-		static float[] angleSnapValues = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f };
+		//int maxSymmetryMode = 99;
+		//static float[] angleSnapValues = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f };
 
 		//old vars
 		//const string launchSiteName_LaunchPad = "LaunchPad";
-		//const string launchSiteName_Runway = "Runway";	
-		//bool ignoreHotKeys = false;	
+		//const string launchSiteName_Runway = "Runway";
+		//bool ignoreHotKeys = false;
 		//bool inVAB = false;
 	
 		EditorLogic editor;
 
-		#endregion
+		Version pluginVersion;
 
 		ConfigData cfg;
+		string pluginDirectory;
+		string configFilePath;
+		const string ConfigFileName = "config.xml";
+
+		#endregion
+
+
 		//bool abort = false;
 		/// <summary>
 		/// ctor
 		/// </summary>
 		public EditorExtensions ()
 		{
-			string pluginDirectory = string.Empty;
-			//Get plugin's dll version
 			try {
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
-				string assemblyVersion = execAssembly.GetName ().Version.ToString ();
+
+				pluginVersion = execAssembly.GetName ().Version;
 				pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
 
-				Log.Debug ("Initializing version " + assemblyVersion);
+				configFilePath = Path.Combine (pluginDirectory, ConfigFileName);
+
+				if (ModConfig.FileExists (configFilePath)) {
+
+					cfg = LoadConfig ();
+
+					if (cfg == null) {
+						//failed to load config, create new
+						cfg = CreateDefaultConfig ();
+					} else {
+						//check config file version
+						Version fileVersion = new Version ();
+
+						if (cfg.FileVersion != null) {
+							Log.Debug ("Config v" + cfg.FileVersion + " Mod v" + pluginVersion.ToString ());
+
+							try {
+								fileVersion = new Version (cfg.FileVersion);
+							} catch (Exception ex) {
+								Log.Error ("Error parsing version from config file: " + ex.Message);
+							}
+						}
+
+#if DEBUG
+						//for debug, replace if version isn't exactly the same
+						bool versionMismatch = (cfg.FileVersion == null || fileVersion != pluginVersion);
+#else
+						//replace if x.x doesn't match
+						bool versionMismatch = (cfg.FileVersion == null || fileVersion.Major < pluginVersion.Major || (fileVersion.Major == pluginVersion.Major && fileVersion.Minor < pluginVersion.Minor));
+#endif
+
+						if (versionMismatch) {
+							Log.Info ("Config file version mismatch, replacing with new defaults");
+							cfg = CreateDefaultConfig ();
+						} else {
+							Log.Debug ("Config file is current");
+						}
+					}
+
+				} else {
+					cfg = CreateDefaultConfig ();
+					Log.Info ("No existing config found, created new default config");
+				}
+
+				Log.Debug ("Initializing version " + pluginVersion.ToString ());
 			} catch (Exception ex) {
 				//abort = true;
 				Log.Debug ("FATAL ERROR - Unable to initialize: " + ex.Message);
 				return;
 			}
-
-			string configFilePath = Path.Combine(pluginDirectory, "config.xml");
-
-			ConfigDefaults (configFilePath);
-
-			cfg = LoadConfig (configFilePath);
-
-			if (cfg.KeyMap.ResetCamera == KeyCode.Space) {
-				Log.Debug ("keymap read");
-				Log.Debug ("angles read: " + cfg.AngleSnapValues.Length.ToString());
-			}
-
 		}
 
-		private ConfigData LoadConfig(string configFilePath)
+		private ConfigData LoadConfig ()
 		{
-				Log.Debug ("Reading config at " + configFilePath);
-				return ModConfig.LoadConfig(configFilePath);
+			return ModConfig.LoadConfig (configFilePath);
 		}
 
-		private void ConfigDefaults(string configFilePath)
+		private ConfigData CreateDefaultConfig ()
 		{
 			try {
 				Log.Debug ("configFilePath: " + configFilePath);
 
-				ConfigData config = new ConfigData();
-				config.AngleSnapValues = new float[]{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f };
-				config.MaxSymmetry = 99;
+				ConfigData defaultConfig = new ConfigData () {
+					AngleSnapValues = new float[]{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
+					MaxSymmetry = 99,
+					FileVersion = pluginVersion.ToString ()
+				};
 
-				config.KeyMap.ResetCamera = KeyCode.Space;
+				KeyMaps defaultKeys = new KeyMaps () {
+					AngleSnap = KeyCode.C,
+					AttachmentMode = KeyCode.T,
+					PartClipping = KeyCode.Z,
+					ResetCamera = KeyCode.Space,
+					Symmetry = KeyCode.X
+				};
 
-				ModConfig.SaveConfig(config, configFilePath);
-
-				Log.Debug ("Config done");
+				defaultConfig.KeyMap = defaultKeys;
+				ModConfig.SaveConfig (defaultConfig, configFilePath);
+				Log.Debug ("Created default config");
+				return defaultConfig;
 			} catch (Exception ex) {
 				Log.Debug ("Error defaulting config: " + ex.Message);
+				return null;
 			}
-
 		}
 	
 		//Unity initialization call
@@ -171,7 +217,7 @@ namespace EditorExtensions
 			//look into skewing camera
 	
 			//Space - when no part is selected, reset camera
-			if (Input.GetKeyDown (keyMapResetCamera) && !EditorLogic.SelectedPart) {
+			if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
 				//if (HighLogic.LoadedSceneIsEditor) {
 				VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
 				VABcam.camPitch = 0;
@@ -209,7 +255,7 @@ namespace EditorExtensions
 			//EditorLogic.SelectedPart.attachRules.allowStack
 
 			// T: Surface attachment and node attachment toggle
-			if (Input.GetKeyDown (keyMapSurfaceAttachment)) {
+			if (Input.GetKeyDown (cfg.KeyMap.AttachmentMode)) {
 
 				Part selectedPart = EditorLogic.SelectedPart;
 
@@ -239,7 +285,7 @@ namespace EditorExtensions
 			}
 	
 			// ALT+Z : Toggle part clipping (From cheat options)
-			if (altKeyDown && Input.GetKeyDown (KeyCode.Z)) {
+			if (altKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
 				CheatOptions.AllowPartClipping ^= true;
 				Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 				OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"), 1);
@@ -247,12 +293,12 @@ namespace EditorExtensions
 			}
 	
 			// C, Shift+C : Increment/Decrement Angle snap
-			if (Input.GetKeyDown (KeyCode.C)) {
+			if (Input.GetKeyDown (cfg.KeyMap.AngleSnap)) {
 	
 				if (!altKeyDown) {
 					Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 	
-					int currentAngleIndex = Array.IndexOf (angleSnapValues, editor.srfAttachAngleSnap);
+					int currentAngleIndex = Array.IndexOf (cfg.AngleSnapValues, editor.srfAttachAngleSnap);
 	
 					Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
 	
@@ -260,11 +306,11 @@ namespace EditorExtensions
 					float newAngle;
 					if (shiftKeyDown) {
 						//lower snap
-						newAngle = angleSnapValues [currentAngleIndex == 0 ? angleSnapValues.Length - 1 : currentAngleIndex - 1];
+						newAngle = cfg.AngleSnapValues [currentAngleIndex == 0 ? cfg.AngleSnapValues.Length - 1 : currentAngleIndex - 1];
 					} else {
 						//higher snap
 						//Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
-						newAngle = angleSnapValues [currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1];
+						newAngle = cfg.AngleSnapValues [currentAngleIndex == cfg.AngleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1];
 					}
 	
 					Log.Debug ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
@@ -292,16 +338,16 @@ namespace EditorExtensions
 			}
 	
 			// X, Shift+X : Increment/decrement symmetry mode
-			if (Input.GetKeyDown (KeyCode.X)) {
+			if (Input.GetKeyDown (cfg.KeyMap.Symmetry)) {
 
 				//only inc/dec symmetry in radial mode, mirror is just 1&2
 				if (editor.symmetryMethod == SymmetryMethod.Radial) {
 					if (altKeyDown || (_symmetryMode < 2 && shiftKeyDown)) {
 						//Alt+X or Symmetry is at 1(index 2) or lower
 						_symmetryMode = 0;
-					} else if (_symmetryMode > maxSymmetryMode - 2 && !shiftKeyDown) {
+					} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !shiftKeyDown) {
 						//Stop adding at max symmetry
-						_symmetryMode = maxSymmetryMode - 1;
+						_symmetryMode = cfg.MaxSymmetry - 1;
 					} else {
 						//inc/dec symmetry
 						_symmetryMode = _symmetryMode + (shiftKeyDown ? -1 : 1);
@@ -379,7 +425,7 @@ namespace EditorExtensions
 				GUILayout.EndArea ();			
 			}
 		}
-	
+
 		string symmetryLabelValue = string.Empty;
 
 		//symmetry & angle sprite/label size and position
@@ -406,7 +452,7 @@ namespace EditorExtensions
 		/// <summary>
 		/// Hides the stock angle & symmetry sprites and replaces with textual labels
 		/// </summary>
-		private void ShowSnapLabels()
+		private void ShowSnapLabels ()
 		{
 			//Only show angle/symmetry sprites on parts tab
 			if (editor.editorScreen == EditorScreen.Parts) {
@@ -446,8 +492,7 @@ namespace EditorExtensions
 					editor.angleSnapSprite.Hide (true);
 					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, labelStyle);
 
-				}
-				else {
+				} else {
 					//angle snap is off, show stock sprite
 					editor.angleSnapSprite.PlayAnim (0);
 					editor.angleSnapSprite.Hide (false);
