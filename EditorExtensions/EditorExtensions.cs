@@ -12,7 +12,7 @@ namespace EditorExtensions
 		#region member vars
 
 		//current vars
-		//string pluginDirectory;
+
 		KeyCode keyMapResetCamera = KeyCode.Space;
 		KeyCode keyMapSurfaceAttachment = KeyCode.T;
 		//look into loading game keymaps for applying alt+shift modifiers
@@ -31,79 +31,64 @@ namespace EditorExtensions
 
 		#endregion
 
+		ConfigData cfg;
+		//bool abort = false;
 		/// <summary>
 		/// ctor
 		/// </summary>
 		public EditorExtensions ()
 		{
+			string pluginDirectory = string.Empty;
 			//Get plugin's dll version
 			try {
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
 				string assemblyVersion = execAssembly.GetName ().Version.ToString ();
-				//pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
+				pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
 
 				Log.Debug ("Initializing version " + assemblyVersion);
 			} catch (Exception ex) {
-				Log.Debug ("Unable to get assembly version: " + ex.Message);
+				//abort = true;
+				Log.Debug ("FATAL ERROR - Unable to initialize: " + ex.Message);
+				return;
 			}
+
+			string configFilePath = Path.Combine(pluginDirectory, "config.xml");
+
+			ConfigDefaults (configFilePath);
+
+			cfg = LoadConfig (configFilePath);
+
+			if (cfg.KeyMap.ResetCamera == KeyCode.Space) {
+				Log.Debug ("keymap read");
+				Log.Debug ("angles read: " + cfg.AngleSnapValues.Length.ToString());
+			}
+
 		}
 
+		private ConfigData LoadConfig(string configFilePath)
+		{
+				Log.Debug ("Reading config at " + configFilePath);
+				return ModConfig.LoadConfig(configFilePath);
+		}
 
-		/// <summary>
-		/// experimenting with config files for future version
-		/// </summary>
-		void InitConfig(){
-			PluginConfiguration cfg = PluginConfiguration.CreateForType<EditorExtensions> ();
+		private void ConfigDefaults(string configFilePath)
+		{
 			try {
-				cfg.load ();
+				Log.Debug ("configFilePath: " + configFilePath);
 
-				ConfigNode cfgNode = new ConfigNode ("settings");
-				cfgNode.AddValue ("nodeName", "nodeValue");
+				ConfigData config = new ConfigData();
+				config.AngleSnapValues = new float[]{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f };
+				config.MaxSymmetry = 99;
 
-				cfgNode.Save ("EditorExtensions.cfg");
+				config.KeyMap.ResetCamera = KeyCode.Space;
 
-				//Check to see what is returned when config isnt there
-				if (cfg == null) {
-					Log.Debug ("cfg is null");
-				} else {
-					Log.Debug ("cfg is not null");
-				}
+				ModConfig.SaveConfig(config, configFilePath);
 
-				Log.Debug ("Loaded Config: typeof" + cfg.GetType ().ToString ());
-
+				Log.Debug ("Config done");
 			} catch (Exception ex) {
-				Log.Error ("Error loading config: " + ex.Message);
+				Log.Debug ("Error defaulting config: " + ex.Message);
 			}
 
-			try {
-				cfg ["stringsetting"] = "string setting value";
-				cfg ["SomeVector"] = new Vector3d (0, 1, 2);
-				cfg ["testarray"] = new int[]{ 42, 42, 42 };
-				cfg.SetValue ("testarray2", new int[]{ 11, 22, 33 });
-				cfg.save ();
-
-				Log.Debug ("Saved config");
-
-			} catch (Exception ex) {
-				Log.Error ("Error saving config: " + ex.Message);
-			}
-
-			try {
-				//check what is returned when a setting doesnt exist. null?
-				string val = string.Empty;
-				val = cfg.GetValue<string> ("notthere");
-
-				if (val == null) {
-					Log.Debug ("Val is null");
-				} else {
-					Log.Debug ("Get value: '" + val + "' type: " + val.GetType ().ToString ());
-				}
-
-
-
-			} catch (Exception ex) {
-				Log.Error ("Error getting config value: " + ex.Message);
-			}
 		}
 	
 		//Unity initialization call
