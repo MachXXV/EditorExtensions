@@ -19,6 +19,12 @@ namespace EditorExtensions
 		[XmlElement("MaxSymmetry")]
 		public int MaxSymmetry { get; set; }
 
+		/// <summary>
+		/// Time, in seconds, that the on screen messages will display
+		/// </summary>
+		[XmlElement("OnScreenMessageTime")]
+		public float OnScreenMessageTime { get; set; }
+
 		public ConfigData()
 		{
 			this.KeyMap = new KeyMaps ();

@@ -11,15 +11,9 @@ namespace EditorExtensions
 	{
 		#region member vars
 
-		//current vars
-
-		//KeyCode keyMapResetCamera = KeyCode.Space;
-		//KeyCode keyMapSurfaceAttachment = KeyCode.T;
 		//look into loading game keymaps for applying alt+shift modifiers
 		const string degreesSymbol = "\u00B0";
 		int _symmetryMode = 0;
-		//int maxSymmetryMode = 99;
-		//static float[] angleSnapValues = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f };
 
 		//old vars
 		//const string launchSiteName_LaunchPad = "LaunchPad";
@@ -41,18 +35,20 @@ namespace EditorExtensions
 
 		//bool abort = false;
 		/// <summary>
-		/// ctor
+		/// ctor - gets plugin info and initializes config
 		/// </summary>
 		public EditorExtensions ()
 		{
 			try {
+				//get location and version info of the plugin
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
-
 				pluginVersion = execAssembly.GetName ().Version;
 				pluginDirectory = Path.GetDirectoryName (execAssembly.Location);
 
+				//dll's path + filename for the config file
 				configFilePath = Path.Combine (pluginDirectory, ConfigFileName);
 
+				//check if the config file is there and create if its missing
 				if (ModConfig.FileExists (configFilePath)) {
 
 					cfg = LoadConfig ();
@@ -108,6 +104,11 @@ namespace EditorExtensions
 			return ModConfig.LoadConfig (configFilePath);
 		}
 
+		/// <summary>
+		/// Creates a new config file with defaults
+		/// will replace any existing file
+		/// </summary>
+		/// <returns>New config object with default settings</returns>
 		private ConfigData CreateDefaultConfig ()
 		{
 			try {
@@ -116,7 +117,8 @@ namespace EditorExtensions
 				ConfigData defaultConfig = new ConfigData () {
 					AngleSnapValues = new float[]{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
 					MaxSymmetry = 99,
-					FileVersion = pluginVersion.ToString ()
+					FileVersion = pluginVersion.ToString (),
+					OnScreenMessageTime = 1.5f
 				};
 
 				KeyMaps defaultKeys = new KeyMaps () {
@@ -126,8 +128,8 @@ namespace EditorExtensions
 					ResetCamera = KeyCode.Space,
 					Symmetry = KeyCode.X
 				};
-
 				defaultConfig.KeyMap = defaultKeys;
+
 				ModConfig.SaveConfig (defaultConfig, configFilePath);
 				Log.Debug ("Created default config");
 				return defaultConfig;
@@ -140,18 +142,10 @@ namespace EditorExtensions
 		//Unity initialization call
 		public void Awake ()
 		{
-			//Log.Debug ("Awake() initializing");
-
 			//get current editor instance
 			editor = EditorLogic.fetch;
 	
-			//hide snap sprites
-			//editor.symmetrySprite.Hide (true);
-			//editor.mirrorSprite.Hide (true);
-	
 			InitStyles ();
-	
-			//Disable shortcut keys when ship name textarea has focus
 		}
 
 		//Broken
@@ -201,6 +195,7 @@ namespace EditorExtensions
 		/// </summary>
 		public void Update ()
 		{		
+			//Disable shortcut keys when ship name textarea has focus
 			//if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
 			//    return;
 	
@@ -399,14 +394,22 @@ namespace EditorExtensions
 			ShowSnapLabels ();
 		}
 
+		/// <summary>
+		/// Set a on screen display message with the default duration
+		/// </summary>
+		/// <param name="message">Message string</param>
+		void OSDMessage (string message)
+		{
+			OSDMessage (message, cfg.OnScreenMessageTime);
+		}
+
 		float messageCutoff = 0;
 		string messageText = "";
-
 		/// <summary>
 		/// Set a on screen display message
 		/// </summary>
 		/// <param name="message">Message string</param>
-		/// <param name="delay">Amount of time to display the message</param>
+		/// <param name="delay">Amount of time to display the message in seconds</param>
 		void OSDMessage (string message, float delay)
 		{
 			messageCutoff = Time.time + delay;
@@ -470,8 +473,6 @@ namespace EditorExtensions
 					symmetryLabelRect.xMin = symmetryLabelLeftOffset;
 					symmetryLabelRect.xMax = symmetryLabelLeftOffset + symmetryLabelSize;
 				}
-
-
 
 				//Radial mode 'number+R', mirror mode is 'M'/'MM'
 				if (editor.symmetryMethod == SymmetryMethod.Radial) {
