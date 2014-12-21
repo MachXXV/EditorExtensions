@@ -9,6 +9,9 @@ namespace EditorExtensions
 	[KSPAddon (KSPAddon.Startup.EditorAny, false)]
 	public class EditorExtensions : MonoBehaviour
 	{
+		public static EditorExtensions Instance { get; private set; }
+		public bool Visible {get;set;}
+
 		#region member vars
 
 		//look into loading game keymaps for applying alt+shift modifiers
@@ -29,6 +32,7 @@ namespace EditorExtensions
 		string _configFilePath;
 		int _symmetryMode = 0;
 
+		bool enableHotkeys = true;
 		//bool _abort = false;
 
 		#endregion
@@ -111,8 +115,6 @@ namespace EditorExtensions
 		private ConfigData CreateDefaultConfig ()
 		{
 			try {
-				Log.Debug ("_configFilePath: " + _configFilePath);
-
 				ConfigData defaultConfig = new ConfigData () {
 					AngleSnapValues = new float[]{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
 					MaxSymmetry = 99,
@@ -143,13 +145,17 @@ namespace EditorExtensions
 		{
 			//get current editor instance
 			editor = EditorLogic.fetch;
+
+			Instance = this;
 	
-			InitStyles ();
+			InitializeGUI ();
 		}
 
 		//Broken
 		const string VABGameObjectName = "interior_vehicleassembly";
 		const string SPHGameObjectName = "xport_sph3";
+
+
 
 		/// <summary>
 		/// embiggen the hangar space
@@ -208,25 +214,28 @@ namespace EditorExtensions
 			//check for shift key
 			shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
 
-			//look into skewing camera
-	
-			//Space - when no part is selected, reset camera
-			if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
-				//if (HighLogic.LoadedSceneIsEditor) {
-				VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
-				VABcam.camPitch = 0;
-				VABcam.camHdg = 0;
-				//VABcam.ResetCamera ();
+			//look into skewing camera	
 
-				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera> ();
-				SPHcam.camPitch = 0;
-				SPHcam.camHdg = 0;
-				//SPHcam.ResetCamera();
-				//}
-			}
+			//hotkeyed editor functions
+			if (enableHotkeys) {
+
+				//Space - when no part is selected, reset camera
+				if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
+					//if (HighLogic.LoadedSceneIsEditor) {
+					VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
+					VABcam.camPitch = 0;
+					VABcam.camHdg = 0;
+					//VABcam.ResetCamera ();
+
+					SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera> ();
+					SPHcam.camPitch = 0;
+					SPHcam.camHdg = 0;
+					//SPHcam.ResetCamera();
+					//}
+				}
 	
-			//Broken, api doesnt respond
-			// V - Vertical alignment toggle
+				//Broken, api doesnt respond
+				// V - Vertical alignment toggle
 //			if (Input.GetKeyDown (KeyCode.V)) {
 //				//Log.Debug ("Toggling vertical snap");
 //				GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ^= true;
@@ -245,152 +254,293 @@ namespace EditorExtensions
 //				return;
 //			}
 	
-			//look into also toggling  editor.allowNodeAttachment
-			//EditorLogic.SelectedPart.attachRules.allowStack
+				// T: Surface attachment toggle
+				if (Input.GetKeyDown (cfg.KeyMap.AttachmentMode)) {
 
-			// T: Surface attachment and node attachment toggle
-			if (Input.GetKeyDown (cfg.KeyMap.AttachmentMode)) {
+					if (EditorLogic.SelectedPart) {
+						//Toggle surface attachment for selected part
+						EditorLogic.SelectedPart.attachRules.srfAttach ^= true;
 
-				Part selectedPart = EditorLogic.SelectedPart;
+						Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
+						OSDMessage (String.Format ("Surface attachment {0} for {1}"
+							, EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"
+							, EditorLogic.SelectedPart.name
+						));
+					}
 
-				if (selectedPart) {
-					//Toggle surface attachment for selected part
-					selectedPart.attachRules.srfAttach ^= true;
+					/* avoiding this approach of messing with global toggles for now
+					Part selectedPart = EditorLogic.SelectedPart;
+					if (selectedPart) {
+						//Toggle surface attachment for selected part
+						selectedPart.attachRules.srfAttach ^= true;
 
-					//set global toggling to match
-					editor.allowSrfAttachment = selectedPart.attachRules.srfAttach;
-					editor.allowNodeAttachment = !selectedPart.attachRules.srfAttach;
+						//set global toggling to match
+						editor.allowSrfAttachment = selectedPart.attachRules.srfAttach;
+						editor.allowNodeAttachment = !selectedPart.attachRules.srfAttach;
 
-					Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
-					OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1} \n for {2}"
+						Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
+						OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1} \n for {2}"
 						, selectedPart.attachRules.srfAttach ? "enabled" : "disabled"
 						, editor.allowNodeAttachment ? "enabled" : "disabled"
 						, selectedPart.name
-					), 1);
-				} else {
-					//just toggle global surface attachment, parts whose config do not allow it are unaffected
-					editor.allowSrfAttachment ^= true;
-					editor.allowNodeAttachment = !editor.allowSrfAttachment;
-					OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1}"
+						), 1);
+					}
+					else {
+						//just toggle global surface attachment, parts whose config do not allow it are unaffected
+						editor.allowSrfAttachment ^= true;
+						editor.allowNodeAttachment = !editor.allowSrfAttachment;
+						OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1}"
 						, editor.allowSrfAttachment ? "enabled" : "disabled"
 						, editor.allowNodeAttachment ? "enabled" : "disabled"
-					), 1);
+						), 1);
+					}
+					*/
 				}
-			}
 	
-			// ALT+Z : Toggle part clipping (From cheat options)
-			if (altKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
-				CheatOptions.AllowPartClipping ^= true;
-				Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
-				OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"), 1);
-				return;
-			}
+				// ALT+Z : Toggle part clipping (From cheat options)
+				if (altKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
+					CheatOptions.AllowPartClipping ^= true;
+					Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
+					OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"), 1);
+					return;
+				}
 	
-			// C, Shift+C : Increment/Decrement Angle snap
-			if (Input.GetKeyDown (cfg.KeyMap.AngleSnap)) {
+				// C, Shift+C : Increment/Decrement Angle snap
+				if (Input.GetKeyDown (cfg.KeyMap.AngleSnap)) {
 	
-				if (!altKeyDown) {
-					Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
+					if (!altKeyDown) {
+						Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 	
-					int currentAngleIndex = Array.IndexOf (cfg.AngleSnapValues, editor.srfAttachAngleSnap);
+						int currentAngleIndex = Array.IndexOf (cfg.AngleSnapValues, editor.srfAttachAngleSnap);
 	
-					Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
+						Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
 	
-					//rotate through the angle snap values
-					float newAngle;
-					if (shiftKeyDown) {
-						//lower snap
-						newAngle = cfg.AngleSnapValues [currentAngleIndex == 0 ? cfg.AngleSnapValues.Length - 1 : currentAngleIndex - 1];
+						//rotate through the angle snap values
+						float newAngle;
+						if (shiftKeyDown) {
+							//lower snap
+							newAngle = cfg.AngleSnapValues [currentAngleIndex == 0 ? cfg.AngleSnapValues.Length - 1 : currentAngleIndex - 1];
+						} else {
+							//higher snap
+							//Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
+							newAngle = cfg.AngleSnapValues [currentAngleIndex == cfg.AngleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1];
+						}
+	
+						Log.Debug ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
+						editor.srfAttachAngleSnap = newAngle;
 					} else {
-						//higher snap
-						//Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
-						newAngle = cfg.AngleSnapValues [currentAngleIndex == cfg.AngleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1];
+						Log.Debug ("Resetting srfAttachAngleSnap to 0");
+						editor.srfAttachAngleSnap = 0;
 					}
 	
-					Log.Debug ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
-					editor.srfAttachAngleSnap = newAngle;
-				} else {
-					Log.Debug ("Resetting srfAttachAngleSnap to 0");
-					editor.srfAttachAngleSnap = 0;
+					//at angle snap 0, turn off angle snap and show stock circle sprite
+					if (editor.srfAttachAngleSnap == 0) {
+						GameSettings.VAB_USE_ANGLE_SNAP = false;
+						//set playanim index and unhide stock sprite
+						//editor.angleSnapSprite.PlayAnim (0);
+						//editor.angleSnapSprite.Hide (false);
+					} else {
+						GameSettings.VAB_USE_ANGLE_SNAP = true;
+						//angle snap is on, re-hide stock sprite
+						//editor.angleSnapSprite.Hide (true);
+					}
+	
+					Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
+					return;
+	
 				}
 	
-				//at angle snap 0, turn off angle snap and show stock circle sprite
-				if (editor.srfAttachAngleSnap == 0) {
-					GameSettings.VAB_USE_ANGLE_SNAP = false;
-					//set playanim index and unhide stock sprite
-					//editor.angleSnapSprite.PlayAnim (0);
-					//editor.angleSnapSprite.Hide (false);
-				} else {
-					GameSettings.VAB_USE_ANGLE_SNAP = true;
-					//angle snap is on, re-hide stock sprite
-					//editor.angleSnapSprite.Hide (true);
-				}
-	
-				Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
-				return;
-	
-			}
-	
-			// X, Shift+X : Increment/decrement symmetry mode
-			if (Input.GetKeyDown (cfg.KeyMap.Symmetry)) {
+				// X, Shift+X : Increment/decrement symmetry mode
+				if (Input.GetKeyDown (cfg.KeyMap.Symmetry)) {
 
-				//only inc/dec symmetry in radial mode, mirror is just 1&2
-				if (editor.symmetryMethod == SymmetryMethod.Radial) {
-					if (altKeyDown || (_symmetryMode < 2 && shiftKeyDown)) {
-						//Alt+X or Symmetry is at 1(index 2) or lower
-						_symmetryMode = 0;
-					} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !shiftKeyDown) {
-						//Stop adding at max symmetry
-						_symmetryMode = cfg.MaxSymmetry - 1;
+					//only inc/dec symmetry in radial mode, mirror is just 1&2
+					if (editor.symmetryMethod == SymmetryMethod.Radial) {
+						if (altKeyDown || (_symmetryMode < 2 && shiftKeyDown)) {
+							//Alt+X or Symmetry is at 1(index 2) or lower
+							_symmetryMode = 0;
+						} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !shiftKeyDown) {
+							//Stop adding at max symmetry
+							_symmetryMode = cfg.MaxSymmetry - 1;
+						} else {
+							//inc/dec symmetry
+							_symmetryMode = _symmetryMode + (shiftKeyDown ? -1 : 1);
+						}
+						editor.symmetryMode = _symmetryMode;
+						Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
 					} else {
-						//inc/dec symmetry
-						_symmetryMode = _symmetryMode + (shiftKeyDown ? -1 : 1);
+						//editor.symmetryMethod == SymmetryMethod.Mirror
+						//update var with stock action's result
+						_symmetryMode = editor.symmetryMode;
 					}
-					editor.symmetryMode = _symmetryMode;
-					Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
-				} else {
-					//editor.symmetryMethod == SymmetryMethod.Mirror
-					//update var with stock action's result
-					_symmetryMode = editor.symmetryMode;
 				}
-			}
+
+			}//end if(enableHotKeys)
 		}
 
 		#region GUI
 
-		GUIStyle osdLabelStyle, labelStyle;
-
+		//GUIStyle labelStyle;
+		private Rect _settingsWindowRect;
+		GUISkin skin = null;
 		/// <summary>
-		/// Init styles for GUI items
+		/// Init styles & rects for GUI items
 		/// </summary>
-		void InitStyles ()
+		void InitializeGUI ()
 		{
-			//Log.Debug ("InitStyles()");	
+			//use KSP's unity skin
+			skin = HighLogic.Skin;
+
+			_settingsWindowRect = new Rect (){
+				xMin = Screen.width/2,
+				xMax = Screen.width/2 + 300,
+				yMin = Screen.height/2,
+				yMax = Screen.height/2 + 0.0f
+			};
+
+
+			GUIStyle osdLabel = new GUIStyle () {
+				stretchWidth = true,
+				stretchHeight = true,
+				alignment = TextAnchor.MiddleCenter,
+				fontSize = 22,
+				fontStyle = FontStyle.Bold,
+				name = "OSDLabel"
+			};
+			osdLabel.normal.textColor = Color.yellow;
+
+			GUIStyle symmetryLabel = new GUIStyle ("Label");
+			symmetryLabel.stretchWidth = true;
+			symmetryLabel.stretchHeight = true;
+			symmetryLabel.alignment = TextAnchor.MiddleCenter;
+			symmetryLabel.fontSize = 18;
+			symmetryLabel.fontStyle = FontStyle.Bold;
+			symmetryLabel.normal.textColor = Color.yellow;
+			symmetryLabel.name = "SymmetryLabel";
+
+			skin.customStyles = new GUIStyle[]{ osdLabel, symmetryLabel };
 	
-			osdLabelStyle = new GUIStyle ();
-			osdLabelStyle.stretchWidth = true;
-			osdLabelStyle.alignment = TextAnchor.MiddleCenter;
-			osdLabelStyle.fontSize = 24;
-			osdLabelStyle.fontStyle = FontStyle.Bold;
-			osdLabelStyle.normal.textColor = Color.yellow;
-	
-			labelStyle = new GUIStyle ("Label");
-			labelStyle.alignment = TextAnchor.MiddleCenter;
-			labelStyle.fontSize = 18;
-			//labelStyle.fontStyle = FontStyle.Bold;
-			labelStyle.normal.textColor = XKCDColors.DarkYellow;
+//			labelStyle = new GUIStyle ("Label");
+//			labelStyle.alignment = TextAnchor.MiddleCenter;
+//			labelStyle.fontSize = 18;
+//			//labelStyle.fontStyle = FontStyle.Bold;
+//			labelStyle.normal.textColor = XKCDColors.DarkYellow;
 		}
 
+		KeyCode _lastKeyDown = KeyCode.None;
 		/// <summary>
 		/// Unity GUI paint event, fired every screen refresh
 		/// </summary>
 		public void OnGUI ()
 		{	
+			//apply skin
+			GUI.skin = skin;
+
 			//show on-screen messages
 			DisplayOSD ();
 
 			//show and update the angle snap and symmetry mode labels
 			ShowSnapLabels ();
+
+			//GUI test
+			if (Event.current.type == EventType.Layout) {
+				ShowWindows();
+			}
+
+			if (GUI.changed)
+			{
+				Log.Debug ("GUI.Changed");
+			}
+				
+			//get current keypress
+			if (Event.current.isKey) {
+
+				_lastKeyDown = Event.current.keyCode;
+			}
+
+		}
+			
+		private bool _showSettings = false;
+		void ShowWindows()
+		{
+			_showSettings = this.Visible;
+
+			if (_showSettings) {
+				_settingsWindowRect = GUILayout.Window (500, _settingsWindowRect, SettingsWindowContent, "Editor Extensions Settings");
+			}
+		}
+
+		//private int _toolbarInt = 0;
+		//private string[] _toolbarStrings = {"Toolbar1", "Toolbar2", "Toolbar3"};
+		void SettingsWindowContent (int windowID) {
+
+			GUILayout.BeginVertical();
+
+			//_toolbarInt = GUILayout.Toolbar (_toolbarInt, _toolbarStrings);
+
+			GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Version:");
+			GUILayout.Label (cfg.FileVersion);
+			GUILayout.EndHorizontal ();
+
+			GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Current key:");
+			GUILayout.Label (_lastKeyDown.ToString(), "TextField");
+			GUILayout.EndHorizontal ();
+
+			if (EditorLogic.SelectedPart) {
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label ("Selected Part:");
+				GUILayout.Label (EditorLogic.SelectedPart ? EditorLogic.SelectedPart.name : "none");
+				GUILayout.EndHorizontal ();
+
+				GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
+				GUILayout.Label ("srfAttach " + (EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"));
+				GUILayout.Label ("allowCollision " + (EditorLogic.SelectedPart.attachRules.allowCollision ? "enabled" : "disabled"));
+				GUILayout.Label ("allowStack " + (EditorLogic.SelectedPart.attachRules.allowStack ? "enabled" : "disabled"));
+				GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
+				GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
+				GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
+
+
+
+			}
+
+			GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Message time (s):");
+			string osdTimeString = GUILayout.TextField (cfg.OnScreenMessageTime.ToString());
+			float newOsdTime = cfg.OnScreenMessageTime;
+			if (float.TryParse (osdTimeString, out newOsdTime)) {
+				cfg.OnScreenMessageTime = newOsdTime;
+			}
+			GUILayout.EndHorizontal ();
+
+			GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Max symmetry:");
+			string maxSym = GUILayout.TextField (cfg.MaxSymmetry.ToString());
+			int newMaxSym = cfg.MaxSymmetry;
+			if (Int32.TryParse (maxSym, out newMaxSym)) {
+				cfg.MaxSymmetry = newMaxSym;
+			}
+			GUILayout.EndHorizontal ();
+
+			GUILayout.BeginHorizontal ();
+			if(GUILayout.Button("Cancel")){
+				cfg = ModConfig.LoadConfig (_configFilePath);
+				_showSettings = false;
+			}
+			if(GUILayout.Button("Defaults")){
+				cfg = CreateDefaultConfig ();
+			}
+			if(GUILayout.Button("Save")){
+				ModConfig.SaveConfig (cfg, _configFilePath);
+				_showSettings = false;
+			}
+			GUILayout.EndHorizontal();
+
+
+			GUILayout.EndVertical();
+
+			GUI.DragWindow();
 		}
 
 		/// <summary>
@@ -422,8 +572,8 @@ namespace EditorExtensions
 		void DisplayOSD ()
 		{
 			if (Time.time < messageCutoff) {
-				GUILayout.BeginArea (new Rect (0, (Screen.height / 4), Screen.width, 200), osdLabelStyle);
-				GUILayout.Label (messageText, osdLabelStyle);
+				GUILayout.BeginArea (new Rect (0, (Screen.height / 4), Screen.width, 200));
+				GUILayout.Label (messageText, "OSDLabel");
 				GUILayout.EndArea ();			
 			}
 		}
@@ -432,12 +582,12 @@ namespace EditorExtensions
 
 		//symmetry & angle sprite/label size and position
 		const int advancedModeOffset = 34;
-		const int angleSnapLabelSize = 46;
-		const int angleSnapLabelLeftOffset = 207;
-		const int angleSnapLabelBottomOffset = 63;
-		const int symmetryLabelSize = 57;
-		const int symmetryLabelLeftOffset = 150;
-		const int symmetryLabelBottomOffset = 65;
+		const int angleSnapLabelSize = 43;
+		const int angleSnapLabelLeftOffset = 209;
+		const int angleSnapLabelBottomOffset = 61;
+		const int symmetryLabelSize = 56;
+		const int symmetryLabelLeftOffset = 152;
+		const int symmetryLabelBottomOffset = 63;
 		Rect angleSnapLabelRect = new Rect () {
 			xMin = angleSnapLabelLeftOffset,
 			xMax = angleSnapLabelLeftOffset + angleSnapLabelSize,
@@ -485,12 +635,12 @@ namespace EditorExtensions
 				editor.mirrorSprite.Hide (true);
 
 				// Show Symmetry label
-				GUI.Label (symmetryLabelRect, symmetryLabelValue, labelStyle);
+				GUI.Label (symmetryLabelRect, symmetryLabelValue, "SymmetryLabel");
 
 				//if angle snap is on hide stock sprite
 				if (GameSettings.VAB_USE_ANGLE_SNAP) {
 					editor.angleSnapSprite.Hide (true);
-					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, labelStyle);
+					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, "SymmetryLabel");
 
 				} else {
 					//angle snap is off, show stock sprite

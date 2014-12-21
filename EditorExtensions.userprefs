@@ -1,11 +1,10 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug Win" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="EditorExtensions\ModConfig.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="EditorExtensions\EditorExtensions.cs">
     <Files>
-      <File FileName="EditorExtensions\EditorExtensions.cs" Line="17" Column="17" />
-      <File FileName="EditorExtensions\ConfigData.cs" Line="3" Column="3" />
-      <File FileName="EditorExtensions\ModConfig.cs" Line="59" Column="59" />
-      <File FileName="EditorExtensions\Logging.cs" Line="1" Column="1" />
+      <File FileName="EditorExtensions\EditorExtensions.cs" Line="4" Column="4" />
+      <File FileName="EditorExtensions\DefaultKeys.txt" Line="1" Column="1" />
+      <File FileName="EditorExtensions\AppLauncherButton.cs" Line="7" Column="7" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -75,6 +75,8 @@
     <Compile Include="Logging.cs" />
     <Compile Include="ConfigData.cs" />
     <Compile Include="ModConfig.cs" />
+    <Compile Include="SettingsWindow.cs" />
+    <Compile Include="AppLauncherButton.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -86,6 +88,11 @@
     <None Include="DefaultKeys.txt" />
     <None Include="..\README.md">
       <Link>README.md</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="deploy.bat" />
+    <None Include="deploy-mac.sh" />
+    <None Include="AppLauncherIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

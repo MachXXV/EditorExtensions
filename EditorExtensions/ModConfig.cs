@@ -32,6 +32,7 @@ namespace EditorExtensions
 				using (TextWriter writer = new StreamWriter (configFilePath)) {
 					serializer.Serialize (writer, configData); 
 				}
+				Log.Debug("Saved config file");
 				return true;
 			} catch (Exception ex) {
 				Log.Error ("Error saving config file: " + ex.Message);
