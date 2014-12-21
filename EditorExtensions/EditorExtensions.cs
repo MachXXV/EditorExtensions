@@ -52,9 +52,9 @@ namespace EditorExtensions
 				_configFilePath = Path.Combine (_pluginDirectory, ConfigFileName);
 
 				//check if the config file is there and create if its missing
-				if (ModConfig.FileExists (_configFilePath)) {
+				if (ConfigManager.FileExists (_configFilePath)) {
 
-					cfg = LoadConfig ();
+					cfg = ConfigManager.LoadConfig (_configFilePath);
 
 					if (cfg == null) {
 						//failed to load config, create new
@@ -102,11 +102,6 @@ namespace EditorExtensions
 			}
 		}
 
-		private ConfigData LoadConfig ()
-		{
-			return ModConfig.LoadConfig (_configFilePath);
-		}
-
 		/// <summary>
 		/// Creates a new config file with defaults
 		/// will replace any existing file
@@ -131,8 +126,11 @@ namespace EditorExtensions
 				};
 				defaultConfig.KeyMap = defaultKeys;
 
-				ModConfig.SaveConfig (defaultConfig, _configFilePath);
-				Log.Debug ("Created default config");
+				if(ConfigManager.SaveConfig (defaultConfig, _configFilePath))
+					Log.Debug ("Created default config");
+				else
+					Log.Error("Failed to save default config");
+
 				return defaultConfig;
 			} catch (Exception ex) {
 				Log.Debug ("Error defaulting config: " + ex.Message);
@@ -154,9 +152,6 @@ namespace EditorExtensions
 		//Broken
 		const string VABGameObjectName = "interior_vehicleassembly";
 		const string SPHGameObjectName = "xport_sph3";
-
-
-
 		/// <summary>
 		/// embiggen the hangar space
 		/// currently broken
@@ -194,7 +189,6 @@ namespace EditorExtensions
 
 		bool altKeyDown;
 		bool shiftKeyDown;
-
 		/// <summary>
 		/// Fired by Unity event loop
 		/// </summary>
@@ -379,7 +373,6 @@ namespace EditorExtensions
 
 		#region GUI
 
-		//GUIStyle labelStyle;
 		private Rect _settingsWindowRect;
 		GUISkin skin = null;
 		/// <summary>
@@ -391,12 +384,11 @@ namespace EditorExtensions
 			skin = HighLogic.Skin;
 
 			_settingsWindowRect = new Rect (){
-				xMin = Screen.width/2,
-				xMax = Screen.width/2 + 300,
+				xMin = Screen.width - 400,
+				xMax = Screen.width - 100,
 				yMin = Screen.height/2,
-				yMax = Screen.height/2 + 0.0f
+				yMax = Screen.height/2 //0 height, GUILayout resizes it
 			};
-
 
 			GUIStyle osdLabel = new GUIStyle () {
 				stretchWidth = true,
@@ -408,22 +400,17 @@ namespace EditorExtensions
 			};
 			osdLabel.normal.textColor = Color.yellow;
 
-			GUIStyle symmetryLabel = new GUIStyle ("Label");
-			symmetryLabel.stretchWidth = true;
-			symmetryLabel.stretchHeight = true;
-			symmetryLabel.alignment = TextAnchor.MiddleCenter;
-			symmetryLabel.fontSize = 18;
-			symmetryLabel.fontStyle = FontStyle.Bold;
+			GUIStyle symmetryLabel = new GUIStyle () {
+				stretchWidth = true,
+				stretchHeight = true,
+				alignment = TextAnchor.MiddleCenter,
+				fontSize = 18,
+				fontStyle = FontStyle.Bold,
+				name = "SymmetryLabel"
+			};
 			symmetryLabel.normal.textColor = Color.yellow;
-			symmetryLabel.name = "SymmetryLabel";
 
 			skin.customStyles = new GUIStyle[]{ osdLabel, symmetryLabel };
-	
-//			labelStyle = new GUIStyle ("Label");
-//			labelStyle.alignment = TextAnchor.MiddleCenter;
-//			labelStyle.fontSize = 18;
-//			//labelStyle.fontStyle = FontStyle.Bold;
-//			labelStyle.normal.textColor = XKCDColors.DarkYellow;
 		}
 
 		KeyCode _lastKeyDown = KeyCode.None;
@@ -500,39 +487,49 @@ namespace EditorExtensions
 				GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
 				GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
 				GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
-
-
-
 			}
 
 			GUILayout.BeginHorizontal ();
-			GUILayout.Label ("Message time (s):");
-			string osdTimeString = GUILayout.TextField (cfg.OnScreenMessageTime.ToString());
-			float newOsdTime = cfg.OnScreenMessageTime;
-			if (float.TryParse (osdTimeString, out newOsdTime)) {
-				cfg.OnScreenMessageTime = newOsdTime;
+			GUILayout.Label ("Message delay:");
+			if (GUILayout.Button ("-")) {
+				cfg.OnScreenMessageTime -= 0.5f;
+			}
+			GUILayout.Label (cfg.OnScreenMessageTime.ToString(), "TextField");
+			if (GUILayout.Button ("+")) {
+				cfg.OnScreenMessageTime += 0.5f;
 			}
 			GUILayout.EndHorizontal ();
 
+//			GUILayout.BeginHorizontal ();
+//			GUILayout.Label ("Max symmetry:");
+//			string maxSym = GUILayout.TextField (cfg.MaxSymmetry.ToString());
+//			int newMaxSym = cfg.MaxSymmetry;
+//			if (Int32.TryParse (maxSym, out newMaxSym)) {
+//				cfg.MaxSymmetry = newMaxSym;
+//			}
+//			GUILayout.EndHorizontal ();
+
 			GUILayout.BeginHorizontal ();
 			GUILayout.Label ("Max symmetry:");
-			string maxSym = GUILayout.TextField (cfg.MaxSymmetry.ToString());
-			int newMaxSym = cfg.MaxSymmetry;
-			if (Int32.TryParse (maxSym, out newMaxSym)) {
-				cfg.MaxSymmetry = newMaxSym;
+			if (GUILayout.Button ("-")) {
+				cfg.MaxSymmetry--;
+			}
+			GUILayout.Label (cfg.MaxSymmetry.ToString(), "TextField");
+			if (GUILayout.Button ("+")) {
+				cfg.MaxSymmetry++;
 			}
 			GUILayout.EndHorizontal ();
 
 			GUILayout.BeginHorizontal ();
 			if(GUILayout.Button("Cancel")){
-				cfg = ModConfig.LoadConfig (_configFilePath);
+				cfg = ConfigManager.LoadConfig (_configFilePath);
 				_showSettings = false;
 			}
 			if(GUILayout.Button("Defaults")){
 				cfg = CreateDefaultConfig ();
 			}
 			if(GUILayout.Button("Save")){
-				ModConfig.SaveConfig (cfg, _configFilePath);
+				ConfigManager.SaveConfig (cfg, _configFilePath);
 				_showSettings = false;
 			}
 			GUILayout.EndHorizontal();

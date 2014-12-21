@@ -3,17 +3,12 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace EditorExtensions
 {
-
-	public static class ModConfig
+	public static class ConfigManager
 	{
-
-		static ModConfig ()
-		{
-		}
-			
 		public static bool FileExists (string filePath)
 		{
 			try {
@@ -56,7 +51,6 @@ namespace EditorExtensions
 				return null;
 			}
 		}
-
 	}
 }
 

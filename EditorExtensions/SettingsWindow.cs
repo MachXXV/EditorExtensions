@@ -69,7 +69,7 @@ namespace EditorExtensions
 				//cfg = CreateDefaultConfig ();
 			}
 			if(GUILayout.Button("Save")){
-				ModConfig.SaveConfig (cfg, _configFilePath);
+				ConfigManager.SaveConfig (cfg, _configFilePath);
 				//_showSettings = false;
 			}
 			GUILayout.EndHorizontal();
