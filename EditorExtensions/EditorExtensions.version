@@ -1,17 +1,17 @@
 ﻿{
     "NAME":"EditorExtensions",
-    "URL":"http://github.com/MachXXV/EditorExtensions/raw/Dev/EditorExtensions/EditorExtensions.version",
-    "DOWNLOAD":"http://github.com/MachXXV/EditorExtensions/releases/latest",
+    "URL":"https://github.com/MachXXV/EditorExtensions/raw/Dev/EditorExtensions/EditorExtensions.version",
+    "DOWNLOAD":"https://github.com/MachXXV/EditorExtensions/releases/latest",
     "GITHUB":
     {
         "USERNAME":"MachXXV",
         "REPOSITORY":"EditorExtensions",
-        "ALLOW_PRE_RELEASE":false,
+        "ALLOW_PRE_RELEASE":false
     },
     "VERSION":
     {
         "MAJOR":2,
-        "MINOR":1,
+        "MINOR":0,
         "PATCH":0,
         "BUILD":0
     },
