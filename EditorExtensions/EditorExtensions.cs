@@ -11,7 +11,8 @@ namespace EditorExtensions
 	public class EditorExtensions : MonoBehaviour
 	{
 		public static EditorExtensions Instance { get; private set; }
-		public bool Visible {get;set;}
+
+		public bool Visible { get; set; }
 
 		#region member vars
 
@@ -124,14 +125,15 @@ namespace EditorExtensions
 					PartClipping = KeyCode.Z,
 					ResetCamera = KeyCode.Space,
 					Symmetry = KeyCode.X,
-					VerticalSnap = KeyCode.V
+					VerticalSnap = KeyCode.V,
+					HorizontalSnap = KeyCode.H
 				};
 				defaultConfig.KeyMap = defaultKeys;
 
-				if(ConfigManager.SaveConfig (defaultConfig, _configFilePath))
+				if (ConfigManager.SaveConfig (defaultConfig, _configFilePath))
 					Log.Debug ("Created default config");
 				else
-					Log.Error("Failed to save default config");
+					Log.Error ("Failed to save default config");
 
 				return defaultConfig;
 			} catch (Exception ex) {
@@ -154,6 +156,7 @@ namespace EditorExtensions
 		//Broken
 		const string VABGameObjectName = "interior_vehicleassembly";
 		const string SPHGameObjectName = "xport_sph3";
+
 		/// <summary>
 		/// embiggen the hangar space
 		/// currently broken
@@ -189,15 +192,15 @@ namespace EditorExtensions
 //			}
 		}
 
-		private Part GetPartUnderCursor(){
-			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		private Part GetPartUnderCursor ()
+		{
+			var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 			RaycastHit hit;
 
 			EditorLogic ed = EditorLogic.fetch;
 
-			if (ed != null && Physics.Raycast(ray, out hit))
-			{
-				return ed.ship.Parts.Find(p => p.gameObject == hit.transform.gameObject);
+			if (ed != null && Physics.Raycast (ray, out hit)) {
+				return ed.ship.Parts.Find (p => p.gameObject == hit.transform.gameObject);
 			}
 			return null;
 		}
@@ -205,6 +208,7 @@ namespace EditorExtensions
 
 		bool altKeyDown;
 		bool shiftKeyDown;
+
 		/// <summary>
 		/// Fired by Unity event loop
 		/// </summary>
@@ -217,9 +221,8 @@ namespace EditorExtensions
 			//may need to go away from this and do explicit editor.editorType calls 
 			//inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
 
-			//look into fuel crossfeed toggle
-
-			//shipNameField.Focused
+			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
+				return;
 	
 			//check for the various alt/mod etc keypresses
 			altKeyDown = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt) || Input.GetKey (KeyCode.AltGr);
@@ -230,42 +233,65 @@ namespace EditorExtensions
 
 			//hotkeyed editor functions
 			if (enableHotkeys) {
-
-				//Broken, api doesnt respond
-				// V - Vertical alignment toggle
+			
+				// V - Vertically align part under cursor with the part it is attached to
 				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
 
-					Part sp = GetPartUnderCursor ();
+					try {
+						Part sp = GetPartUnderCursor ();
 
+						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null) {
 
+							Part ap = sp.srfAttachNode.attachedPart;
+							List<Part> symParts = sp.symmetryCounterparts;
 
-					if (sp != null) {
-						if (sp.srfAttachNode != null) {
-							if (sp.srfAttachNode.attachedPart != null) {
+							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
 
-								Part ap = sp.srfAttachNode.attachedPart;
-								List<Part> symParts = sp.symmetryCounterparts;
+							//move hovered part
+							sp.transform.position = new Vector3 (sp.transform.position.x, ap.transform.position.y, sp.transform.position.z);
+							sp.attPos0.y = ap.transform.position.y;
 
-								Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString());
-
-								//move hovered part
-								sp.transform.position = new Vector3 (sp.transform.position.x, ap.transform.position.y, sp.transform.position.z);
-								sp.attPos0.y = ap.transform.position.y;
-
-								//move any symmetry siblings/counterparts
-								foreach(Part symPart in symParts){
-									symPart.transform.position = new Vector3 (symPart.transform.position.x, ap.transform.position.y, symPart.transform.position.z);
-									symPart.attPos0.y = ap.transform.position.y;
-								}
-
-
-
+							//move any symmetry siblings/counterparts
+							foreach (Part symPart in symParts) {
+								symPart.transform.position = new Vector3 (symPart.transform.position.x, ap.transform.position.y, symPart.transform.position.z);
+								symPart.attPos0.y = ap.transform.position.y;
 							}
 						}
+					} catch (Exception ex) {
+						Log.Error ("Error trying to vertically align: " + ex.Message);
 					}
 
 					//OSDMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"), 1);
 					//Log.Debug ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
+					return;
+				}
+
+				// H - Horizontally align part under cursor with the part it is attached to
+				if (Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
+
+					try {
+						Part sp = GetPartUnderCursor ();
+
+						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null) {
+
+							Part ap = sp.srfAttachNode.attachedPart;
+							List<Part> symParts = sp.symmetryCounterparts;
+
+							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
+
+							//move selected part
+							sp.transform.position = new Vector3 (sp.transform.position.x, sp.transform.position.y, ap.transform.position.z);
+							sp.attPos0.z = ap.transform.position.z;
+
+							//move any symmetry siblings/counterparts
+							foreach (Part symPart in symParts) {
+								symPart.transform.position = new Vector3 (symPart.transform.position.x, symPart.transform.position.y, ap.transform.position.z);
+								symPart.attPos0.z = ap.transform.position.z;
+							}
+						}
+					} catch (Exception ex) {
+						Log.Error ("Error trying to Horizontally align: " + ex.Message);
+					}
 					return;
 				}
 
@@ -332,7 +358,7 @@ namespace EditorExtensions
 				if (altKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
 					CheatOptions.AllowPartClipping ^= true;
 					Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
-					OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"), 1);
+					OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 					return;
 				}
 	
@@ -412,6 +438,7 @@ namespace EditorExtensions
 
 		private Rect _settingsWindowRect;
 		GUISkin skin = null;
+
 		/// <summary>
 		/// Init styles & rects for GUI items
 		/// </summary>
@@ -420,11 +447,11 @@ namespace EditorExtensions
 			//use KSP's unity skin
 			skin = HighLogic.Skin;
 
-			_settingsWindowRect = new Rect (){
+			_settingsWindowRect = new Rect () {
 				xMin = Screen.width - 400,
 				xMax = Screen.width - 100,
-				yMin = Screen.height/2,
-				yMax = Screen.height/2 //0 height, GUILayout resizes it
+				yMin = Screen.height / 2,
+				yMax = Screen.height / 2 //0 height, GUILayout resizes it
 			};
 
 			GUIStyle osdLabel = new GUIStyle () {
@@ -450,7 +477,7 @@ namespace EditorExtensions
 			skin.customStyles = new GUIStyle[]{ osdLabel, symmetryLabel };
 		}
 
-		KeyCode _lastKeyDown = KeyCode.None;
+		KeyCode currentKeyPress = KeyCode.None;
 		/// <summary>
 		/// Unity GUI paint event, fired every screen refresh
 		/// </summary>
@@ -465,43 +492,41 @@ namespace EditorExtensions
 			//show and update the angle snap and symmetry mode labels
 			ShowSnapLabels ();
 
-			//GUI test
+			//show windows, only on Unity Layout pass
 			if (Event.current.type == EventType.Layout) {
-				ShowWindows();
-			}
-
-			if (GUI.changed)
-			{
-				Log.Debug ("GUI.Changed");
+				ShowWindows ();
 			}
 				
 			//get current keypress
-			if (Event.current.isKey) {
-
-				_lastKeyDown = Event.current.keyCode;
+			if (Event.current.isKey) { 
+				currentKeyPress = Event.current.keyCode;
 			}
 
 		}
-			
-		private bool _showSettings = false;
-		void ShowWindows()
+
+		//private bool _showSettings = false;
+
+		void ShowWindows ()
 		{
-			_showSettings = this.Visible;
+			//_showSettings = this.Visible;
 
-			string windowTitle = "Editor Extensions v" + pluginVersion.Major.ToString() + "." + pluginVersion.Minor.ToString();
+			string windowTitle = "Editor Extensions v" + pluginVersion.Major.ToString () + "." + pluginVersion.Minor.ToString ();
 
-			if (_showSettings) {
+			if (this.Visible) {
+				//collapse window height so that it resizes to content
+				_settingsWindowRect.yMax = _settingsWindowRect.yMin;
 				_settingsWindowRect = GUILayout.Window (500, _settingsWindowRect, SettingsWindowContent, windowTitle);
 			}
 		}
 
 		private int toolbarInt = 0;
-		private string[] _toolbarStrings = {"Settings", "Debug"};
-		void SettingsWindowContent (int windowID) {
+		private string[] _toolbarStrings = { "Settings", "Debug" };
 
-			GUILayout.BeginVertical();
-
+		void SettingsWindowContent (int windowID)
+		{
 			toolbarInt = GUILayout.Toolbar (toolbarInt, _toolbarStrings);
+
+			GUILayout.BeginVertical ("box");
 
 			//settings
 			if (toolbarInt == 0) {
@@ -510,7 +535,7 @@ namespace EditorExtensions
 				if (GUILayout.Button ("-")) {
 					cfg.OnScreenMessageTime -= 0.5f;
 				}
-				GUILayout.Label (cfg.OnScreenMessageTime.ToString(), "TextField");
+				GUILayout.Label (cfg.OnScreenMessageTime.ToString (), "TextField");
 				if (GUILayout.Button ("+")) {
 					cfg.OnScreenMessageTime += 0.5f;
 				}
@@ -521,30 +546,56 @@ namespace EditorExtensions
 				if (GUILayout.Button ("-")) {
 					cfg.MaxSymmetry--;
 				}
-				GUILayout.Label (cfg.MaxSymmetry.ToString(), "TextField");
+				GUILayout.Label (cfg.MaxSymmetry.ToString (), "TextField");
 				if (GUILayout.Button ("+")) {
 					cfg.MaxSymmetry++;
 				}
 				GUILayout.EndHorizontal ();
+
+//				GUILayout.BeginHorizontal ();
+//				GUILayout.Label ("Surface attachment:");
+//				GUI.SetNextControlName ("AttachmentMode");
+//				string tmpAttachmentMode = cfg.KeyMap.AttachmentMode.ToString ();
+//				tmpAttachmentMode = GUILayout.TextField (tmpAttachmentMode);
+//
+//				if (tmpAttachmentMode.Length == 1) {
+//					try {
+//						KeyCode newAttachmentMode = (KeyCode)Enum.Parse (typeof(KeyCode), tmpAttachmentMode);
+//						cfg.KeyMap.AttachmentMode = newAttachmentMode;
+//					} catch {
+//						//ignore
+//						Log.Error ("Invalid value for cfg.KeyMap.AttachmentMode: " + tmpAttachmentMode);
+//					}
+//				}
+//
+//				GUILayout.EndHorizontal ();
+
+					//			GUILayout.BeginHorizontal ();
+					//			GUILayout.Label ("Max symmetry:");
+					//			string maxSym = GUILayout.TextField (cfg.MaxSymmetry.ToString());
+					//			int newMaxSym = cfg.MaxSymmetry;
+					//			if (Int32.TryParse (maxSym, out newMaxSym)) {
+					//				cfg.MaxSymmetry = newMaxSym;
+					//			}
+					//			GUILayout.EndHorizontal ();
 			}
 
-			//debug 
+			//debug info
 			if (toolbarInt == 1) {
 				GUILayout.BeginHorizontal ();
 				GUILayout.Label ("Version:");
 				GUILayout.Label (cfg.FileVersion);
 				GUILayout.EndHorizontal ();
 
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Current key:");
-				GUILayout.Label (_lastKeyDown.ToString(), "TextField");
-				GUILayout.EndHorizontal ();
+				//Get selected part, mouseover part if none is active
+				Part sp = EditorLogic.SelectedPart;
+				if (sp == null)
+						sp = GetPartUnderCursor ();
 
-				if (EditorLogic.SelectedPart) {
-					Part sp = EditorLogic.SelectedPart;
+				if (sp != null) {
 
 					GUILayout.BeginHorizontal ();
-					GUILayout.Label ("Selected Part:");
+					GUILayout.Label ("Current Part:");
 					GUILayout.Label (sp ? sp.name : "none");
 					GUILayout.EndHorizontal ();
 
@@ -560,88 +611,88 @@ namespace EditorExtensions
 						GUILayout.Label ("child: " + child.name);
 					}
 
-					GUILayout.Label ("localPosition " + sp.transform.localPosition.ToString());
-					GUILayout.Label ("position " + sp.transform.position.ToString());
 
-					GUILayout.Label ("isAttached" + sp.isAttached.ToString ());
+
+					GUILayout.Label ("localPosition " + sp.transform.localPosition.ToString ());
+					GUILayout.Label ("position " + sp.transform.position.ToString ());
+					GUILayout.Label ("rotation " + sp.transform.rotation.ToString ());
+					GUILayout.Label ("attRotation: " + sp.attRotation.ToString ());
+					GUILayout.Label ("attRotation0: " + sp.attRotation0.ToString ());
+					//attPos doesnt seem to be used
+					//GUILayout.Label ("attPos: " + sp.attPos.ToString ());
+					GUILayout.Label ("attPos0: " + sp.attPos0.ToString ());
+
+					GUILayout.Label ("isAttached " + sp.isAttached.ToString ());
+
+
 
 					if (sp.srfAttachNode != null) {
+						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString ());
 
+						GUILayout.BeginVertical("box");
+						GUILayout.Label ("Attached part:");
 						if (sp.srfAttachNode.attachedPart != null) {
-							GUILayout.Label ("attached part attPos0: " + sp.srfAttachNode.attachedPart.attPos0.ToString ());
-							GUILayout.Label ("attached part localPosition " + sp.srfAttachNode.attachedPart.transform.localPosition.ToString());
-							GUILayout.Label ("attached part position " + sp.srfAttachNode.attachedPart.transform.position.ToString());
+							GUILayout.Label ("attPos0: " + sp.srfAttachNode.attachedPart.attPos0.ToString ());
+							GUILayout.Label ("localPosition " + sp.srfAttachNode.attachedPart.transform.localPosition.ToString ());
+							GUILayout.Label ("position " + sp.srfAttachNode.attachedPart.transform.position.ToString ());
+							GUILayout.Label ("rotation " + sp.srfAttachNode.attachedPart.transform.rotation.ToString ());
+							GUILayout.Label ("up " + sp.srfAttachNode.attachedPart.transform.up.ToString ());
+
+							AttachNode an = sp.srfAttachNode.attachedPart.attachNodes [0];
+							GUILayout.Label ("attachNode " + an.position.ToString());
 							//sp.attPos0.y = sp.srfAttachNode.attachedPart.attPos0.y;
 						}
-						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString());
 
+						GUILayout.EndVertical ();
 					}
 
 
-					GUILayout.Label ("attPos: " + sp.attPos.ToString());
-					GUILayout.Label ("attPos0: " + sp.attPos0.ToString());
 
-					GUILayout.Label ("attRotation: " + sp.attRotation.ToString());
-					GUILayout.Label ("attRotation0: " + sp.attRotation0.ToString());
 
-//					foreach (var node in sp.attachNodes) {
-//						GUILayout.Label ("attachNode");
-//						GUILayout.Label ("position: " + node.position.ToString());
-//						GUILayout.Label ("nodeType: " + node.nodeType.ToString());
-//					}
 
 
 
 				}
 			}
 
-//			GUILayout.BeginHorizontal ();
-//			GUILayout.Label ("Max symmetry:");
-//			string maxSym = GUILayout.TextField (cfg.MaxSymmetry.ToString());
-//			int newMaxSym = cfg.MaxSymmetry;
-//			if (Int32.TryParse (maxSym, out newMaxSym)) {
-//				cfg.MaxSymmetry = newMaxSym;
-//			}
-//			GUILayout.EndHorizontal ();
+
+
+			GUILayout.EndVertical ();
 
 			GUILayout.BeginHorizontal ();
-			if(GUILayout.Button("Cancel")){
+			if (GUILayout.Button ("Close")) {
 				cfg = ConfigManager.LoadConfig (_configFilePath);
-				_showSettings = false;
+				this.Visible = false;
 			}
-			if(GUILayout.Button("Defaults")){
-				cfg = CreateDefaultConfig ();
+			//only show on settings tab
+			if (toolbarInt == 0) {
+				if (GUILayout.Button ("Defaults")) {
+					cfg = CreateDefaultConfig ();
+				}
+				if (GUILayout.Button ("Save")) {
+					ConfigManager.SaveConfig (cfg, _configFilePath);
+					this.Visible = false;
+				}
 			}
-			if(GUILayout.Button("Save")){
-				ConfigManager.SaveConfig (cfg, _configFilePath);
-				_showSettings = false;
-			}
-			GUILayout.EndHorizontal();
+			GUILayout.EndHorizontal ();
 
-			GUILayout.EndVertical();
 
-			GUI.DragWindow();
-		}
 
-		/// <summary>
-		/// Set a on screen display message with the default duration
-		/// </summary>
-		/// <param name="message">Message string</param>
-		void OSDMessage (string message)
-		{
-			OSDMessage (message, cfg.OnScreenMessageTime);
+
+			GUI.DragWindow ();
 		}
 
 		float messageCutoff = 0;
 		string messageText = "";
+
 		/// <summary>
 		/// Set a on screen display message
 		/// </summary>
 		/// <param name="message">Message string</param>
 		/// <param name="delay">Amount of time to display the message in seconds</param>
-		void OSDMessage (string message, float delay)
+		void OSDMessage (string message)
 		{
-			messageCutoff = Time.time + delay;
+			messageCutoff = Time.time + cfg.OnScreenMessageTime;
 			messageText = message;
 			Log.Debug (String.Format ("OSD messageCutoff = {0}, messageText = {1}", messageCutoff.ToString (), messageText));
 		}

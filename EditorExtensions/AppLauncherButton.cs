@@ -32,8 +32,8 @@ namespace EditorExtensions
 				this.button = ApplicationLauncher.Instance.AddModApplication (
 					//ButtonState(true), //RUIToggleButton.onTrue
 					//ButtonState(false), //RUIToggleButton.onFalse
-					() => {EditorExtensions.Instance.Visible = true;Log.Debug ("ApplicationLauncher true");}, 	//RUIToggleButton.onTrue
-					() => {EditorExtensions.Instance.Visible = false;Log.Debug ("ApplicationLauncher false");},	//RUIToggleButton.onFalse
+					() => {EditorExtensions.Instance.Visible = true;}, 	//RUIToggleButton.onTrue
+					() => {EditorExtensions.Instance.Visible = false;},	//RUIToggleButton.onFalse
 					null, //RUIToggleButton.OnHover
 					null, //RUIToggleButton.onHoverOut
 					null, //RUIToggleButton.onEnable

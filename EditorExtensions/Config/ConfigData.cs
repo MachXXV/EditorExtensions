@@ -50,6 +50,9 @@ namespace EditorExtensions
 
 		[XmlElement("VerticalSnap")]
 		public KeyCode VerticalSnap { get; set; }
+
+		[XmlElement("HorizontalSnap")]
+		public KeyCode HorizontalSnap { get; set; }
 	}
 }
 
