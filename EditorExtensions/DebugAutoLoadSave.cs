@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EditorExtensions
 {
-	#if DEBUG
+	#if IGNORE
 	//Autoload persistent save and enter the vessel editor
 	[KSPAddon(KSPAddon.Startup.MainMenu, false)]
 	public class DebugAutoLoadSave : MonoBehaviour

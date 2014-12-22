@@ -1,6 +1,6 @@
 ﻿{
     "NAME":"EditorExtensions",
-    "URL":"https://raw.githubusercontent.com/MachXXV/EditorExtensions/Dev/EditorExtensions/EditorExtensions.version",
+    "URL":"http://www.machxxv.com/EditorExtensions.version",
     "DOWNLOAD":"https://github.com/MachXXV/EditorExtensions/releases/latest",
     "GITHUB":
     {
@@ -27,5 +27,4 @@
         "MINOR":90,
         "PATCH":0
     }
-
 }

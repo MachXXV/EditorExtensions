@@ -3,15 +3,20 @@
 ###Changes in v2.1
 * Added new vertical snap (V)
 -- Place parts like normal.
--- Once part is placed, hover over the part with your mouse and hit V. Part will align itself vertically to the middle of the part it is attached to.
+-- Once part is placed, hover over the part with your mouse and hit V. Part will align itself vertically to the middle of its parent part.
 * Added new horizontal snap (H)
 -- Place parts like normal.
--- Once part is placed, hover over the part with your mouse and hit H. Part will align itself horizontally to the middle of the part it is attached to.
+-- Once part is placed, hover over the part with your mouse and hit H. Part will align itself horizontally to the middle of its parent part.
 * Changed attachment mode toggling (T): now only toggles surface attachment of selected part.
-* Added toolbar icon, and option to change the max symmetry level.
+* Added toolbar icon ("EEX") to bring up settings menu
+-- Customize hotkeys
+-- Customize angle snap values
+-- Customize symmetry level
 
-####[Download v2.1 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.0/EditorExtensions_v2.1.zip)
-####[Download v2.0 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.0/EditorExtensions_v2.0.zip)
+A note regarding the new vertical/horizontal snap functions: These are currently very simplistic, they align themselves on a single axis to their parent part, and might clip into the parent part if the parent is rotated away from vertical/horizontal.
+I'm working on a more sophisticated method that will align the parts to rotated parents and respect the collision meshes.
+
+####[Download latest version for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/latest)
 
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
 ####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
@@ -25,8 +30,8 @@ This version is not compatible with any KSP versions prior to 0.90, for 0.25 use
 * Reset hangar camera view
 
 ### Keybindings
-* **V** 			- Veritcally center part to the part it is attached to
-* **H** 			- Horizontally center part to the part it is attached to
+* **V** 			- Vertically center the part under the mouse to its parent part
+* **H** 			- Horizontally center the part under the mouse to its parent part
 * **X, Shift+X** 	- Increase/Decrease symmetry level
 * **Alt+X** 		- Reset symmetry level
 * **C, Shift+C** 	- Increase/Decrease angle snap

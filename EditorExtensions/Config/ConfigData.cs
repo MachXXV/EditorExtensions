@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace EditorExtensions
 {
@@ -14,7 +15,7 @@ namespace EditorExtensions
 		public KeyMaps KeyMap { get; set; }
 
 		[XmlArray("AngleSnapValues")]
-		public float[] AngleSnapValues { get; set; }
+		public List<float> AngleSnapValues { get; set; }
 
 		[XmlElement("MaxSymmetry")]
 		public int MaxSymmetry { get; set; }
