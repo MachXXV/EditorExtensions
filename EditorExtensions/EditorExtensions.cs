@@ -3,6 +3,7 @@ using UnityEngine;
 using KSP.IO;
 using System.Reflection;
 using System.IO;
+using System.Collections.Generic;
 
 namespace EditorExtensions
 {
@@ -122,7 +123,8 @@ namespace EditorExtensions
 					AttachmentMode = KeyCode.T,
 					PartClipping = KeyCode.Z,
 					ResetCamera = KeyCode.Space,
-					Symmetry = KeyCode.X
+					Symmetry = KeyCode.X,
+					VerticalSnap = KeyCode.V
 				};
 				defaultConfig.KeyMap = defaultKeys;
 
@@ -187,6 +189,20 @@ namespace EditorExtensions
 //			}
 		}
 
+		private Part GetPartUnderCursor(){
+			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			RaycastHit hit;
+
+			EditorLogic ed = EditorLogic.fetch;
+
+			if (ed != null && Physics.Raycast(ray, out hit))
+			{
+				return ed.ship.Parts.Find(p => p.gameObject == hit.transform.gameObject);
+			}
+			return null;
+		}
+
+
 		bool altKeyDown;
 		bool shiftKeyDown;
 		/// <summary>
@@ -202,6 +218,8 @@ namespace EditorExtensions
 			//inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
 
 			//look into fuel crossfeed toggle
+
+			//shipNameField.Focused
 	
 			//check for the various alt/mod etc keypresses
 			altKeyDown = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt) || Input.GetKey (KeyCode.AltGr);
@@ -212,6 +230,45 @@ namespace EditorExtensions
 
 			//hotkeyed editor functions
 			if (enableHotkeys) {
+
+				//Broken, api doesnt respond
+				// V - Vertical alignment toggle
+				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
+
+					Part sp = GetPartUnderCursor ();
+
+
+
+					if (sp != null) {
+						if (sp.srfAttachNode != null) {
+							if (sp.srfAttachNode.attachedPart != null) {
+
+								Part ap = sp.srfAttachNode.attachedPart;
+								List<Part> symParts = sp.symmetryCounterparts;
+
+								Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString());
+
+								//move hovered part
+								sp.transform.position = new Vector3 (sp.transform.position.x, ap.transform.position.y, sp.transform.position.z);
+								sp.attPos0.y = ap.transform.position.y;
+
+								//move any symmetry siblings/counterparts
+								foreach(Part symPart in symParts){
+									symPart.transform.position = new Vector3 (symPart.transform.position.x, ap.transform.position.y, symPart.transform.position.z);
+									symPart.attPos0.y = ap.transform.position.y;
+								}
+
+
+
+							}
+						}
+					}
+
+					//OSDMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"), 1);
+					//Log.Debug ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
+					return;
+				}
+
 
 				//Space - when no part is selected, reset camera
 				if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
@@ -227,26 +284,6 @@ namespace EditorExtensions
 					//SPHcam.ResetCamera();
 					//}
 				}
-	
-				//Broken, api doesnt respond
-				// V - Vertical alignment toggle
-//			if (Input.GetKeyDown (KeyCode.V)) {
-//				//Log.Debug ("Toggling vertical snap");
-//				GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ^= true;
-//	
-//				//if normal radial angle snap is currently off, vertical snap will have no effect unless it is re-enabled
-//				//automatically set aangle snap to minimum - some people thought vert snap was broken in this situation, the game doesn't appear to allow it
-//				if (GameSettings.VAB_USE_ANGLE_SNAP == false && GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL == true) {
-//					Log.Debug ("Enabling angle snap to allow vertical snap to work");
-//					//angle snap needs be > 0, otherwise log is spammed with DivideByZero errors
-//					if (editor.srfAttachAngleSnap == 0)
-//						editor.srfAttachAngleSnap = 1;
-//					GameSettings.VAB_USE_ANGLE_SNAP = true;
-//				}
-//				OSDMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"), 1);
-//				Log.Debug ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
-//				return;
-//			}
 	
 				// T: Surface attachment toggle
 				if (Input.GetKeyDown (cfg.KeyMap.AttachmentMode)) {
@@ -451,54 +488,112 @@ namespace EditorExtensions
 		{
 			_showSettings = this.Visible;
 
+			string windowTitle = "Editor Extensions v" + pluginVersion.Major.ToString() + "." + pluginVersion.Minor.ToString();
+
 			if (_showSettings) {
-				_settingsWindowRect = GUILayout.Window (500, _settingsWindowRect, SettingsWindowContent, "Editor Extensions Settings");
+				_settingsWindowRect = GUILayout.Window (500, _settingsWindowRect, SettingsWindowContent, windowTitle);
 			}
 		}
 
-		//private int _toolbarInt = 0;
-		//private string[] _toolbarStrings = {"Toolbar1", "Toolbar2", "Toolbar3"};
+		private int toolbarInt = 0;
+		private string[] _toolbarStrings = {"Settings", "Debug"};
 		void SettingsWindowContent (int windowID) {
 
 			GUILayout.BeginVertical();
 
-			//_toolbarInt = GUILayout.Toolbar (_toolbarInt, _toolbarStrings);
+			toolbarInt = GUILayout.Toolbar (toolbarInt, _toolbarStrings);
 
-			GUILayout.BeginHorizontal ();
-			GUILayout.Label ("Version:");
-			GUILayout.Label (cfg.FileVersion);
-			GUILayout.EndHorizontal ();
-
-			GUILayout.BeginHorizontal ();
-			GUILayout.Label ("Current key:");
-			GUILayout.Label (_lastKeyDown.ToString(), "TextField");
-			GUILayout.EndHorizontal ();
-
-			if (EditorLogic.SelectedPart) {
+			//settings
+			if (toolbarInt == 0) {
 				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Selected Part:");
-				GUILayout.Label (EditorLogic.SelectedPart ? EditorLogic.SelectedPart.name : "none");
+				GUILayout.Label ("Message delay:");
+				if (GUILayout.Button ("-")) {
+					cfg.OnScreenMessageTime -= 0.5f;
+				}
+				GUILayout.Label (cfg.OnScreenMessageTime.ToString(), "TextField");
+				if (GUILayout.Button ("+")) {
+					cfg.OnScreenMessageTime += 0.5f;
+				}
 				GUILayout.EndHorizontal ();
 
-				GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
-				GUILayout.Label ("srfAttach " + (EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"));
-				GUILayout.Label ("allowCollision " + (EditorLogic.SelectedPart.attachRules.allowCollision ? "enabled" : "disabled"));
-				GUILayout.Label ("allowStack " + (EditorLogic.SelectedPart.attachRules.allowStack ? "enabled" : "disabled"));
-				GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
-				GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
-				GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label ("Max symmetry:");
+				if (GUILayout.Button ("-")) {
+					cfg.MaxSymmetry--;
+				}
+				GUILayout.Label (cfg.MaxSymmetry.ToString(), "TextField");
+				if (GUILayout.Button ("+")) {
+					cfg.MaxSymmetry++;
+				}
+				GUILayout.EndHorizontal ();
 			}
 
-			GUILayout.BeginHorizontal ();
-			GUILayout.Label ("Message delay:");
-			if (GUILayout.Button ("-")) {
-				cfg.OnScreenMessageTime -= 0.5f;
+			//debug 
+			if (toolbarInt == 1) {
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label ("Version:");
+				GUILayout.Label (cfg.FileVersion);
+				GUILayout.EndHorizontal ();
+
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label ("Current key:");
+				GUILayout.Label (_lastKeyDown.ToString(), "TextField");
+				GUILayout.EndHorizontal ();
+
+				if (EditorLogic.SelectedPart) {
+					Part sp = EditorLogic.SelectedPart;
+
+					GUILayout.BeginHorizontal ();
+					GUILayout.Label ("Selected Part:");
+					GUILayout.Label (sp ? sp.name : "none");
+					GUILayout.EndHorizontal ();
+
+					//GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
+					GUILayout.Label ("srfAttach " + (sp.attachRules.srfAttach ? "enabled" : "disabled"));
+					//GUILayout.Label ("allowCollision " + (EditorLogic.SelectedPart.attachRules.allowCollision ? "enabled" : "disabled"));
+					//GUILayout.Label ("allowStack " + (EditorLogic.SelectedPart.attachRules.allowStack ? "enabled" : "disabled"));
+					//GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
+					//GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
+					//GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
+
+					foreach (var child in sp.children) {
+						GUILayout.Label ("child: " + child.name);
+					}
+
+					GUILayout.Label ("localPosition " + sp.transform.localPosition.ToString());
+					GUILayout.Label ("position " + sp.transform.position.ToString());
+
+					GUILayout.Label ("isAttached" + sp.isAttached.ToString ());
+
+					if (sp.srfAttachNode != null) {
+
+						if (sp.srfAttachNode.attachedPart != null) {
+							GUILayout.Label ("attached part attPos0: " + sp.srfAttachNode.attachedPart.attPos0.ToString ());
+							GUILayout.Label ("attached part localPosition " + sp.srfAttachNode.attachedPart.transform.localPosition.ToString());
+							GUILayout.Label ("attached part position " + sp.srfAttachNode.attachedPart.transform.position.ToString());
+							//sp.attPos0.y = sp.srfAttachNode.attachedPart.attPos0.y;
+						}
+						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString());
+
+					}
+
+
+					GUILayout.Label ("attPos: " + sp.attPos.ToString());
+					GUILayout.Label ("attPos0: " + sp.attPos0.ToString());
+
+					GUILayout.Label ("attRotation: " + sp.attRotation.ToString());
+					GUILayout.Label ("attRotation0: " + sp.attRotation0.ToString());
+
+//					foreach (var node in sp.attachNodes) {
+//						GUILayout.Label ("attachNode");
+//						GUILayout.Label ("position: " + node.position.ToString());
+//						GUILayout.Label ("nodeType: " + node.nodeType.ToString());
+//					}
+
+
+
+				}
 			}
-			GUILayout.Label (cfg.OnScreenMessageTime.ToString(), "TextField");
-			if (GUILayout.Button ("+")) {
-				cfg.OnScreenMessageTime += 0.5f;
-			}
-			GUILayout.EndHorizontal ();
 
 //			GUILayout.BeginHorizontal ();
 //			GUILayout.Label ("Max symmetry:");
@@ -508,17 +603,6 @@ namespace EditorExtensions
 //				cfg.MaxSymmetry = newMaxSym;
 //			}
 //			GUILayout.EndHorizontal ();
-
-			GUILayout.BeginHorizontal ();
-			GUILayout.Label ("Max symmetry:");
-			if (GUILayout.Button ("-")) {
-				cfg.MaxSymmetry--;
-			}
-			GUILayout.Label (cfg.MaxSymmetry.ToString(), "TextField");
-			if (GUILayout.Button ("+")) {
-				cfg.MaxSymmetry++;
-			}
-			GUILayout.EndHorizontal ();
 
 			GUILayout.BeginHorizontal ();
 			if(GUILayout.Button("Cancel")){
@@ -533,7 +617,6 @@ namespace EditorExtensions
 				_showSettings = false;
 			}
 			GUILayout.EndHorizontal();
-
 
 			GUILayout.EndVertical();
 

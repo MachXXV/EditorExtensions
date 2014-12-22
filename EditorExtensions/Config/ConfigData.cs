@@ -47,6 +47,9 @@ namespace EditorExtensions
 
 		[XmlElement("PartClipping")]
 		public KeyCode PartClipping { get; set; }
+
+		[XmlElement("VerticalSnap")]
+		public KeyCode VerticalSnap { get; set; }
 	}
 }
 
