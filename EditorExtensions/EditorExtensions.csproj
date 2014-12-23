@@ -67,11 +67,17 @@
       <HintPath>externals\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EditorExtensions.cs" />
     <Compile Include="Logging.cs" />
+    <Compile Include="SettingsWindow.cs" />
+    <Compile Include="AppLauncherButton.cs" />
+    <Compile Include="DebugAutoLoadSave.cs" />
+    <Compile Include="Config\ConfigData.cs" />
+    <Compile Include="Config\ConfigManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -85,6 +91,16 @@
       <Link>README.md</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="EditorExtensions.version" />
+    <None Include="deploy.bat" />
+    <None Include="deploy-mac.sh" />
+    <None Include="AppLauncherIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="EditorExtensions.version">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
   </ItemGroup>
 </Project>

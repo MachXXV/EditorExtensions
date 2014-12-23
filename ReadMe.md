@@ -1,27 +1,38 @@
-## Editor Extensions v2.0
+## Editor Extensions v2.1
 
-###Changes in v2.0
-* KSP 0.90 support
-* Changed attachment mode toggling:
--- Changed Hotkey to "T", previous hotkey conflicted with new stock symmetry mode toggle (R)
--- Now toggles between surface attachment and node attachment. When surface attachment is enabled, part will not attach to regular nodes (green dots).
-* Veritcal snap removed, new 0.90 editor does not have the same functionality. Currently working on new method of providing automatic vertical snap without having to use the translation gizmo.
-* Removed launchpad/runway toggle due to incompatibility with KSP 0.90
-* Removed redundant symmetry mode (radial/mirror) toggle, now in stock editor with R hotkey.
-* This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4 which can be downloaded at the github page under releases.
+###Changes in v2.1
+* Added new vertical snap (V)
+-- Place parts like normal.
+-- Once part is placed, hover over the part with your mouse and hit V. Part will align itself vertically to the middle of its parent part.
+* Added new horizontal snap (H)
+-- Place parts like normal.
+-- Once part is placed, hover over the part with your mouse and hit H. Part will align itself horizontally to the middle of its parent part.
+* Changed attachment mode toggling (T): now only toggles surface attachment of selected part.
+* Added toolbar icon ("EEX") to bring up settings menu
+-- Customize hotkeys
+-- Customize angle snap values
+-- Customize symmetry level
+* Added KSP-AVC versioning support
 
-####[Download v2.0 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/raw/master/Releases/EditorExtensions_v2.0.zip)
+A note regarding the new vertical/horizontal snap functions: These are currently very simplistic, they align themselves on a single axis to their parent part, and might clip into the parent part if the parent is rotated away from vertical/horizontal.
+I'm working on a more sophisticated method that will align the parts to rotated parents and respect the collision meshes.
 
-####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/raw/master/Releases/EditorExtensions_v1.4.zip)
+####[Download v2.1 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/latest)
+
+This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
+####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
 
 ### Features
-* Allows levels of radial symmetry from 1 to 99
-* Adds radial/angle snapping at 1,5,15,22.5,30,45,60, and 90 degrees.
+* Allows custom levels of radial symmetry beyond the stock limitations.
+* Horizontally and vertically center parts.
+* Adds radial/angle snapping at 1,5,15,22.5,30,45,60, and 90 degrees. Angles are customizable.
 * Toggle part clipping (From the cheat options)
 * Toggle radial and node attachment of parts
 * Reset hangar camera view
 
-### Keybindings
+### Default Keybindings
+* **V** 			- Vertically center the part under the mouse to its parent part
+* **H** 			- Horizontally center the part under the mouse to its parent part
 * **X, Shift+X** 	- Increase/Decrease symmetry level
 * **Alt+X** 		- Reset symmetry level
 * **C, Shift+C** 	- Increase/Decrease angle snap

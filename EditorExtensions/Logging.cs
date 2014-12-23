@@ -5,22 +5,23 @@ namespace EditorExtensions
 {
 	public static class Log
 	{
-		//set debug flag to toggle debugging messages
-		#if DEBUG
-		const bool debug = true;
-		#else
-		const bool debug = false;
-		#endif
+		const string MessagePrefix = "EditorExtensions: ";
 
 		public static void Debug (string message)
 		{
-			if (debug)
-				MonoBehaviour.print ("EditorExtensions: " + message);
+#if DEBUG
+			MonoBehaviour.print (MessagePrefix + message);
+#endif
+		}
+
+		public static void Info(string message)
+		{
+			MonoBehaviour.print (MessagePrefix + message);
 		}
 
 		public static void Error(string message)
 		{
-			MonoBehaviour.print ("EditorExtensions: " + message);
+			MonoBehaviour.print (MessagePrefix + message);
 		}
 	}
 }
