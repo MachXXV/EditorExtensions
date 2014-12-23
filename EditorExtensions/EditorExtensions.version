@@ -3,12 +3,6 @@
    "URL":"https://raw.githubusercontent.com/MachXXV/EditorExtensions/Dev/EditorExtensions/EditorExtensions.version",
    "CHANGE_LOG_URL": "https://raw.githubusercontent.com/MachXXV/EditorExtensions/Dev/ReadMe.md",
    "DOWNLOAD":"https://github.com/MachXXV/EditorExtensions/releases/latest",
-   "GITHUB":
-   {  
-      "USERNAME":"MachXXV",
-      "REPOSITORY":"EditorExtensions",
-      "ALLOW_PRE_RELEASE":false
-   },
    "VERSION":
    {  
       "MAJOR":2,
@@ -16,14 +10,12 @@
       "PATCH":0,
       "BUILD":0
    },
-   "KSP_VERSION":
-   {  
+   "KSP_VERSION":{  
       "MAJOR":0,
-      "MINOR":90,
+      "MINOR":25,
       "PATCH":0
    },
-   "KSP_VERSION_MIN":
-   {  
+   "KSP_VERSION_MAX":{  
       "MAJOR":0,
       "MINOR":90,
       "PATCH":0
