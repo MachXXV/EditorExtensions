@@ -11,18 +11,9 @@ namespace EditorExtensions
 	public class EditorExtensions : MonoBehaviour
 	{
 		public static EditorExtensions Instance { get; private set; }
-
 		public bool Visible { get; set; }
 
 		#region member vars
-
-		//look into loading game keymaps for applying alt+shift modifiers
-
-		//old vars
-		//const string launchSiteName_LaunchPad = "LaunchPad";
-		//const string launchSiteName_Runway = "Runway";
-		//bool ignoreHotKeys = false;
-		//bool inVAB = false;
 
 		const string ConfigFileName = "config.xml";
 		const string degreesSymbol = "\u00B0";
@@ -39,11 +30,24 @@ namespace EditorExtensions
 
 		#endregion
 
-		/// <summary>
-		/// ctor - gets plugin info and initializes config
-		/// </summary>
 		public EditorExtensions ()
 		{
+			//per unity docs use Awake() instead of ctor:
+			//Awake instead of the constructor for initialization,
+			//as the serialized state of the component is undefined at construction time.
+			//Awake is called once, just like the constructor.
+		}
+
+		//Unity initialization call
+		public void Awake ()
+		{
+			//get current editor instance
+			editor = EditorLogic.fetch;
+
+			Instance = this;
+
+			#region Init config
+
 			try {
 				//get location and version info of the plugin
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
@@ -75,13 +79,13 @@ namespace EditorExtensions
 							}
 						}
 
-#if DEBUG
+						#if DEBUG
 						//for debug, replace if version isn't exactly the same
 						bool versionMismatch = (cfg.FileVersion == null || fileVersion != pluginVersion);
-#else
+						#else
 						//replace if x.x doesn't match
 						bool versionMismatch = (cfg.FileVersion == null || fileVersion.Major < pluginVersion.Major || (fileVersion.Major == pluginVersion.Major && fileVersion.Minor < pluginVersion.Minor));
-#endif
+						#endif
 
 						if (versionMismatch) {
 							Log.Info ("Config file version mismatch, replacing with new defaults");
@@ -102,6 +106,15 @@ namespace EditorExtensions
 				//_abort = true;
 				return;
 			}
+
+			#endregion
+
+			InitializeGUI ();
+		}
+
+		//Unity OnDestroy
+		void OnDestroy(){
+			print ("EditorExtensions OnDestroy()");
 		}
 
 		/// <summary>
@@ -141,56 +154,6 @@ namespace EditorExtensions
 				return null;
 			}
 		}
-	
-		//Unity initialization call
-		public void Awake ()
-		{
-			//get current editor instance
-			editor = EditorLogic.fetch;
-
-			Instance = this;
-	
-			InitializeGUI ();
-		}
-
-		//Broken
-		const string VABGameObjectName = "interior_vehicleassembly";
-		const string SPHGameObjectName = "xport_sph3";
-
-		/// <summary>
-		/// embiggen the hangar space
-		/// currently broken
-		/// </summary>
-		/// <param name="editor">Editor.</param>
-		void AlterEditorSpace (EditorLogic editor)
-		{	
-			// Modify cameras/available interior space
-			if (HighLogic.LoadedScene == GameScenes.EDITOR) {
-				Log.Debug ("Updating VAB dimensions and camera");
-	
-				VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
-				VABcam.maxHeight = 2000;
-				VABcam.maxDistance = 2000;
-	
-				GameObject interior = GameObject.Find (VABGameObjectName);
-				interior.transform.localScale = new Vector3 (2.2f, 1.8f, 1.8f);
-				interior.transform.position = new Vector3 (59f, 51.5f, 12);
-			}
-//			else if (HighLogic.LoadedScene == GameScenes.SPH)
-//			{
-//				Log.Debug ("Updating SPH dimensions and camera");
-//	
-//				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera>();
-//				SPHcam.maxHeight = 2000;
-//				SPHcam.maxDistance = 2000;
-//				SPHcam.maxDisplaceX = 2000;
-//				SPHcam.maxDisplaceZ = 2000;
-//	
-//				GameObject interior = GameObject.Find(SPHGameObjectName);
-//				interior.transform.localScale = new Vector3(12, 6, 12);
-//				interior.transform.position = new Vector3(-24.9f, -0.3f, 22.8f);
-//			}
-		}
 
 		private Part GetPartUnderCursor ()
 		{
@@ -205,21 +168,15 @@ namespace EditorExtensions
 			return null;
 		}
 
-
 		bool altKeyDown;
 		bool shiftKeyDown;
 
-		/// <summary>
-		/// Fired by Unity event loop
-		/// </summary>
-		public void Update ()
+		//Unity update loop
+		void Update ()
 		{		
 			//Disable shortcut keys when ship name textarea has focus
 			//if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
 			//    return;
-	
-			//may need to go away from this and do explicit editor.editorType calls 
-			//inVAB = (editor.editorType == EditorLogic.EditorMode.VAB);
 
 			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
 				return;
@@ -256,6 +213,10 @@ namespace EditorExtensions
 								symPart.transform.position = new Vector3 (symPart.transform.position.x, ap.transform.position.y, symPart.transform.position.z);
 								symPart.attPos0.y = ap.transform.position.y;
 							}
+
+							//need to verify this
+							//Add edit to undo history
+							editor.SetBackup();
 						}
 					} catch (Exception ex) {
 						Log.Error ("Error trying to vertically align: " + ex.Message);
@@ -437,17 +398,9 @@ namespace EditorExtensions
 		#region GUI
 
 		private Rect _settingsWindowRect;
-		//GUISkin skin = null;
-
 		GUIStyle osdLabelStyle, symmetryLabelStyle;
-		/// <summary>
-		/// Init styles & rects for GUI items
-		/// </summary>
 		void InitializeGUI ()
 		{
-			//use KSP's unity skin
-			//skin = HighLogic.Skin;
-
 			_settingsWindowRect = new Rect () {
 				xMin = Screen.width - 350,
 				xMax = Screen.width - 50,
@@ -479,11 +432,8 @@ namespace EditorExtensions
 		}
 
 		KeyCode lastKeyPressed = KeyCode.None;
-
-		/// <summary>
-		/// Unity GUI paint event, fired every screen refresh
-		/// </summary>
-		public void OnGUI ()
+		//Unity GUI loop
+		void OnGUI ()
 		{	
 			//apply skin
 			//GUI.skin = skin;
@@ -508,7 +458,6 @@ namespace EditorExtensions
 		}
 
 		//private bool _showSettings = false;
-
 		void ShowWindows ()
 		{
 			//_showSettings = this.Visible;
@@ -521,6 +470,8 @@ namespace EditorExtensions
 				_settingsWindowRect = GUILayout.Window (500, _settingsWindowRect, SettingsWindowContent, windowTitle);
 			}
 		}
+
+		#region Settings window
 
 		private int toolbarInt = 0;
 		private string[] _toolbarStrings = { "Settings", "Angle Snap", "Debug" };
@@ -678,38 +629,7 @@ namespace EditorExtensions
 					//just ignore the error and continue since it's non-critical
 				}
 #endif
-			}//end angles
-
-
-
-//				GUILayout.BeginHorizontal ();
-//				GUILayout.Label ("Surface attachment:");
-//				GUI.SetNextControlName ("AttachmentMode");
-//				string tmpAttachmentMode = cfg.KeyMap.AttachmentMode.ToString ();
-//				tmpAttachmentMode = GUILayout.TextField (tmpAttachmentMode);
-//
-//				if (tmpAttachmentMode.Length == 1) {
-//					try {
-//						KeyCode newAttachmentMode = (KeyCode)Enum.Parse (typeof(KeyCode), tmpAttachmentMode);
-//						cfg.KeyMap.AttachmentMode = newAttachmentMode;
-//					} catch {
-//						//ignore
-//						Log.Error ("Invalid value for cfg.KeyMap.AttachmentMode: " + tmpAttachmentMode);
-//					}
-//				}
-//
-//				GUILayout.EndHorizontal ();
-
-			//			GUILayout.BeginHorizontal ();
-			//			GUILayout.Label ("Max symmetry:");
-			//			string maxSym = GUILayout.TextField (cfg.MaxSymmetry.ToString());
-			//			int newMaxSym = cfg.MaxSymmetry;
-			//			if (Int32.TryParse (maxSym, out newMaxSym)) {
-			//				cfg.MaxSymmetry = newMaxSym;
-			//			}
-			//			GUILayout.EndHorizontal ();
-		
-	
+			}//end angles	
 
 			//debug info
 			if (toolbarInt == 2) {
@@ -797,9 +717,12 @@ namespace EditorExtensions
 			GUI.DragWindow ();
 		}
 
+		#endregion
+
+		#region On screen display message
+
 		float messageCutoff = 0;
 		string messageText = "";
-
 		/// <summary>
 		/// Set a on screen display message
 		/// </summary>
@@ -824,8 +747,11 @@ namespace EditorExtensions
 			}
 		}
 
-		string symmetryLabelValue = string.Empty;
+		#endregion
 
+		#region Snap labels
+
+		string symmetryLabelValue = string.Empty;
 		//symmetry & angle sprite/label size and position
 		const int advancedModeOffset = 34;
 		const int angleSnapLabelSize = 43;
@@ -877,24 +803,31 @@ namespace EditorExtensions
 				}
 
 				//always hide stock symmetry and mirror sprites
-				editor.symmetrySprite.Hide (true);
-				editor.mirrorSprite.Hide (true);
+				//editor.symmetrySprite.Hide (true);
+				//editor.mirrorSprite.Hide (true);
+				//KSP code appears to use this method
+				editor.symmetrySprite.gameObject.SetActive (false);
+				editor.mirrorSprite.gameObject.SetActive (false);
 
 				// Show Symmetry label
 				GUI.Label (symmetryLabelRect, symmetryLabelValue, symmetryLabelStyle);
 
 				//if angle snap is on hide stock sprite
 				if (GameSettings.VAB_USE_ANGLE_SNAP) {
-					editor.angleSnapSprite.Hide (true);
+					//editor.angleSnapSprite.Hide (true);
+					editor.angleSnapSprite.gameObject.SetActive (false);
 					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, symmetryLabelStyle);
 
 				} else {
 					//angle snap is off, show stock sprite
 					editor.angleSnapSprite.PlayAnim (0);
-					editor.angleSnapSprite.Hide (false);
+					//editor.angleSnapSprite.Hide (false);
+					editor.angleSnapSprite.gameObject.SetActive (true);
 				}
 			}
 		}
+
+		#endregion
 
 		#endregion
 	}

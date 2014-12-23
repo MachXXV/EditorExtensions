@@ -3,8 +3,11 @@ using UnityEngine;
 
 namespace EditorExtensions
 {
-	public class SettingsWindow
+	public class SettingsWindow : MonoBehaviour
 	{
+		public static SettingsWindow Instance { get; private set; }
+		public bool Visible { get; set; }
+
 		ConfigData cfg;
 		string _configFilePath;
 
@@ -12,11 +15,32 @@ namespace EditorExtensions
 
 		Cancel _cancelCallback;
 
+		public Cancel CancelWindow = null;
+
+		void Awake(){
+
+		}
+
+		void Update() {
+
+		}
+
+		void OnGUI() {
+
+		}
+
+		void OnDestroy(){
+
+		}
+
 		public SettingsWindow (ConfigData currentConfig, string configFilePath, Cancel cancelCallback)
 		{
 			cfg = currentConfig;
 			_configFilePath = configFilePath;
 			_cancelCallback = cancelCallback;
+
+
+
 		}
 
 		public void CreateContent(int windowID)
