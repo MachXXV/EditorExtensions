@@ -1,17 +1,19 @@
 ## Editor Extensions v2.1
 
-###Changes in v2.1
+build 2.1.5469.41325 - 22 December 2014
+
+### Changes in v2.1
 * Added new vertical snap (V)
--- Place parts like normal.
--- Once part is placed, hover over the part with your mouse and hit V. Part will align itself vertically to the middle of its parent part.
+ 1. Place parts like normal.
+ 2. Once part is placed, hover over the part with your mouse and hit V. Part will align itself vertically to the middle of its parent part.
 * Added new horizontal snap (H)
--- Place parts like normal.
--- Once part is placed, hover over the part with your mouse and hit H. Part will align itself horizontally to the middle of its parent part.
+ 1. Place parts like normal.
+ 2. Once part is placed, hover over the part with your mouse and hit H. Part will align itself horizontally to the middle of its parent part.
 * Changed attachment mode toggling (T): now only toggles surface attachment of selected part.
 * Added toolbar icon ("EEX") to bring up settings menu
--- Customize hotkeys
--- Customize angle snap values
--- Customize symmetry level
+ * Customize hotkeys
+ * Customize angle snap values
+ * Customize symmetry level
 * Added KSP-AVC versioning support
 
 A note regarding the new vertical/horizontal snap functions: These are currently very simplistic, they align themselves on a single axis to their parent part, and might clip into the parent part if the parent is rotated away from vertical/horizontal.

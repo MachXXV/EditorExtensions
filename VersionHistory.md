@@ -1,4 +1,14 @@
-﻿### Version History
+﻿### Previous Version History
+
+### v2.0 - build 2.0.5466.37911 - 19 December 2014
+* KSP 0.90 support
+* Changed attachment mode toggling:
+ * Changed Hotkey to "T", previous hotkey conflicted with new stock symmetry mode toggle (R)
+ * Now toggles between surface attachment and node attachment. When surface attachment is enabled, part will not attach to regular nodes (green dots).
+* Veritcal snap removed, new 0.90 editor does not have the same functionality. Currently working on new method of providing automatic vertical snap without having to use the translation gizmo.
+* Removed launchpad/runway toggle due to incompatibility with KSP 0.90
+* Removed redundant symmetry mode (radial/mirror) toggle, now in stock editor with R hotkey.
+* This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4 which can be downloaded at the github page under releases.
 
 #### 1.4 - 7 October 2014
   *   Recompiled against KSP 0.25 assemblies
