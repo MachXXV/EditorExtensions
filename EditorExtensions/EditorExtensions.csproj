@@ -85,5 +85,6 @@
       <Link>README.md</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="EditorExtensions.version" />
   </ItemGroup>
 </Project>
