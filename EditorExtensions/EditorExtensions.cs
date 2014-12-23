@@ -437,15 +437,16 @@ namespace EditorExtensions
 		#region GUI
 
 		private Rect _settingsWindowRect;
-		GUISkin skin = null;
+		//GUISkin skin = null;
 
+		GUIStyle osdLabelStyle, symmetryLabelStyle;
 		/// <summary>
 		/// Init styles & rects for GUI items
 		/// </summary>
 		void InitializeGUI ()
 		{
 			//use KSP's unity skin
-			skin = HighLogic.Skin;
+			//skin = HighLogic.Skin;
 
 			_settingsWindowRect = new Rect () {
 				xMin = Screen.width - 350,
@@ -454,7 +455,7 @@ namespace EditorExtensions
 				yMax = 50 //0 height, GUILayout resizes it
 			};
 
-			GUIStyle osdLabel = new GUIStyle () {
+			osdLabelStyle = new GUIStyle () {
 				stretchWidth = true,
 				stretchHeight = true,
 				alignment = TextAnchor.MiddleCenter,
@@ -462,9 +463,9 @@ namespace EditorExtensions
 				fontStyle = FontStyle.Bold,
 				name = "OSDLabel"
 			};
-			osdLabel.normal.textColor = Color.yellow;
+			osdLabelStyle.normal.textColor = Color.yellow;
 
-			GUIStyle symmetryLabel = new GUIStyle () {
+			symmetryLabelStyle = new GUIStyle () {
 				stretchWidth = true,
 				stretchHeight = true,
 				alignment = TextAnchor.MiddleCenter,
@@ -472,9 +473,9 @@ namespace EditorExtensions
 				fontStyle = FontStyle.Bold,
 				name = "SymmetryLabel"
 			};
-			symmetryLabel.normal.textColor = Color.yellow;
+			symmetryLabelStyle.normal.textColor = Color.yellow;
 
-			skin.customStyles = new GUIStyle[]{ osdLabel, symmetryLabel };
+			//skin.customStyles = new GUIStyle[]{ osdLabel, symmetryLabel };
 		}
 
 		KeyCode lastKeyPressed = KeyCode.None;
@@ -485,10 +486,9 @@ namespace EditorExtensions
 		public void OnGUI ()
 		{	
 			//apply skin
-			GUI.skin = skin;
+			//GUI.skin = skin;
 
 			//get current keypress
-
 			if (Event.current.isKey) { 
 				lastKeyPressed = Event.current.keyCode;
 			} else {
@@ -819,7 +819,7 @@ namespace EditorExtensions
 		{
 			if (Time.time < messageCutoff) {
 				GUILayout.BeginArea (new Rect (0, (Screen.height / 4), Screen.width, 200));
-				GUILayout.Label (messageText, "OSDLabel");
+				GUILayout.Label (messageText, osdLabelStyle);
 				GUILayout.EndArea ();			
 			}
 		}
@@ -881,12 +881,12 @@ namespace EditorExtensions
 				editor.mirrorSprite.Hide (true);
 
 				// Show Symmetry label
-				GUI.Label (symmetryLabelRect, symmetryLabelValue, "SymmetryLabel");
+				GUI.Label (symmetryLabelRect, symmetryLabelValue, symmetryLabelStyle);
 
 				//if angle snap is on hide stock sprite
 				if (GameSettings.VAB_USE_ANGLE_SNAP) {
 					editor.angleSnapSprite.Hide (true);
-					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, "SymmetryLabel");
+					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, symmetryLabelStyle);
 
 				} else {
 					//angle snap is off, show stock sprite
