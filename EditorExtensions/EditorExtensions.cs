@@ -114,7 +114,7 @@ namespace EditorExtensions
 			try {
 				ConfigData defaultConfig = new ConfigData () {
 					AngleSnapValues = new List<float>{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
-					MaxSymmetry = 99,
+					MaxSymmetry = 20,
 					FileVersion = pluginVersion.ToString (),
 					OnScreenMessageTime = 1.5f
 				};
@@ -448,10 +448,10 @@ namespace EditorExtensions
 			skin = HighLogic.Skin;
 
 			_settingsWindowRect = new Rect () {
-				xMin = Screen.width - 400,
-				xMax = Screen.width - 100,
-				yMin = Screen.height / 2,
-				yMax = Screen.height / 2 //0 height, GUILayout resizes it
+				xMin = Screen.width - 350,
+				xMax = Screen.width - 50,
+				yMin = 50,
+				yMax = 50 //0 height, GUILayout resizes it
 			};
 
 			GUIStyle osdLabel = new GUIStyle () {
@@ -656,7 +656,7 @@ namespace EditorExtensions
 
 						if (!string.IsNullOrEmpty (newAngleString) && float.TryParse (newAngleString, out newAngle)) {
 							lock (anglesLock) {
-								if (newAngle != 0.0f && cfg.AngleSnapValues.IndexOf (newAngle) == -1) {
+								if (newAngle > 0.0f && newAngle <= 90.0f && cfg.AngleSnapValues.IndexOf (newAngle) == -1) {
 									cfg.AngleSnapValues.Add (newAngle);
 									cfg.AngleSnapValues.Sort ();
 								}

@@ -12,24 +12,25 @@
 -- Customize hotkeys
 -- Customize angle snap values
 -- Customize symmetry level
+* Added KSP-AVC versioning support
 
 A note regarding the new vertical/horizontal snap functions: These are currently very simplistic, they align themselves on a single axis to their parent part, and might clip into the parent part if the parent is rotated away from vertical/horizontal.
 I'm working on a more sophisticated method that will align the parts to rotated parents and respect the collision meshes.
 
-####[Download latest version for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/latest)
+####[Download v2.1 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/latest)
 
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
 ####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
 
 ### Features
-* Allows levels of radial symmetry from 1 to 99
+* Allows custom levels of radial symmetry beyond the stock limitations.
 * Horizontally and vertically center parts.
-* Adds radial/angle snapping at 1,5,15,22.5,30,45,60, and 90 degrees.
+* Adds radial/angle snapping at 1,5,15,22.5,30,45,60, and 90 degrees. Angles are customizable.
 * Toggle part clipping (From the cheat options)
 * Toggle radial and node attachment of parts
 * Reset hangar camera view
 
-### Keybindings
+### Default Keybindings
 * **V** 			- Vertically center the part under the mouse to its parent part
 * **H** 			- Horizontally center the part under the mouse to its parent part
 * **X, Shift+X** 	- Increase/Decrease symmetry level
