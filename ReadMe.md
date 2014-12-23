@@ -17,8 +17,7 @@
 A note regarding the new vertical/horizontal snap functions: These are currently very simplistic, they align themselves on a single axis to their parent part, and might clip into the parent part if the parent is rotated away from vertical/horizontal.
 I'm working on a more sophisticated method that will align the parts to rotated parents and respect the collision meshes.
 
-####[Download v2.1 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/latest)
-
+####[Download v2.1 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.1/EditorExtensions_v2.1.zip)
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
 ####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
 

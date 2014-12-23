@@ -666,14 +666,18 @@ namespace EditorExtensions
 					}
 					GUILayout.EndHorizontal ();
 
-				} catch (Exception ex) {
-					//potential for some intermittent locking/threading issues here
-					//just ignore the error and continue since it's non-critical
+				}
 #if DEBUG
+				catch (Exception ex) {
+					//potential for some intermittent locking/threading issues here	
 					//Debug only to avoid log spam
 					Log.Error ("Error updating AngleSnapValues: " + ex.Message);
-#endif
 				}
+#else
+				catch(Exception){
+					//just ignore the error and continue since it's non-critical
+				}
+#endif
 			}//end angles
 
 
