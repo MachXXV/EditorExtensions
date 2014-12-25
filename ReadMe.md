@@ -1,7 +1,6 @@
 ## Editor Extensions v2.3
 
-
-build 2.2.5470.2764 - 24 December 2014
+build 2.3.5471.37348 - 24 December 2014
 
 ### Changes in v2.3
 * Revised vertical/horizontal snap
@@ -9,11 +8,10 @@ build 2.2.5470.2764 - 24 December 2014
  * Vertical snap will center itself lengthwise for horizontal parts in the SPH
  * Snapping disabled while a gizmo is active
 * Bugfixes
- * part movements made with snaps now work with undo/redo in the editor
+ * Part movements made with snaps now work with undo/redo in the editor
  * Fixed an issue where snapping, using a gizmo, and pressing space to reset the gizmo warped the part away by 2x its original position.
 
-
-####[Download v2.2 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.2/EditorExtensions_v2.2.zip)
+####[Download v2.3 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.3/EditorExtensions_v2.3.zip)
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
 ####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
 

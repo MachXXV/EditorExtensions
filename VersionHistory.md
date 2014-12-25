@@ -1,5 +1,10 @@
 ﻿### Previous Version History
 
+## v2.2 - 2.2.5470.2764 - 23 December 2014
+
+Bugfix: v2.1 caused a GUI error when opening the vessel loading screen. This was caused by a conflict between this mod's GUI skin and KSP's GUI skin.
+This mod has been reverted to use the generic GUI skin to work around this issue. Otherwise no functional changes vs. v2.1
+
 ### v2.1 - build 2.1.5469.41325 - 22 December 2014
 * Added new vertical snap (V)
  1. Place parts like normal.
