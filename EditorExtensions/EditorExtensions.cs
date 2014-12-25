@@ -11,6 +11,7 @@ namespace EditorExtensions
 	public class EditorExtensions : MonoBehaviour
 	{
 		public static EditorExtensions Instance { get; private set; }
+
 		public bool Visible { get; set; }
 
 		#region member vars
@@ -25,8 +26,11 @@ namespace EditorExtensions
 		string _configFilePath;
 		int _symmetryMode = 0;
 
+		SettingsWindow _settingsWindow = null;
+		PartInfoWindow _partInfoWindow = null;
+
 		bool enableHotkeys = true;
-		//bool _abort = false;
+		bool _gizmoActive = false;
 
 		#endregion
 
@@ -37,17 +41,17 @@ namespace EditorExtensions
 			//as the serialized state of the component is undefined at construction time.
 			//Awake is called once, just like the constructor.
 		}
-
+		
 		//Unity initialization call
 		public void Awake ()
 		{
-			//get current editor instance
 			editor = EditorLogic.fetch;
-
 			Instance = this;
+			InitConfig ();
+			InitializeGUI ();
+		}
 
-			#region Init config
-
+		void InitConfig(){
 			try {
 				//get location and version info of the plugin
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
@@ -64,7 +68,7 @@ namespace EditorExtensions
 
 					if (cfg == null) {
 						//failed to load config, create new
-						cfg = CreateDefaultConfig ();
+						cfg = ConfigManager.CreateDefaultConfig(_configFilePath, pluginVersion.ToString());
 					} else {
 						//check config file version
 						Version fileVersion = new Version ();
@@ -89,14 +93,14 @@ namespace EditorExtensions
 
 						if (versionMismatch) {
 							Log.Info ("Config file version mismatch, replacing with new defaults");
-							cfg = CreateDefaultConfig ();
+							cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString());
 						} else {
 							Log.Debug ("Config file is current");
 						}
 					}
 
 				} else {
-					cfg = CreateDefaultConfig ();
+					cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString());
 					Log.Info ("No existing config found, created new default config");
 				}
 
@@ -106,117 +110,83 @@ namespace EditorExtensions
 				//_abort = true;
 				return;
 			}
-
-			#endregion
-
-			InitializeGUI ();
 		}
 
 		//Unity OnDestroy
-		void OnDestroy(){
-			print ("EditorExtensions OnDestroy()");
-		}
-
-		/// <summary>
-		/// Creates a new config file with defaults
-		/// will replace any existing file
-		/// </summary>
-		/// <returns>New config object with default settings</returns>
-		private ConfigData CreateDefaultConfig ()
+		void OnDestroy ()
 		{
-			try {
-				ConfigData defaultConfig = new ConfigData () {
-					AngleSnapValues = new List<float>{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
-					MaxSymmetry = 20,
-					FileVersion = pluginVersion.ToString (),
-					OnScreenMessageTime = 1.5f
-				};
-
-				KeyMaps defaultKeys = new KeyMaps () {
-					AngleSnap = KeyCode.C,
-					AttachmentMode = KeyCode.T,
-					PartClipping = KeyCode.Z,
-					ResetCamera = KeyCode.Space,
-					Symmetry = KeyCode.X,
-					VerticalSnap = KeyCode.V,
-					HorizontalSnap = KeyCode.H
-				};
-				defaultConfig.KeyMap = defaultKeys;
-
-				if (ConfigManager.SaveConfig (defaultConfig, _configFilePath))
-					Log.Debug ("Created default config");
-				else
-					Log.Error ("Failed to save default config");
-
-				return defaultConfig;
-			} catch (Exception ex) {
-				Log.Debug ("Error defaulting config: " + ex.Message);
-				return null;
-			}
-		}
-
-		private Part GetPartUnderCursor ()
-		{
-			var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-			RaycastHit hit;
-
-			EditorLogic ed = EditorLogic.fetch;
-
-			if (ed != null && Physics.Raycast (ray, out hit)) {
-				return ed.ship.Parts.Find (p => p.gameObject == hit.transform.gameObject);
-			}
-			return null;
+			Log.Debug ("OnDestroy()");
+//			if (_settingsWindow != null)
+//				_settingsWindow.enabled = false;
+//			if (_partInfoWindow != null)
+//				_partInfoWindow.enabled = false;
 		}
 
 		bool altKeyDown;
 		bool shiftKeyDown;
 
-		//Unity update loop
+		//Unity update
 		void Update ()
-		{		
-			//Disable shortcut keys when ship name textarea has focus
-			//if(ignoreHotKeys || editor.editorScreen != EditorLogic.EditorScreen.Parts)
-			//    return;
-
+		{
 			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
 				return;
-	
-			//check for the various alt/mod etc keypresses
-			altKeyDown = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt) || Input.GetKey (KeyCode.AltGr);
-			//check for shift key
-			shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
 
-			//look into skewing camera	
+			try{
+			if (HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset> ().Length > 0 || HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate> ().Length > 0) {
+				_gizmoActive = true;
+				//enableHotkeys = false;
+			} else {
+				_gizmoActive = false;
+				//enableHotkeys = true;
+			}
+#if DEBUG
+			} catch (Exception ex) {
+				Log.Error("Error getting active Gizmos: " + ex.Message);
+#else
+			} catch (Exception) {
+#endif
+				_gizmoActive = false;
+				//enableHotkeys = true;
+			}
+
+			//ignore hotkeys while settings window is open
+			//if (_settingsWindow != null && _settingsWindow.enabled)
+			//	return;
 
 			//hotkeyed editor functions
 			if (enableHotkeys) {
+
+				//check for the various alt/mod etc keypresses
+				altKeyDown = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt) || Input.GetKey (KeyCode.AltGr);
+				//check for shift key
+				shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
 			
 				// V - Vertically align part under cursor with the part it is attached to
-				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
+				if (!_gizmoActive && Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
 
 					try {
-						Part sp = GetPartUnderCursor ();
+						Part sp = Utility.GetPartUnderCursor ();
 
 						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null) {
 
-							Part ap = sp.srfAttachNode.attachedPart;
+							//Part ap = sp.srfAttachNode.attachedPart;
 							List<Part> symParts = sp.symmetryCounterparts;
 
 							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
 
 							//move hovered part
-							sp.transform.position = new Vector3 (sp.transform.position.x, ap.transform.position.y, sp.transform.position.z);
-							sp.attPos0.y = ap.transform.position.y;
+							sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, 0f, sp.transform.localPosition.z);
+							sp.attPos0.y = 0f;
 
 							//move any symmetry siblings/counterparts
 							foreach (Part symPart in symParts) {
-								symPart.transform.position = new Vector3 (symPart.transform.position.x, ap.transform.position.y, symPart.transform.position.z);
-								symPart.attPos0.y = ap.transform.position.y;
+								symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, 0f, symPart.transform.localPosition.z);
+								symPart.attPos0.y = 0f;
 							}
 
-							//need to verify this
+							//need to verify this is the right way, it does seem to work
 							//Add edit to undo history
-							editor.SetBackup();
+							editor.SetBackup ();
 						}
 					} catch (Exception ex) {
 						Log.Error ("Error trying to vertically align: " + ex.Message);
@@ -228,37 +198,40 @@ namespace EditorExtensions
 				}
 
 				// H - Horizontally align part under cursor with the part it is attached to
-				if (Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
+				if (!_gizmoActive && Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
 
 					try {
-						Part sp = GetPartUnderCursor ();
+						Part sp = Utility.GetPartUnderCursor ();
 
 						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null) {
 
-							Part ap = sp.srfAttachNode.attachedPart;
+							//Part ap = sp.srfAttachNode.attachedPart;
 							List<Part> symParts = sp.symmetryCounterparts;
 
 							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
 
 							//move selected part
-							sp.transform.position = new Vector3 (sp.transform.position.x, sp.transform.position.y, ap.transform.position.z);
-							sp.attPos0.z = ap.transform.position.z;
+							sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, sp.transform.localPosition.y, 0f);
+							sp.attPos0.z = 0f;
 
 							//move any symmetry siblings/counterparts
 							foreach (Part symPart in symParts) {
-								symPart.transform.position = new Vector3 (symPart.transform.position.x, symPart.transform.position.y, ap.transform.position.z);
-								symPart.attPos0.z = ap.transform.position.z;
+								symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, symPart.transform.localPosition.y, 0f);
+								symPart.attPos0.z = 0f;
 							}
+
+							//Add edit to undo history
+							editor.SetBackup ();
 						}
 					} catch (Exception ex) {
 						Log.Error ("Error trying to Horizontally align: " + ex.Message);
 					}
 					return;
-				}
-
+				}     
 
 				//Space - when no part is selected, reset camera
-				if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
+				if (!_gizmoActive && Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
+				
 					//if (HighLogic.LoadedSceneIsEditor) {
 					VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
 					VABcam.camPitch = 0;
@@ -397,16 +370,15 @@ namespace EditorExtensions
 
 		#region GUI
 
-		private Rect _settingsWindowRect;
+		//private Rect _settingsWindowRect;
 		GUIStyle osdLabelStyle, symmetryLabelStyle;
+
 		void InitializeGUI ()
 		{
-			_settingsWindowRect = new Rect () {
-				xMin = Screen.width - 350,
-				xMax = Screen.width - 50,
-				yMin = 50,
-				yMax = 50 //0 height, GUILayout resizes it
-			};
+			_settingsWindow = this.gameObject.AddComponent<SettingsWindow> ();
+			_settingsWindow.WindowDisabled += new SettingsWindow.WindowDisabledEventHandler (Hide);
+
+			_partInfoWindow = this.gameObject.AddComponent<PartInfoWindow> ();
 
 			osdLabelStyle = new GUIStyle () {
 				stretchWidth = true,
@@ -431,20 +403,49 @@ namespace EditorExtensions
 			//skin.customStyles = new GUIStyle[]{ osdLabel, symmetryLabel };
 		}
 
-		KeyCode lastKeyPressed = KeyCode.None;
+		//show the addon's GUI
+		public void Show(){
+			this.Visible = true;
+			Log.Debug ("Show()");
+			if (!_settingsWindow.enabled) {
+				_settingsWindow.Show (cfg, _configFilePath, pluginVersion);
+			}
+		}
+
+		//hide the addon's GUI
+		public void Hide(){
+			this.Visible = false;
+			Log.Debug ("Hide()");
+			if (_settingsWindow.enabled) {
+				Log.Debug ("_settingsWindow disable");
+				_settingsWindow.enabled = false;
+			}
+		}
+
+		bool _showMenu = false;
+		Rect _menuRect = new Rect ();
+		public void ShowMenu(Vector3 position){
+
+			position = Input.mousePosition;
+
+			float menuWidth = 100;
+
+			_menuRect = new Rect () {
+				xMin = position.x - menuWidth/2,
+				xMax = position.x + menuWidth/2,
+				yMin = Screen.height - 37 - 80,
+				yMax =  Screen.height - 37
+			};
+			_showMenu = true;
+		}
+
+		public void HideMenu(){
+			_showMenu = false;
+		}
+
 		//Unity GUI loop
 		void OnGUI ()
-		{	
-			//apply skin
-			//GUI.skin = skin;
-
-			//get current keypress
-			if (Event.current.isKey) { 
-				lastKeyPressed = Event.current.keyCode;
-			} else {
-				//currentKey = KeyCode.None;
-			}
-
+		{
 			//show on-screen messages
 			DisplayOSD ();
 
@@ -452,277 +453,37 @@ namespace EditorExtensions
 			ShowSnapLabels ();
 
 			//show windows, only on Unity Layout pass
+			//if (Event.current.type == EventType.Layout) {
+			//	ShowWindows ();
+			//}
+
 			if (Event.current.type == EventType.Layout) {
-				ShowWindows ();
+				if (_showMenu || _menuRect.Contains (Event.current.mousePosition))
+					_menuRect = GUILayout.Window (this.GetInstanceID (), _menuRect, MenuContent, "EEX Menu");
+				else
+					_menuRect = new Rect ();
 			}
 		}
 
-		//private bool _showSettings = false;
-		void ShowWindows ()
-		{
-			//_showSettings = this.Visible;
-
-			string windowTitle = string.Format ("Editor Extensions v{0}.{1}", pluginVersion.Major.ToString (), pluginVersion.Minor.ToString ());
-
-			if (this.Visible) {
-				//collapse window height so that it resizes to content
-				_settingsWindowRect.yMax = _settingsWindowRect.yMin;
-				_settingsWindowRect = GUILayout.Window (500, _settingsWindowRect, SettingsWindowContent, windowTitle);
+		void MenuContent(int WindowID){
+			GUILayout.BeginVertical ();
+			if(GUILayout.Button("Settings")){
+				_settingsWindow.Show (cfg, _configFilePath, pluginVersion);
+				this.Visible = true;
 			}
+			if (cfg.ShowDebugInfo) {
+				if (GUILayout.Button ("Position Debug")) {
+					_partInfoWindow.Show ();
+				}
+			}
+			GUILayout.EndVertical ();
 		}
-
-		#region Settings window
-
-		private int toolbarInt = 0;
-		private string[] _toolbarStrings = { "Settings", "Angle Snap", "Debug" };
-		string keyMapToUpdate = string.Empty;
-		string newAngleString = string.Empty;
-		public int angleGridIndex = -1;
-		public string[] angleStrings = new string[] { string.Empty };
-		object anglesLock = new object ();
-		GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
-
-		void SettingsWindowContent (int windowID)
-		{
-			toolbarInt = GUILayout.Toolbar (toolbarInt, _toolbarStrings);
-
-			GUILayout.BeginVertical ("box");
-
-			//settings
-			if (toolbarInt == 0) {
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Message delay:", settingsLabelLayout);
-				if (GUILayout.Button ("-")) {
-					cfg.OnScreenMessageTime -= 0.5f;
-				}
-				GUILayout.Label (cfg.OnScreenMessageTime.ToString (), "TextField");
-				if (GUILayout.Button ("+")) {
-					cfg.OnScreenMessageTime += 0.5f;
-				}
-				GUILayout.EndHorizontal ();
-
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Max symmetry:", settingsLabelLayout);
-				if (GUILayout.Button ("-")) {
-					cfg.MaxSymmetry--;
-				}
-				GUILayout.Label (cfg.MaxSymmetry.ToString (), "TextField");
-				if (GUILayout.Button ("+")) {
-					cfg.MaxSymmetry++;
-				}
-				GUILayout.EndHorizontal ();
-
-				if (keyMapToUpdate == string.Empty) {
-					GUILayout.Label ("Click button and press key to change");
-				} else {
-					GUILayout.Label ("Waiting for key");
-				}
-
-#if DEBUG
-				GUILayout.Label ("lastKeyPressed: " + lastKeyPressed.ToString ());
-#endif
-
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Surface attachment:", settingsLabelLayout);
-				if (keyMapToUpdate == "am" && lastKeyPressed != KeyCode.None) {
-					cfg.KeyMap.AttachmentMode = lastKeyPressed;
-					keyMapToUpdate = string.Empty;
-				}
-				if (GUILayout.Button (cfg.KeyMap.AttachmentMode.ToString ())) {
-					lastKeyPressed = KeyCode.None;
-					keyMapToUpdate = "am";
-				}
-				GUILayout.EndHorizontal ();
-
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Vertical snap:", settingsLabelLayout);
-				if (keyMapToUpdate == "vs" && lastKeyPressed != KeyCode.None) {
-					cfg.KeyMap.VerticalSnap = lastKeyPressed;
-					keyMapToUpdate = string.Empty;
-				}
-				if (GUILayout.Button (cfg.KeyMap.VerticalSnap.ToString ())) {
-					lastKeyPressed = KeyCode.None;
-					keyMapToUpdate = "vs";
-				}
-				GUILayout.EndHorizontal ();
-
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Horizontal snap:", settingsLabelLayout);
-				if (keyMapToUpdate == "hs" && lastKeyPressed != KeyCode.None) {
-					cfg.KeyMap.HorizontalSnap = lastKeyPressed;
-					keyMapToUpdate = string.Empty;
-				}
-				if (GUILayout.Button (cfg.KeyMap.HorizontalSnap.ToString ())) {
-					lastKeyPressed = KeyCode.None;
-					keyMapToUpdate = "hs";
-				}
-				GUILayout.EndHorizontal ();
-
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Reset camera:", settingsLabelLayout);
-				if (keyMapToUpdate == "rc" && lastKeyPressed != KeyCode.None) {
-					cfg.KeyMap.ResetCamera = lastKeyPressed;
-					keyMapToUpdate = string.Empty;
-				}
-				if (GUILayout.Button (cfg.KeyMap.ResetCamera.ToString ())) {
-					lastKeyPressed = KeyCode.None;
-					keyMapToUpdate = "rc";
-				}
-				GUILayout.EndHorizontal ();
-			}//end settings
-
-			//angle snap values settings
-			if (toolbarInt == 1) {
-
-				try {
-					//float[] tmpAngles;
-					//cfg.AngleSnapValues.CopyTo (tmpAngles);
-
-					lock (anglesLock) {
-						foreach (float a in cfg.AngleSnapValues) {
-							if (a != 0.0f) {
-								GUILayout.BeginHorizontal ();
-								GUILayout.Label (a.ToString (), settingsLabelLayout);
-								if (GUILayout.Button ("Remove")) {
-									cfg.AngleSnapValues.Remove (a);
-								}
-								GUILayout.EndHorizontal ();
-							}
-						}
-					}
-
-					//above creating this error when list is modified
-					//[EXC 15:41:29.330] InvalidOperationException: Collection was modified; enumeration operation may not execute.
-					//System.Collections.Generic.List`1+Enumerator[System.Single].VerifyState ()
-					//System.Collections.Generic.List`1+Enumerator[System.Single].MoveNext ()
-					//EditorExtensions.EditorExtensions.SettingsWindowContent (Int32 windowID)
-					//UnityEngine.GUILayout+LayoutedWindow.DoWindow (Int32 windowID)
-					//UnityEngine.GUI.CallWindowDelegate (UnityEngine.WindowFunction func, Int32 id, UnityEngine.GUISkin _skin, Int32 forceRect, Single width, Single height, UnityEngine.GUIStyle style)
-
-					GUILayout.BeginHorizontal ();
-					GUILayout.Label ("Add angle: ");
-					newAngleString = GUILayout.TextField (newAngleString);
-					if (GUILayout.Button ("Add")) {
-						float newAngle = 0.0f;
-
-						if (!string.IsNullOrEmpty (newAngleString) && float.TryParse (newAngleString, out newAngle)) {
-							lock (anglesLock) {
-								if (newAngle > 0.0f && newAngle <= 90.0f && cfg.AngleSnapValues.IndexOf (newAngle) == -1) {
-									cfg.AngleSnapValues.Add (newAngle);
-									cfg.AngleSnapValues.Sort ();
-								}
-							}
-						}
-					
-					}
-					GUILayout.EndHorizontal ();
-
-				}
-#if DEBUG
-				catch (Exception ex) {
-					//potential for some intermittent locking/threading issues here	
-					//Debug only to avoid log spam
-					Log.Error ("Error updating AngleSnapValues: " + ex.Message);
-				}
-#else
-				catch(Exception){
-					//just ignore the error and continue since it's non-critical
-				}
-#endif
-			}//end angles	
-
-			//debug info
-			if (toolbarInt == 2) {
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Version:", settingsLabelLayout);
-				GUILayout.Label (cfg.FileVersion);
-				GUILayout.EndHorizontal ();
-
-				//Get selected part, mouseover part if none is active
-				Part sp = EditorLogic.SelectedPart;
-				if (sp == null)
-					sp = GetPartUnderCursor ();
-
-				if (sp != null) {
-
-					GUILayout.BeginHorizontal ();
-					GUILayout.Label ("Current Part:");
-					GUILayout.Label (sp ? sp.name : "none");
-					GUILayout.EndHorizontal ();
-
-					//GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
-					GUILayout.Label ("srfAttach " + (sp.attachRules.srfAttach ? "enabled" : "disabled"));
-					//GUILayout.Label ("allowCollision " + (EditorLogic.SelectedPart.attachRules.allowCollision ? "enabled" : "disabled"));
-					//GUILayout.Label ("allowStack " + (EditorLogic.SelectedPart.attachRules.allowStack ? "enabled" : "disabled"));
-					//GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
-					//GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
-					//GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
-
-					foreach (var child in sp.children) {
-						GUILayout.Label ("child: " + child.name);
-					}
-
-					GUILayout.Label ("localPosition " + sp.transform.localPosition.ToString ());
-					GUILayout.Label ("position " + sp.transform.position.ToString ());
-					GUILayout.Label ("rotation " + sp.transform.rotation.ToString ());
-					GUILayout.Label ("attRotation: " + sp.attRotation.ToString ());
-					GUILayout.Label ("attRotation0: " + sp.attRotation0.ToString ());
-					//attPos doesnt seem to be used
-					GUILayout.Label ("attPos: " + sp.attPos.ToString ());
-					GUILayout.Label ("attPos0: " + sp.attPos0.ToString ());
-					GUILayout.Label ("isAttached " + sp.isAttached.ToString ());
-
-					if (sp.srfAttachNode != null) {
-						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString ());
-
-						GUILayout.BeginVertical ("box");
-						GUILayout.Label ("Attached part:");
-						if (sp.srfAttachNode.attachedPart != null) {
-							GUILayout.Label ("attPos0: " + sp.srfAttachNode.attachedPart.attPos0.ToString ());
-							GUILayout.Label ("localPosition " + sp.srfAttachNode.attachedPart.transform.localPosition.ToString ());
-							GUILayout.Label ("position " + sp.srfAttachNode.attachedPart.transform.position.ToString ());
-							GUILayout.Label ("rotation " + sp.srfAttachNode.attachedPart.transform.rotation.ToString ());
-							GUILayout.Label ("up " + sp.srfAttachNode.attachedPart.transform.up.ToString ());
-
-							AttachNode an = sp.srfAttachNode.attachedPart.attachNodes [0];
-							GUILayout.Label ("attachNode " + an.position.ToString ());
-							//sp.attPos0.y = sp.srfAttachNode.attachedPart.attPos0.y;
-						}
-
-						GUILayout.EndVertical ();
-					}
-		
-				}
-			}
-
-			GUILayout.EndVertical ();//end main content
-
-			GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Close")) {
-				cfg = ConfigManager.LoadConfig (_configFilePath);
-				this.Visible = false;
-			}
-			//don't show on debug tab
-			if (toolbarInt != 2) {
-				if (GUILayout.Button ("Defaults")) {
-					cfg = CreateDefaultConfig ();
-				}
-				if (GUILayout.Button ("Save")) {
-					ConfigManager.SaveConfig (cfg, _configFilePath);
-					this.Visible = false;
-				}
-			}
-			GUILayout.EndHorizontal ();
-
-			GUI.DragWindow ();
-		}
-
-		#endregion
-
+			
 		#region On screen display message
 
 		float messageCutoff = 0;
 		string messageText = "";
+
 		/// <summary>
 		/// Set a on screen display message
 		/// </summary>
@@ -751,6 +512,7 @@ namespace EditorExtensions
 
 		#region Snap labels
 
+
 		string symmetryLabelValue = string.Empty;
 		//symmetry & angle sprite/label size and position
 		const int advancedModeOffset = 34;
@@ -778,6 +540,8 @@ namespace EditorExtensions
 		/// </summary>
 		private void ShowSnapLabels ()
 		{
+			//editor.symmetryButton.transform.position?
+
 			//Only show angle/symmetry sprites on parts tab
 			if (editor.editorScreen == EditorScreen.Parts) {
 				if (EditorLogic.Mode == EditorLogic.EditorModes.ADVANCED) {

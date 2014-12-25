@@ -20,6 +20,9 @@ namespace EditorExtensions
 		[XmlElement("MaxSymmetry")]
 		public int MaxSymmetry { get; set; }
 
+		[XmlElement("ShowDebugInfo")]
+		public bool ShowDebugInfo { get; set; }
+
 		/// <summary>
 		/// Time, in seconds, that the on screen messages will display
 		/// </summary>

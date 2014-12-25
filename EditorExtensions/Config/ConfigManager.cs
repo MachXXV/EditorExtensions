@@ -51,6 +51,45 @@ namespace EditorExtensions
 				return null;
 			}
 		}
+
+		/// <summary>
+		/// Creates a new config file with defaults
+		/// will replace any existing file
+		/// </summary>
+		/// <returns>New config object with default settings</returns>
+		public static ConfigData CreateDefaultConfig (string configFilePath, string version)
+		{
+			try {
+				ConfigData defaultConfig = new ConfigData () {
+					AngleSnapValues = new List<float>{ 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f },
+					MaxSymmetry = 20,
+					FileVersion = version,
+					OnScreenMessageTime = 1.5f,
+					ShowDebugInfo = true
+				};
+
+				KeyMaps defaultKeys = new KeyMaps () {
+					AngleSnap = KeyCode.C,
+					AttachmentMode = KeyCode.T,
+					PartClipping = KeyCode.Z,
+					ResetCamera = KeyCode.Space,
+					Symmetry = KeyCode.X,
+					VerticalSnap = KeyCode.V,
+					HorizontalSnap = KeyCode.H
+				};
+				defaultConfig.KeyMap = defaultKeys;
+
+				if (ConfigManager.SaveConfig (defaultConfig, configFilePath))
+					Log.Debug ("Created default config");
+				else
+					Log.Error ("Failed to save default config");
+
+				return defaultConfig;
+			} catch (Exception ex) {
+				Log.Error ("Error defaulting config: " + ex.Message);
+				return null;
+			}
+		}
 	}
 }
 

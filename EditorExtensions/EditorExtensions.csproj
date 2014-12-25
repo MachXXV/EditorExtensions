@@ -78,6 +78,8 @@
     <Compile Include="DebugAutoLoadSave.cs" />
     <Compile Include="Config\ConfigData.cs" />
     <Compile Include="Config\ConfigManager.cs" />
+    <Compile Include="PartInfoWindow.cs" />
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

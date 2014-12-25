@@ -1,27 +1,17 @@
-## Editor Extensions v2.2
+## Editor Extensions v2.3
 
-### BugFix
-v2.1 caused a GUI error when opening the vessel loading screen. This was caused by a conflict between this mod's GUI skin and KSP's GUI skin.
-This mod has been reverted to use the generic GUI skin to work around this issue. Otherwise no functional changes vs. v2.1
 
-build 2.2.5470.2764 - 23 December 2014
+build 2.2.5470.2764 - 24 December 2014
 
-### Changes in v2.1/v2.2
-* Added new vertical snap (V)
- 1. Place parts like normal.
- 2. Once part is placed, hover over the part with your mouse and hit V. Part will align itself vertically to the middle of its parent part.
-* Added new horizontal snap (H)
- 1. Place parts like normal.
- 2. Once part is placed, hover over the part with your mouse and hit H. Part will align itself horizontally to the middle of its parent part.
-* Changed attachment mode toggling (T): now only toggles surface attachment of selected part.
-* Added toolbar icon ("EEX") to bring up settings menu
- * Customize hotkeys
- * Customize angle snap values
- * Customize symmetry level
-* Added KSP-AVC versioning support
+### Changes in v2.3
+* Revised vertical/horizontal snap
+ * Now works with rotated/skewed parts - centers the part along the parent part axis.
+ * Vertical snap will center itself lengthwise for horizontal parts in the SPH
+ * Snapping disabled while a gizmo is active
+* Bugfixes
+ * part movements made with snaps now work with undo/redo in the editor
+ * Fixed an issue where snapping, using a gizmo, and pressing space to reset the gizmo warped the part away by 2x its original position.
 
-A note regarding the new vertical/horizontal snap functions: These are currently very simplistic, they align themselves on a single axis to their parent part, and might clip into the parent part if the parent is rotated away from vertical/horizontal.
-I'm working on a more sophisticated method that will align the parts to rotated parents and respect the collision meshes.
 
 ####[Download v2.2 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.2/EditorExtensions_v2.2.zip)
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:

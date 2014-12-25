@@ -10,18 +10,23 @@ namespace EditorExtensions
 		public static void Debug (string message)
 		{
 #if DEBUG
-			MonoBehaviour.print (MessagePrefix + message);
+			UnityEngine.Debug.Log (MessagePrefix + message);
 #endif
 		}
 
 		public static void Info(string message)
 		{
-			MonoBehaviour.print (MessagePrefix + message);
+			UnityEngine.Debug.Log (MessagePrefix + message);
 		}
 
 		public static void Error(string message)
 		{
-			MonoBehaviour.print (MessagePrefix + message);
+			UnityEngine.Debug.LogError (MessagePrefix + message);
+		}
+
+		public static void Warn(string message)
+		{
+			UnityEngine.Debug.LogWarning (MessagePrefix + message);
 		}
 	}
 }
