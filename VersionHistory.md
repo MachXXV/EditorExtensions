@@ -1,6 +1,15 @@
 ﻿### Previous Version History
 
-## v2.2 - 2.2.5470.2764 - 23 December 2014
+### Changes in v2.3 - build 2.3.5471.37348 - 24 December 2014
+* Revised vertical/horizontal snap
+ * Now works with rotated/skewed parts - centers the part along the parent part axis.
+ * Vertical snap will center itself lengthwise for horizontal parts in the SPH
+ * Snapping disabled while a gizmo is active
+* Bugfixes
+ * Part movements made with snaps now work with undo/redo in the editor
+ * Fixed an issue where snapping, using a gizmo, and pressing space to reset the gizmo warped the part away by 2x its original position.
+
+### v2.2 - 2.2.5470.2764 - 23 December 2014
 
 Bugfix: v2.1 caused a GUI error when opening the vessel loading screen. This was caused by a conflict between this mod's GUI skin and KSP's GUI skin.
 This mod has been reverted to use the generic GUI skin to work around this issue. Otherwise no functional changes vs. v2.1

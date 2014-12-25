@@ -30,7 +30,7 @@ namespace EditorExtensions
 		PartInfoWindow _partInfoWindow = null;
 
 		bool enableHotkeys = true;
-		bool _gizmoActive = false;
+		//bool _gizmoActive = false;
 
 		#endregion
 
@@ -51,7 +51,8 @@ namespace EditorExtensions
 			InitializeGUI ();
 		}
 
-		void InitConfig(){
+		void InitConfig ()
+		{
 			try {
 				//get location and version info of the plugin
 				Assembly execAssembly = Assembly.GetExecutingAssembly ();
@@ -68,7 +69,7 @@ namespace EditorExtensions
 
 					if (cfg == null) {
 						//failed to load config, create new
-						cfg = ConfigManager.CreateDefaultConfig(_configFilePath, pluginVersion.ToString());
+						cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString ());
 					} else {
 						//check config file version
 						Version fileVersion = new Version ();
@@ -93,14 +94,14 @@ namespace EditorExtensions
 
 						if (versionMismatch) {
 							Log.Info ("Config file version mismatch, replacing with new defaults");
-							cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString());
+							cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString ());
 						} else {
 							Log.Debug ("Config file is current");
 						}
 					}
 
 				} else {
-					cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString());
+					cfg = ConfigManager.CreateDefaultConfig (_configFilePath, pluginVersion.ToString ());
 					Log.Info ("No existing config found, created new default config");
 				}
 
@@ -125,29 +126,29 @@ namespace EditorExtensions
 		bool altKeyDown;
 		bool shiftKeyDown;
 
+		bool GizmoActive ()
+		{
+			try {
+				if (HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset> ().Length > 0 || HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate> ().Length > 0) {
+					return true;
+				} else {
+					return false;
+				}
+#if DEBUG
+			} catch (Exception ex) {
+				Log.Error ("Error getting active Gizmos: " + ex.Message);
+#else
+			} catch (Exception) {
+#endif
+				return false;
+			}
+		}
+
 		//Unity update
 		void Update ()
 		{
 			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
 				return;
-
-			try{
-			if (HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset> ().Length > 0 || HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate> ().Length > 0) {
-				_gizmoActive = true;
-				//enableHotkeys = false;
-			} else {
-				_gizmoActive = false;
-				//enableHotkeys = true;
-			}
-#if DEBUG
-			} catch (Exception ex) {
-				Log.Error("Error getting active Gizmos: " + ex.Message);
-#else
-			} catch (Exception) {
-#endif
-				_gizmoActive = false;
-				//enableHotkeys = true;
-			}
 
 			//ignore hotkeys while settings window is open
 			//if (_settingsWindow != null && _settingsWindow.enabled)
@@ -162,12 +163,11 @@ namespace EditorExtensions
 				shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
 			
 				// V - Vertically align part under cursor with the part it is attached to
-				if (!_gizmoActive && Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
-
+				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
 					try {
 						Part sp = Utility.GetPartUnderCursor ();
 
-						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null) {
+						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
 
 							//Part ap = sp.srfAttachNode.attachedPart;
 							List<Part> symParts = sp.symmetryCounterparts;
@@ -198,12 +198,12 @@ namespace EditorExtensions
 				}
 
 				// H - Horizontally align part under cursor with the part it is attached to
-				if (!_gizmoActive && Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
+				if (Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
 
 					try {
 						Part sp = Utility.GetPartUnderCursor ();
 
-						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null) {
+						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
 
 							//Part ap = sp.srfAttachNode.attachedPart;
 							List<Part> symParts = sp.symmetryCounterparts;
@@ -230,9 +230,9 @@ namespace EditorExtensions
 				}     
 
 				//Space - when no part is selected, reset camera
-				if (!_gizmoActive && Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
-				
-					//if (HighLogic.LoadedSceneIsEditor) {
+				if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
+
+					if (!GizmoActive()) {
 					VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
 					VABcam.camPitch = 0;
 					VABcam.camHdg = 0;
@@ -242,7 +242,7 @@ namespace EditorExtensions
 					SPHcam.camPitch = 0;
 					SPHcam.camHdg = 0;
 					//SPHcam.ResetCamera();
-					//}
+					}
 				}
 	
 				// T: Surface attachment toggle
@@ -404,7 +404,8 @@ namespace EditorExtensions
 		}
 
 		//show the addon's GUI
-		public void Show(){
+		public void Show ()
+		{
 			this.Visible = true;
 			Log.Debug ("Show()");
 			if (!_settingsWindow.enabled) {
@@ -413,7 +414,8 @@ namespace EditorExtensions
 		}
 
 		//hide the addon's GUI
-		public void Hide(){
+		public void Hide ()
+		{
 			this.Visible = false;
 			Log.Debug ("Hide()");
 			if (_settingsWindow.enabled) {
@@ -424,22 +426,25 @@ namespace EditorExtensions
 
 		bool _showMenu = false;
 		Rect _menuRect = new Rect ();
-		public void ShowMenu(Vector3 position){
+
+		public void ShowMenu (Vector3 position)
+		{
 
 			position = Input.mousePosition;
 
 			float menuWidth = 100;
 
 			_menuRect = new Rect () {
-				xMin = position.x - menuWidth/2,
-				xMax = position.x + menuWidth/2,
+				xMin = position.x - menuWidth / 2,
+				xMax = position.x + menuWidth / 2,
 				yMin = Screen.height - 37 - 80,
-				yMax =  Screen.height - 37
+				yMax = Screen.height - 37
 			};
 			_showMenu = true;
 		}
 
-		public void HideMenu(){
+		public void HideMenu ()
+		{
 			_showMenu = false;
 		}
 
@@ -465,9 +470,10 @@ namespace EditorExtensions
 			}
 		}
 
-		void MenuContent(int WindowID){
+		void MenuContent (int WindowID)
+		{
 			GUILayout.BeginVertical ();
-			if(GUILayout.Button("Settings")){
+			if (GUILayout.Button ("Settings")) {
 				_settingsWindow.Show (cfg, _configFilePath, pluginVersion);
 				this.Visible = true;
 			}
@@ -478,7 +484,7 @@ namespace EditorExtensions
 			}
 			GUILayout.EndVertical ();
 		}
-			
+
 		#region On screen display message
 
 		float messageCutoff = 0;

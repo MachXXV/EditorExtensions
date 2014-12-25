@@ -80,6 +80,7 @@
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="PartInfoWindow.cs" />
     <Compile Include="Utility.cs" />
+    <Compile Include="GUIWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

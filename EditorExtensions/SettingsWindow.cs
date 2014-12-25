@@ -105,14 +105,15 @@ namespace EditorExtensions
 
 			GUILayout.BeginVertical ("box");
 
-			;
-
 			# region Settings
 			if (toolbarInt == 0) {
 
 				GUILayout.BeginHorizontal ();
 				GUILayout.Label ("Version:", settingsLabelLayout);
 				GUILayout.Label (_version.ToString());
+#if DEBUG
+				GUILayout.Label ("Debug Build");
+#endif
 				GUILayout.EndHorizontal ();
 
 				GUILayout.BeginHorizontal ();

@@ -52,6 +52,7 @@ namespace EditorExtensions
 		void OnDisable(){
 		}
 
+
 		void OnGUI ()
 		{
 			if (Event.current.type == EventType.Layout) {
@@ -78,17 +79,13 @@ namespace EditorExtensions
 		{
 			GUILayout.BeginVertical ("box");
 
-			//string prefabName = getcom(365447);
-			//GameObject prefab = AssetBase.GetPrefab(prefabName);
-			//UnityEngine.Object obj4 = Object.Instantiate(prefab);
-			//GizmoOffset offset = ((GameObject) obj4).GetComponent<GizmoOffset>();
-
-			int activeGizmos = -1;
-			try{
-				activeGizmos = HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset>().Length + HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate>().Length;
-			} catch(Exception){
-			}
-			GUILayout.Label ("Gizmos: " + activeGizmos.ToString());
+//			int activeGizmos = -1;
+//			try{
+			//bad cpu impact
+//				activeGizmos = HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset>().Length + HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate>().Length;
+//			} catch(Exception){
+//			}
+//			GUILayout.Label ("Gizmos: " + activeGizmos.ToString());
 
 			//Get selected part, mouseover part if none is active
 			Part sp = EditorLogic.SelectedPart;
@@ -145,7 +142,9 @@ namespace EditorExtensions
 
 					GUILayout.EndVertical ();
 				}
-			}			
+			} else {
+				GUILayout.Label ("No part selected");
+			}
 
 			GUILayout.EndVertical ();//end main content
 
