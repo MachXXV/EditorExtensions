@@ -1,6 +1,6 @@
 ## Editor Extensions v2.4
 
-build 2.3.5472.4071 - 25 December 2014
+build 2.4.5472.4071 - 25 December 2014
 
 v2.4 is a bugfix release for a CPU/Framerate issue in v2.3, otherwise no changes from v2.3
 
