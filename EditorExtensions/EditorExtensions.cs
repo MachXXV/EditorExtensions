@@ -117,10 +117,10 @@ namespace EditorExtensions
 		void OnDestroy ()
 		{
 			Log.Debug ("OnDestroy()");
-//			if (_settingsWindow != null)
-//				_settingsWindow.enabled = false;
-//			if (_partInfoWindow != null)
-//				_partInfoWindow.enabled = false;
+			//if (_settingsWindow != null)
+			//	_settingsWindow.enabled = false;
+			//if (_partInfoWindow != null)
+			//	_partInfoWindow.enabled = false;
 		}
 
 		bool altKeyDown;
@@ -161,6 +161,14 @@ namespace EditorExtensions
 				altKeyDown = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt) || Input.GetKey (KeyCode.AltGr);
 				//check for shift key
 				shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
+
+//				if (false) {
+//					Part sp = Utility.GetPartUnderCursor ();
+//					if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive ()) {
+//						Part ap = sp.srfAttachNode.attachedPart;
+//
+//					}
+//				}
 			
 				// V - Vertically align part under cursor with the part it is attached to
 				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
@@ -169,7 +177,6 @@ namespace EditorExtensions
 
 						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
 
-							//Part ap = sp.srfAttachNode.attachedPart;
 							List<Part> symParts = sp.symmetryCounterparts;
 
 							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());

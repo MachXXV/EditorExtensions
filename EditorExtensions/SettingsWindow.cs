@@ -138,10 +138,10 @@ namespace EditorExtensions
 				}
 				GUILayout.EndHorizontal ();
 
-				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Show debug info:", settingsLabelLayout);
-				_config.ShowDebugInfo = GUILayout.Toggle(_config.ShowDebugInfo, _config.ShowDebugInfo ? "Yep" : "Nope");
-				GUILayout.EndHorizontal ();
+				//GUILayout.BeginHorizontal ();
+				//GUILayout.Label ("Show debug info:", settingsLabelLayout);
+				//_config.ShowDebugInfo = GUILayout.Toggle(_config.ShowDebugInfo, _config.ShowDebugInfo ? "Yep" : "Nope");
+				//GUILayout.EndHorizontal ();
 
 				if (keyMapToUpdate == string.Empty) {
 					GUILayout.Label ("Click button and press key to change");

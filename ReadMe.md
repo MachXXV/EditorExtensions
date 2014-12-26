@@ -26,8 +26,8 @@ This version is not compatible with any KSP versions prior to 0.90, for 0.25 use
 * Reset hangar camera view
 
 ### Default Keybindings
-* **V** 			- Vertically center the part under the mouse to its parent part
-* **H** 			- Horizontally center the part under the mouse to its parent part
+* **V** 			- Vertically center a part. Place the part, hover over it with the mouse, and press the hotkey.
+* **H** 			- Horizontally center the part. Place the part, hover over it with the mouse, and press the hotkey.
 * **X, Shift+X** 	- Increase/Decrease symmetry level
 * **Alt+X** 		- Reset symmetry level
 * **C, Shift+C** 	- Increase/Decrease angle snap

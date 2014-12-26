@@ -120,6 +120,18 @@ namespace EditorExtensions
 				GUILayout.Label ("attPos: " + sp.attPos.ToString (vectorFormat));
 				GUILayout.Label ("attPos0: " + sp.attPos0.ToString (vectorFormat));
 				GUILayout.Label ("isAttached " + sp.isAttached.ToString ());
+				GUILayout.Label ("localScale " + sp.transform.localScale.ToString (vectorFormat));
+				GUILayout.Label ("lossyScale " + sp.transform.lossyScale.ToString (vectorFormat));
+
+//				try{
+//					GUILayout.Label ("bounds.size " + sp.renderer.bounds.extents.ToString (vectorFormat));
+//				} catch(Exception){
+//				}
+//
+//				try{
+//					GUILayout.Label ("bounds.extents " + sp.renderer.bounds.extents.ToString (vectorFormat));
+//				} catch(Exception){
+//				}
 
 				GUILayout.Label ("orgPos: " + sp.orgPos.ToString (vectorFormat));
 
@@ -134,6 +146,10 @@ namespace EditorExtensions
 						GUILayout.Label ("position " + sp.srfAttachNode.attachedPart.transform.position.ToString (vectorFormat));
 						GUILayout.Label ("rotation " + sp.srfAttachNode.attachedPart.transform.rotation.ToString (vectorFormat));
 						GUILayout.Label ("up " + sp.srfAttachNode.attachedPart.transform.up.ToString (vectorFormat));
+
+						GUILayout.Label ("localScale " + sp.srfAttachNode.attachedPart.transform.localScale.ToString (vectorFormat));
+						GUILayout.Label ("lossyScale " + sp.srfAttachNode.attachedPart.transform.lossyScale.ToString (vectorFormat));
+						//GUILayout.Label ("bounds " + sp.srfAttachNode.attachedPart.GetComponent<MeshFilter>().mesh.bounds.extents.ToString (vectorFormat));
 
 						AttachNode an = sp.srfAttachNode.attachedPart.attachNodes [0];
 						GUILayout.Label ("attachNode " + an.position.ToString (vectorFormat));
