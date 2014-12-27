@@ -72,11 +72,11 @@ namespace EditorExtensions
 				};
 
 				KeyMaps defaultKeys = new KeyMaps () {
-					AngleSnap = KeyCode.C,
+					//using gamesettings keybinding AngleSnap = KeyCode.C,
 					AttachmentMode = KeyCode.T,
 					PartClipping = KeyCode.Z,
 					ResetCamera = KeyCode.Space,
-					Symmetry = KeyCode.X,
+					//using gamesettings keybinding Symmetry = KeyCode.X,
 					VerticalSnap = KeyCode.V,
 					HorizontalSnap = KeyCode.H,
 					CompoundPartAlign = KeyCode.U

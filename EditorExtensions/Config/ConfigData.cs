@@ -43,11 +43,13 @@ namespace EditorExtensions
 		[XmlElement("AttachmentMode")]
 		public KeyCode AttachmentMode { get; set; }
 
-		[XmlElement("AngleSnap")]
-		public KeyCode AngleSnap { get; set; }
+		//using gamesettings keybinding
+		//[XmlElement("AngleSnap")]
+		//public KeyCode AngleSnap { get; set; }
 
-		[XmlElement("Symmetry")]
-		public KeyCode Symmetry { get; set; }
+		//using gamesettings keybinding
+		//[XmlElement("Symmetry")]
+		//public KeyCode Symmetry { get; set; }
 
 		[XmlElement("PartClipping")]
 		public KeyCode PartClipping { get; set; }

@@ -338,9 +338,10 @@ namespace EditorExtensions
 					OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 					return;
 				}
-	
+
+				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.AngleSnap)
 				// C, Shift+C : Increment/Decrement Angle snap
-				if (Input.GetKeyDown (cfg.KeyMap.AngleSnap)) {
+				if (GameSettings.Editor_toggleAngleSnap.GetKeyDown()) {
 	
 					if (!altKeyDown) {
 						Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
@@ -384,8 +385,9 @@ namespace EditorExtensions
 	
 				}
 	
+				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.Symmetry)
 				// X, Shift+X : Increment/decrement symmetry mode
-				if (Input.GetKeyDown (cfg.KeyMap.Symmetry)) {
+				if (GameSettings.Editor_toggleSymMode.GetKeyDown()) {
 
 					//only inc/dec symmetry in radial mode, mirror is just 1&2
 					if (editor.symmetryMethod == SymmetryMethod.Radial) {

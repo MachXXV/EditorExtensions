@@ -1,11 +1,6 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug Win" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="EditorExtensions\PartInfoWindow.cs">
-    <Files>
-      <File FileName="EditorExtensions\PartInfoWindow.cs" Line="39" Column="39" />
-      <File FileName="EditorExtensions\SettingsWindow.cs" Line="65" Column="65" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
