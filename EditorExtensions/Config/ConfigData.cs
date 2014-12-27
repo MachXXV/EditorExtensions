@@ -57,6 +57,9 @@ namespace EditorExtensions
 
 		[XmlElement("HorizontalSnap")]
 		public KeyCode HorizontalSnap { get; set; }
+
+		[XmlElement("CompoundPartAlign")]
+		public KeyCode CompoundPartAlign { get; set; }
 	}
 }
 

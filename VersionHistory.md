@@ -1,5 +1,8 @@
 ﻿### Previous Version History
 
+### Changes in v2.4 - build 2.4.5472.4071 - 25 December 2014
+* Bugfix release for a CPU/Framerate issue in v2.3, otherwise no changes from v2.3
+
 ### Changes in v2.3 - build 2.3.5471.37348 - 24 December 2014
 * Revised vertical/horizontal snap
  * Now works with rotated/skewed parts - centers the part along the parent part axis.

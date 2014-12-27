@@ -75,8 +75,12 @@ namespace EditorExtensions
 
 		const string vectorFormat = "F3";
 		GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
+		private int _toolbarInt = 0;
+		private string[] _toolbarStrings = { "Part", "strut"};
 		void WindowContent (int windowID)
 		{
+			_toolbarInt = GUILayout.Toolbar (_toolbarInt, _toolbarStrings);
+
 			GUILayout.BeginVertical ("box");
 
 //			int activeGizmos = -1;
@@ -92,6 +96,8 @@ namespace EditorExtensions
 			if (sp == null)
 				sp = Utility.GetPartUnderCursor ();
 
+
+
 			if (sp != null) {
 
 				GUILayout.BeginHorizontal ();
@@ -99,65 +105,32 @@ namespace EditorExtensions
 				GUILayout.Label (sp ? sp.name : "none");
 				GUILayout.EndHorizontal ();
 
-				//GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
-				GUILayout.Label ("srfAttach: " + (sp.attachRules.srfAttach ? "enabled" : "disabled"));
-				//GUILayout.Label ("allowCollision " + (EditorLogic.SelectedPart.attachRules.allowCollision ? "enabled" : "disabled"));
-				//GUILayout.Label ("allowStack " + (EditorLogic.SelectedPart.attachRules.allowStack ? "enabled" : "disabled"));
-				//GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
-				//GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
-				//GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
+				GUILayout.Label ("Type: " + sp.GetType ().ToString ());
 
-				//foreach (var child in sp.children) {
-				//	GUILayout.Label ("child: " + child.name);
-				//}
+				if (_toolbarInt == 0) {
 
-				GUILayout.Label ("localPosition " + sp.transform.localPosition.ToString (vectorFormat));
-				GUILayout.Label ("position " + sp.transform.position.ToString (vectorFormat));
-				GUILayout.Label ("rotation " + sp.transform.rotation.ToString (vectorFormat));
-				GUILayout.Label ("attRotation: " + sp.attRotation.ToString (vectorFormat));
-				GUILayout.Label ("attRotation0: " + sp.attRotation0.ToString (vectorFormat));
-				//attPos doesnt seem to be used
-				GUILayout.Label ("attPos: " + sp.attPos.ToString (vectorFormat));
-				GUILayout.Label ("attPos0: " + sp.attPos0.ToString (vectorFormat));
-				GUILayout.Label ("isAttached " + sp.isAttached.ToString ());
-				GUILayout.Label ("localScale " + sp.transform.localScale.ToString (vectorFormat));
-				GUILayout.Label ("lossyScale " + sp.transform.lossyScale.ToString (vectorFormat));
+					PartInfoLabels (sp);
 
-//				try{
-//					GUILayout.Label ("bounds.size " + sp.renderer.bounds.extents.ToString (vectorFormat));
-//				} catch(Exception){
-//				}
-//
-//				try{
-//					GUILayout.Label ("bounds.extents " + sp.renderer.bounds.extents.ToString (vectorFormat));
-//				} catch(Exception){
-//				}
-
-				GUILayout.Label ("orgPos: " + sp.orgPos.ToString (vectorFormat));
-
-				if (sp.srfAttachNode != null) {
-					GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString (vectorFormat));
-
-					GUILayout.BeginVertical ("box");
-					GUILayout.Label ("Attached part:");
-					if (sp.srfAttachNode.attachedPart != null) {
-						GUILayout.Label ("attPos0: " + sp.srfAttachNode.attachedPart.attPos0.ToString (vectorFormat));
-						GUILayout.Label ("localPosition " + sp.srfAttachNode.attachedPart.transform.localPosition.ToString (vectorFormat));
-						GUILayout.Label ("position " + sp.srfAttachNode.attachedPart.transform.position.ToString (vectorFormat));
-						GUILayout.Label ("rotation " + sp.srfAttachNode.attachedPart.transform.rotation.ToString (vectorFormat));
-						GUILayout.Label ("up " + sp.srfAttachNode.attachedPart.transform.up.ToString (vectorFormat));
-
-						GUILayout.Label ("localScale " + sp.srfAttachNode.attachedPart.transform.localScale.ToString (vectorFormat));
-						GUILayout.Label ("lossyScale " + sp.srfAttachNode.attachedPart.transform.lossyScale.ToString (vectorFormat));
-						//GUILayout.Label ("bounds " + sp.srfAttachNode.attachedPart.GetComponent<MeshFilter>().mesh.bounds.extents.ToString (vectorFormat));
-
-						AttachNode an = sp.srfAttachNode.attachedPart.attachNodes [0];
-						GUILayout.Label ("attachNode " + an.position.ToString (vectorFormat));
-						//sp.attPos0.y = sp.srfAttachNode.attachedPart.attPos0.y;
+					if (sp.srfAttachNode != null) {
+						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString (vectorFormat));
+						GUILayout.BeginVertical ("box");
+						GUILayout.Label ("Attached part:");
+						if (sp.srfAttachNode.attachedPart != null) {
+							PartInfoLabels (sp.srfAttachNode.attachedPart);
+						}
+						GUILayout.EndVertical ();
 					}
-
-					GUILayout.EndVertical ();
 				}
+
+				if (_toolbarInt == 1) {
+					if (sp.GetType () == typeof(CompoundPart)) {
+
+						CompoundPartInfo ((CompoundPart)sp);
+
+					}
+				}
+
+
 			} else {
 				GUILayout.Label ("No part selected");
 			}
@@ -169,6 +142,71 @@ namespace EditorExtensions
 			}
 
 			GUI.DragWindow ();
+		}
+
+		void PartInfoLabels(Part part){
+
+			//GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
+			GUILayout.Label ("srfAttach: " + (part.attachRules.srfAttach ? "enabled" : "disabled"));
+			//GUILayout.Label ("allowCollision " + (EditorLogic.SelectedPart.attachRules.allowCollision ? "enabled" : "disabled"));
+			//GUILayout.Label ("allowStack " + (EditorLogic.SelectedPart.attachRules.allowStack ? "enabled" : "disabled"));
+			//GUILayout.Label ("allowDock " + (EditorLogic.SelectedPart.attachRules.allowDock ? "enabled" : "disabled"));
+			//GUILayout.Label ("allowRotate " + (EditorLogic.SelectedPart.attachRules.allowRotate ? "enabled" : "disabled"));
+			//GUILayout.Label ("stack " + (EditorLogic.SelectedPart.attachRules.stack ? "enabled" : "disabled"));
+
+			//foreach (var child in part.children) {
+			//	GUILayout.Label ("child: " + child.name);
+			//}
+
+			GUILayout.Label ("isAttached " + part.isAttached.ToString ());
+			GUILayout.Label ("attRotation: " + part.attRotation.ToString (vectorFormat));
+			GUILayout.Label ("attRotation0: " + part.attRotation0.ToString (vectorFormat));
+			GUILayout.Label ("attPos: " + part.attPos.ToString (vectorFormat));
+			GUILayout.Label ("attPos0: " + part.attPos0.ToString (vectorFormat));
+
+			GUILayout.Label ("localPosition " + part.transform.localPosition.ToString (vectorFormat));
+			GUILayout.Label ("position " + part.transform.position.ToString (vectorFormat));
+			GUILayout.Label ("rotation " + part.transform.rotation.ToString (vectorFormat));
+
+
+			GUILayout.Label ("localScale " + part.transform.localScale.ToString (vectorFormat));
+			GUILayout.Label ("lossyScale " + part.transform.lossyScale.ToString (vectorFormat));
+			GUILayout.Label ("right " + part.transform.right.ToString (vectorFormat));
+			GUILayout.Label ("up " + part.transform.up.ToString (vectorFormat));
+
+			//				try{
+			//					GUILayout.Label ("bounds.size " + part.renderer.bounds.extents.ToString (vectorFormat));
+			//				} catch(Exception){
+			//				}
+			//
+			//				try{
+			//					GUILayout.Label ("bounds.extents " + part.renderer.bounds.extents.ToString (vectorFormat));
+			//				} catch(Exception){
+			//				}
+
+			GUILayout.Label ("orgPos: " + part.orgPos.ToString (vectorFormat));
+		}
+
+		void CompoundPartInfo(CompoundPart part){
+		
+
+			GUILayout.Label ("name: " + part.name);
+			GUILayout.Label ("direction: " + part.direction.ToString (vectorFormat));
+
+			GUILayout.Label ("attachState: " + part.attachState.ToString ());
+			if (part.target != null) {
+				GUILayout.Label ("target: " + part.target.name);
+				GUILayout.Label ("targetPosition: " + part.targetPosition.ToString (vectorFormat));
+				GUILayout.Label ("targetRotation: " + part.targetRotation.ToString (vectorFormat));
+
+			}
+			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
+			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
+			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
+			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
+			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
+
+
 		}
 
 	}

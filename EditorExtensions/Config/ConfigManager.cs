@@ -45,6 +45,9 @@ namespace EditorExtensions
 					object obj = deserializer.Deserialize (reader);
 					data = (ConfigData)obj;
 				}
+
+				//need to verify that there are no missing fields
+
 				return data;
 			} catch (Exception ex) {
 				Log.Error ("Error loading config file: " + ex.Message);
@@ -75,7 +78,8 @@ namespace EditorExtensions
 					ResetCamera = KeyCode.Space,
 					Symmetry = KeyCode.X,
 					VerticalSnap = KeyCode.V,
-					HorizontalSnap = KeyCode.H
+					HorizontalSnap = KeyCode.H,
+					CompoundPartAlign = KeyCode.U
 				};
 				defaultConfig.KeyMap = defaultKeys;
 

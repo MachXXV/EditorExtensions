@@ -144,6 +144,42 @@ namespace EditorExtensions
 			}
 		}
 
+		void AlignCompoundPart(CompoundPart part)
+		{
+			bool hasHit = false;
+			Vector3 dir = part.direction;
+			Vector3 newDirection = Vector3.zero;
+
+			if (dir.y < -0.125f) {
+				//more than -22.5deg vert
+				newDirection = new Vector3 (-0.5f, -0.5f, 0.0f);
+				Log.Debug ("Aligning compoundPart 45deg down");
+			} else if (dir.y > 0.125f) {
+				//more than +22.5deg vert
+				newDirection = new Vector3 (-0.5f, 0.5f, 0.0f);
+				Log.Debug ("Aligning compoundPart 45deg up");
+			} else {
+				//straight ahead
+				newDirection = new Vector3 (-1.0f, 0.0f, 0.0f);
+				Log.Debug ("Aligning compoundPart level");
+			}
+
+			List<Part> symParts = part.symmetryCounterparts;
+			//move any symmetry siblings/counterparts
+			foreach (CompoundPart symPart in symParts) {
+				symPart.raycastTarget (newDirection);
+			}
+
+			hasHit = part.raycastTarget (newDirection);
+
+			//revert direction
+			//if (!hasHit)
+			//	part.direction = dir;
+
+			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
+			editor.SetBackup ();
+		}
+
 		//Unity update
 		void Update ()
 		{
@@ -162,13 +198,13 @@ namespace EditorExtensions
 				//check for shift key
 				shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
 
-//				if (false) {
-//					Part sp = Utility.GetPartUnderCursor ();
-//					if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive ()) {
-//						Part ap = sp.srfAttachNode.attachedPart;
-//
-//					}
-//				}
+				// P - strut/fuel line alignment
+				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
+					Part p = Utility.GetPartUnderCursor ();
+					if (p != null && p.GetType () == typeof(CompoundPart)) {
+						AlignCompoundPart ((CompoundPart)p);
+					}
+				}
 			
 				// V - Vertically align part under cursor with the part it is attached to
 				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
@@ -436,7 +472,6 @@ namespace EditorExtensions
 
 		public void ShowMenu (Vector3 position)
 		{
-
 			position = Input.mousePosition;
 
 			float menuWidth = 100;
@@ -463,11 +498,6 @@ namespace EditorExtensions
 
 			//show and update the angle snap and symmetry mode labels
 			ShowSnapLabels ();
-
-			//show windows, only on Unity Layout pass
-			//if (Event.current.type == EventType.Layout) {
-			//	ShowWindows ();
-			//}
 
 			if (Event.current.type == EventType.Layout) {
 				if (_showMenu || _menuRect.Contains (Event.current.mousePosition))

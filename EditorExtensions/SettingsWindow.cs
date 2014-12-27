@@ -109,12 +109,12 @@ namespace EditorExtensions
 			if (toolbarInt == 0) {
 
 				GUILayout.BeginHorizontal ();
-				GUILayout.Label ("Version:", settingsLabelLayout);
-				GUILayout.Label (_version.ToString());
+				GUILayout.Label ("Version: " + _version.ToString());
+				GUILayout.EndHorizontal ();
+
 #if DEBUG
 				GUILayout.Label ("Debug Build");
 #endif
-				GUILayout.EndHorizontal ();
 
 				GUILayout.BeginHorizontal ();
 				GUILayout.Label ("Message delay:", settingsLabelLayout);
@@ -186,6 +186,18 @@ namespace EditorExtensions
 				if (GUILayout.Button (_config.KeyMap.HorizontalSnap.ToString ())) {
 					_lastKeyPressed = KeyCode.None;
 					keyMapToUpdate = "hs";
+				}
+				GUILayout.EndHorizontal ();
+
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label ("Strut/fuel align:", settingsLabelLayout);
+				if (keyMapToUpdate == "cpa" && _lastKeyPressed != KeyCode.None) {
+					_config.KeyMap.CompoundPartAlign = _lastKeyPressed;
+					keyMapToUpdate = string.Empty;
+				}
+				if (GUILayout.Button (_config.KeyMap.CompoundPartAlign.ToString ())) {
+					_lastKeyPressed = KeyCode.None;
+					keyMapToUpdate = "cpa";
 				}
 				GUILayout.EndHorizontal ();
 
