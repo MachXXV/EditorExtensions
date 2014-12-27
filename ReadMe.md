@@ -18,11 +18,11 @@ This version is not compatible with any KSP versions prior to 0.90, for 0.25 use
 * Reset hangar camera view
 * Customize hotkeys
 
-Vertical/Horizontal snap:
+#### Vertical/Horizontal snap:
 * Place the part, then once the part is placed, hover over the part with your mouse and press the Vertical or Horizontal snap hotkey.
 * For vertical snap, part will center itself on the part lengthwise in the SPH
 
- Strut & Fuel line alignment
+#### Strut & Fuel line alignment
 * Place the strut, then hover over the base/start of the strut (the first end placed) with the mouse, and press the hotkey.
 * Addon will align the strut's direction perpendicular from the part's surface.
 * If the strut is close to level, it will be aligned flat at 0°
