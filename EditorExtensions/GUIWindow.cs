@@ -5,8 +5,8 @@ namespace EditorExtensions
 {
 	public abstract class GUIWindow : MonoBehaviour
 	{
-		public static SettingsWindow Instance { get; private set; }
-		public bool Visible { get; set; }
+		//public static SettingsWindow Instance { get; private set; }
+		//public bool Visible { get; set; }
 
 		public delegate void WindowDisabledEventHandler();
 		public event WindowDisabledEventHandler WindowDisabled;
@@ -16,9 +16,9 @@ namespace EditorExtensions
 				WindowDisabled();
 		}
 
-		string _windowTitle = string.Empty;
+		internal string _windowTitle = string.Empty;
 
-		Rect _windowRect = new Rect () {
+		internal Rect _windowRect = new Rect () {
 			xMin = Screen.width/2 - 100,
 			xMax = Screen.width/2 + 100,
 			yMin = Screen.height/2 - 50,
@@ -32,27 +32,27 @@ namespace EditorExtensions
 			this.enabled = false;
 		}
 
-		void Awake ()
+		internal virtual void Awake ()
 		{
 		}
 
-		void Update ()
+		internal virtual void Update ()
 		{
 		}
 
-		void OnEnable ()
+		internal virtual void OnEnable ()
 		{
 		}
 
-		void CloseWindow(){
+		internal virtual void CloseWindow(){
 			this.enabled = false;
 			OnWindowDisabled ();
 		}
 
-		void OnDisable(){
+		internal virtual void OnDisable(){
 		}
 
-		void OnGUI ()
+		internal virtual void OnGUI ()
 		{
 			if (Event.current.type == EventType.Layout) {
 				_windowRect.yMax = _windowRect.yMin;
@@ -72,10 +72,7 @@ namespace EditorExtensions
 			this.enabled = true;
 		}
 
-		void WindowContent (int windowID)
-		{
-
-		}
+		internal abstract void WindowContent (int windowID);
 	}
 }
 

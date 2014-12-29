@@ -1,12 +1,15 @@
 using System;
-using UnityEngine;
-using KSP.IO;
-using System.Reflection;
-using System.IO;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Reflection;
+using KSP.IO;
+using UnityEngine;
 
 namespace EditorExtensions
 {
+
 	[KSPAddon (KSPAddon.Startup.EditorAny, false)]
 	public class EditorExtensions : MonoBehaviour
 	{
@@ -28,6 +31,7 @@ namespace EditorExtensions
 
 		SettingsWindow _settingsWindow = null;
 		PartInfoWindow _partInfoWindow = null;
+		StrutWindow _strutWindow = null;
 
 		bool enableHotkeys = true;
 		//bool _gizmoActive = false;
@@ -164,17 +168,22 @@ namespace EditorExtensions
 				Log.Debug ("Aligning compoundPart level");
 			}
 
+			hasHit = part.raycastTarget (newDirection);
+
+			if (!hasHit){
+				//try just leveling the strut
+				Log.Debug ("Original align failed, Aligning compoundPart level");
+				part.direction = new Vector3 (dir.x, 0.0f, dir.z);
+				hasHit = part.raycastTarget (newDirection);
+			}
+
 			List<Part> symParts = part.symmetryCounterparts;
 			//move any symmetry siblings/counterparts
 			foreach (CompoundPart symPart in symParts) {
 				symPart.raycastTarget (newDirection);
 			}
 
-			hasHit = part.raycastTarget (newDirection);
 
-			//revert direction
-			//if (!hasHit)
-			//	part.direction = dir;
 
 			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
 			editor.SetBackup ();
@@ -425,6 +434,8 @@ namespace EditorExtensions
 
 			_partInfoWindow = this.gameObject.AddComponent<PartInfoWindow> ();
 
+			_strutWindow = this.gameObject.AddComponent<StrutWindow> ();
+
 			osdLabelStyle = new GUIStyle () {
 				stretchWidth = true,
 				stretchHeight = true,
@@ -453,9 +464,9 @@ namespace EditorExtensions
 		{
 			this.Visible = true;
 			Log.Debug ("Show()");
-			if (!_settingsWindow.enabled) {
-				_settingsWindow.Show (cfg, _configFilePath, pluginVersion);
-			}
+			//if (!_settingsWindow.enabled) {
+			//	_settingsWindow.Show (cfg, _configFilePath, pluginVersion);
+			//}
 		}
 
 		//hide the addon's GUI
@@ -463,10 +474,9 @@ namespace EditorExtensions
 		{
 			this.Visible = false;
 			Log.Debug ("Hide()");
-			if (_settingsWindow.enabled) {
-				Log.Debug ("_settingsWindow disable");
-				_settingsWindow.enabled = false;
-			}
+			//if (_settingsWindow.enabled) {
+			//	_settingsWindow.enabled = false;
+			//}
 		}
 
 		bool _showMenu = false;
@@ -481,7 +491,7 @@ namespace EditorExtensions
 			_menuRect = new Rect () {
 				xMin = position.x - menuWidth / 2,
 				xMax = position.x + menuWidth / 2,
-				yMin = Screen.height - 37 - 80,
+				yMin = Screen.height - 37 - 100,
 				yMax = Screen.height - 37
 			};
 			_showMenu = true;
@@ -516,6 +526,15 @@ namespace EditorExtensions
 				_settingsWindow.Show (cfg, _configFilePath, pluginVersion);
 				this.Visible = true;
 			}
+
+
+			_strutWindow.enabled = GUILayout.Toggle (_strutWindow.enabled, "Strut Tool", "Button");
+
+			//if (GUILayout.Button ("Strut tool")) {
+			//	_strutWindow.Show ();
+			//	this.Visible = true;
+			//}
+
 			if (cfg.ShowDebugInfo) {
 				if (GUILayout.Button ("Position Debug")) {
 					_partInfoWindow.Show ();

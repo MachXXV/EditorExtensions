@@ -5,9 +5,6 @@ namespace EditorExtensions
 {
 	public class SettingsWindow : MonoBehaviour
 	{
-		//public static SettingsWindow Instance { get; private set; }
-		//public bool Visible { get; set; }
-
 		public delegate void WindowDisabledEventHandler();
 		public event WindowDisabledEventHandler WindowDisabled;
 		protected virtual void OnWindowDisabled() 
