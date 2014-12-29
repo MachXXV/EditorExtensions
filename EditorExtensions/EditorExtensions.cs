@@ -38,13 +38,7 @@ namespace EditorExtensions
 
 		#endregion
 
-		public EditorExtensions ()
-		{
-			//per unity docs use Awake() instead of ctor:
-			//Awake instead of the constructor for initialization,
-			//as the serialized state of the component is undefined at construction time.
-			//Awake is called once, just like the constructor.
-		}
+		public EditorExtensions (){}
 		
 		//Unity initialization call
 		public void Awake ()
@@ -148,6 +142,20 @@ namespace EditorExtensions
 			}
 		}
 
+		void HighlightPart(Part p){
+			// old highlighter. Not necessary, but looks nice in combination
+			p.SetHighlightDefault();
+			p.SetHighlightType(Part.HighlightType.AlwaysOn);
+			p.SetHighlight(true, false);
+			p.SetHighlightColor(Color.red);
+
+			// New highlighter
+			HighlightingSystem.Highlighter hl; // From Assembly-CSharp-firstpass.dll
+			hl = p.FindModelTransform("model").gameObject.AddComponent<HighlightingSystem.Highlighter>();
+			hl.ConstantOn(XKCDColors.Rust);
+			hl.SeeThroughOn();
+		}
+
 		void AlignCompoundPart(CompoundPart part)
 		{
 			bool hasHit = false;
@@ -183,8 +191,6 @@ namespace EditorExtensions
 				symPart.raycastTarget (newDirection);
 			}
 
-
-
 			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
 			editor.SetBackup ();
 		}
@@ -198,6 +204,8 @@ namespace EditorExtensions
 			//ignore hotkeys while settings window is open
 			//if (_settingsWindow != null && _settingsWindow.enabled)
 			//	return;
+
+			EditorFacility facility = EditorLogic.fetch.ship.shipFacility;
 
 			//hotkeyed editor functions
 			if (enableHotkeys) {

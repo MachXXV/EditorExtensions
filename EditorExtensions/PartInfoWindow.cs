@@ -74,7 +74,7 @@ namespace EditorExtensions
 		}
 
 		const string vectorFormat = "F3";
-		GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
+		//GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
 		private int _toolbarInt = 0;
 		private string[] _toolbarStrings = { "Part", "strut"};
 		void WindowContent (int windowID)
@@ -157,6 +157,14 @@ namespace EditorExtensions
 			//foreach (var child in part.children) {
 			//	GUILayout.Label ("child: " + child.name);
 			//}
+
+			if (part.collider != null) {
+				GUILayout.Label ("part.collider not null");
+			}
+
+			if (part.gameObject != null && part.gameObject.collider != null) {
+				GUILayout.Label ("part.gameObject.collider not null");
+			}
 
 			GUILayout.Label ("isAttached " + part.isAttached.ToString ());
 			GUILayout.Label ("attRotation: " + part.attRotation.ToString (vectorFormat));

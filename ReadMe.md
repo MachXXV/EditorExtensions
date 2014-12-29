@@ -1,10 +1,10 @@
-## Editor Extensions v2.5
-27 December 2014
+## Editor Extensions v2.6
+29 December 2014
 
-### Changes in v2.5
-* Added strut & fuel line alignment options
+### Changes in v2.6
+* Changed angle snap (C) and symmetry (X) functions to use game's current key mapping
 
-####[Download v2.5 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.5/EditorExtensions_v2.5.zip)
+####[Download v2.6 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.6/EditorExtensions_v2.6.zip)
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
 ####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
 
