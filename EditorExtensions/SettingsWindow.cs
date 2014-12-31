@@ -270,7 +270,7 @@ namespace EditorExtensions
 
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Close")) {
-				_config = ConfigManager.LoadConfig (_configFilePath);
+				//_config = ConfigManager.LoadConfig (_configFilePath);
 				CloseWindow ();
 			}
 

@@ -205,7 +205,7 @@ namespace EditorExtensions
 			//if (_settingsWindow != null && _settingsWindow.enabled)
 			//	return;
 
-			EditorFacility facility = EditorLogic.fetch.ship.shipFacility;
+			//EditorFacility facility = EditorLogic.fetch.ship.shipFacility;
 
 			//hotkeyed editor functions
 			if (enableHotkeys) {
@@ -438,7 +438,7 @@ namespace EditorExtensions
 		void InitializeGUI ()
 		{
 			_settingsWindow = this.gameObject.AddComponent<SettingsWindow> ();
-			_settingsWindow.WindowDisabled += new SettingsWindow.WindowDisabledEventHandler (Hide);
+			_settingsWindow.WindowDisabled += new SettingsWindow.WindowDisabledEventHandler (SettingsWindowClosed);
 
 			_partInfoWindow = this.gameObject.AddComponent<PartInfoWindow> ();
 
@@ -487,19 +487,25 @@ namespace EditorExtensions
 			//}
 		}
 
+		public void SettingsWindowClosed(){
+			Log.Debug ("Settings window closed, reloading config");
+			cfg = ConfigManager.LoadConfig (_configFilePath);
+			Hide ();
+		}
+
 		bool _showMenu = false;
 		Rect _menuRect = new Rect ();
+		float _menuWidth = 100.0f;
+		float _menuHeight = 100.0f;
 
-		public void ShowMenu (Vector3 position)
+		public void ShowMenu ()
 		{
-			position = Input.mousePosition;
-
-			float menuWidth = 100;
-
+			Vector3 position = Input.mousePosition;
+				
 			_menuRect = new Rect () {
-				xMin = position.x - menuWidth / 2,
-				xMax = position.x + menuWidth / 2,
-				yMin = Screen.height - 37 - 100,
+				xMin = position.x - _menuWidth / 2,
+				xMax = position.x + _menuWidth / 2,
+				yMin = Screen.height - 37 - _menuHeight,
 				yMax = Screen.height - 37
 			};
 			_showMenu = true;
