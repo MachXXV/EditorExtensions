@@ -560,39 +560,11 @@ namespace EditorExtensions
 			GUILayout.EndVertical ();
 		}
 
-		#region On screen display message
-
-		float messageCutoff = 0;
-		string messageText = "";
-
-		/// <summary>
-		/// Set a on screen display message
-		/// </summary>
-		/// <param name="message">Message string</param>
-		/// <param name="delay">Amount of time to display the message in seconds</param>
 		void OSDMessage (string message)
 		{
-			//messageCutoff = Time.time + cfg.OnScreenMessageTime;
-			//messageText = message;
-			//Log.Debug (String.Format ("OSD messageCutoff = {0}, messageText = {1}", messageCutoff.ToString (), messageText));
-
 			//ScreenMessage msg = new ScreenMessage (message, cfg.OnScreenMessageTime, false, ScreenMessageStyle.LOWER_CENTER);
 			ScreenMessages.PostScreenMessage (message, cfg.OnScreenMessageTime, ScreenMessageStyle.LOWER_CENTER);
 		}
-
-		/// <summary>
-		/// check for On Screen Display message
-		/// </summary>
-		void DisplayOSD ()
-		{
-			if (Time.time < messageCutoff) {
-				GUILayout.BeginArea (new Rect (0, (Screen.height / 4), Screen.width, 200));
-				GUILayout.Label (messageText, osdLabelStyle);
-				GUILayout.EndArea ();			
-			}
-		}
-
-		#endregion
 
 		#region Snap labels
 

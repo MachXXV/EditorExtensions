@@ -8,9 +8,19 @@ namespace EditorExtensions
 	{
 		private ApplicationLauncherButton button;
 
+		public static AppLauncherButton Instance;
+
+		const string texPathDefault = "EditorExtensions/Textures/AppLauncherIcon";
+		const string texPathOn = "EditorExtensions/Textures/AppLauncherIcon-On";
+		const string texPathOff = "EditorExtensions/Textures/AppLauncherIcon-Off";
+
+
+
+
 		private void Awake ()
 		{
 			GameEvents.onGUIApplicationLauncherReady.Add (this.OnGuiAppLauncherReady);
+			Instance = this;
 		}
 
 		private void OnDestroy ()
@@ -37,13 +47,16 @@ namespace EditorExtensions
 					null, //RUIToggleButton.onEnable
 					null, //RUIToggleButton.onDisable
 					ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, //visibleInScenes
-					GameDatabase.Instance.GetTexture ("EditorExtensions/AppLauncherIcon", false) //texture
+					GameDatabase.Instance.GetTexture (texPathDefault, false) //texture
 				);
 				Log.Debug ("Added ApplicationLauncher button");
 			} catch (Exception ex) {
 				Log.Error ("Error adding ApplicationLauncher button: " + ex.Message);
 			}
+
 		}
+
+
 
 		private void Update ()
 		{

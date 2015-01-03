@@ -90,23 +90,33 @@
     <Content Include="License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Textures\AppLauncherIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\AppLauncherIcon-On.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\AppLauncherIcon-Off.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="DefaultKeys.txt" />
     <None Include="..\README.md">
       <Link>README.md</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="deploy.bat" />
     <None Include="deploy-mac.sh" />
-    <None Include="AppLauncherIcon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="EditorExtensions.version">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Content\DefaultKeys.txt" />
+    <None Include="Content\strut-alignment.jpg" />
+    <None Include="Textures\AppLauncherIcon.pdn" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Config\" />
+    <Folder Include="Content\" />
+    <Folder Include="Textures\" />
   </ItemGroup>
 </Project>

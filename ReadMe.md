@@ -1,8 +1,9 @@
 ## Editor Extensions v2.6
-29 December 2014
+03 January 2015
 
 ### Changes in v2.6
 * Changed angle snap (C) and symmetry (X) functions to use game's current key mapping
+* On screen messages now use the stock font/layout
 
 ####[Download v2.6 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.6/EditorExtensions_v2.6.zip)
 This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
