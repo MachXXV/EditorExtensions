@@ -123,9 +123,6 @@ namespace EditorExtensions
 			//	_partInfoWindow.enabled = false;
 		}
 
-		bool altKeyDown;
-		bool shiftKeyDown;
-
 		bool GizmoActive ()
 		{
 			try {
@@ -193,10 +190,10 @@ namespace EditorExtensions
 			//hotkeyed editor functions
 			if (enableHotkeys) {
 
-				//check for the various alt/mod etc keypresses
-				altKeyDown = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt) || Input.GetKey (KeyCode.AltGr);
-				//check for shift key
-				shiftKeyDown = Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift);
+				//check for the configured modifier key
+				bool modKeyDown = GameSettings.MODIFIER_KEY.GetKey();
+				//check for configured editor fine key
+				bool fineKeyDown = GameSettings.Editor_fineTweak.GetKey();
 
 				// P - strut/fuel line alignment
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
@@ -332,7 +329,7 @@ namespace EditorExtensions
 				}
 	
 				// ALT+Z : Toggle part clipping (From cheat options)
-				if (altKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
+				if (modKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
 					CheatOptions.AllowPartClipping ^= true;
 					Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
 					OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
@@ -342,7 +339,7 @@ namespace EditorExtensions
 				// C, Shift+C : Increment/Decrement Angle snap
 				if (Input.GetKeyDown (cfg.KeyMap.AngleSnap)) {
 	
-					if (!altKeyDown) {
+					if (!modKeyDown) {
 						Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 	
 						int currentAngleIndex = cfg.AngleSnapValues.IndexOf (editor.srfAttachAngleSnap);
@@ -351,7 +348,7 @@ namespace EditorExtensions
 	
 						//rotate through the angle snap values
 						float newAngle;
-						if (shiftKeyDown) {
+						if (fineKeyDown) {
 							//lower snap
 							newAngle = cfg.AngleSnapValues [currentAngleIndex == 0 ? cfg.AngleSnapValues.Count - 1 : currentAngleIndex - 1];
 						} else {
@@ -389,15 +386,15 @@ namespace EditorExtensions
 
 					//only inc/dec symmetry in radial mode, mirror is just 1&2
 					if (editor.symmetryMethod == SymmetryMethod.Radial) {
-						if (altKeyDown || (_symmetryMode < 2 && shiftKeyDown)) {
+						if (modKeyDown || (_symmetryMode < 2 && fineKeyDown)) {
 							//Alt+X or Symmetry is at 1(index 2) or lower
 							_symmetryMode = 0;
-						} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !shiftKeyDown) {
+						} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !fineKeyDown) {
 							//Stop adding at max symmetry
 							_symmetryMode = cfg.MaxSymmetry - 1;
 						} else {
 							//inc/dec symmetry
-							_symmetryMode = _symmetryMode + (shiftKeyDown ? -1 : 1);
+							_symmetryMode = _symmetryMode + (fineKeyDown ? -1 : 1);
 						}
 						editor.symmetryMode = _symmetryMode;
 						Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
