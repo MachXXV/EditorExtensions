@@ -1,13 +1,12 @@
 ## Editor Extensions v2.6
-03 January 2015
+13 February 2015
 
 ### Changes in v2.6
 * Changed angle snap (C) and symmetry (X) functions to use game's current key mapping
+* Modifier keys Alt/Mod/Shift now use game's key mapping for better Linux support
 * On screen messages now use the stock font/layout
 
 ####[Download v2.6 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.6/EditorExtensions_v2.6.zip)
-This version is not compatible with any KSP versions prior to 0.90, for 0.25 use v1.4:
-####[Download v1.4 for KSP 0.25](https://github.com/MachXXV/EditorExtensions/releases/download/v1.4/EditorExtensions_v1.4.zip)
 
 ### Features
 * Allows custom levels of radial symmetry beyond the stock limitations.
@@ -18,6 +17,7 @@ This version is not compatible with any KSP versions prior to 0.90, for 0.25 use
 * Toggle radial and node attachment of parts
 * Reset hangar camera view
 * Customize hotkeys
+* KSP-AVC versioning support
 
 #### Vertical/Horizontal snap:
 * Place the part, then once the part is placed, hover over the part with your mouse and press the Vertical or Horizontal snap hotkey.
@@ -33,10 +33,10 @@ This version is not compatible with any KSP versions prior to 0.90, for 0.25 use
 * **V** 			- Vertically center a part. Place the part, hover over it with the mouse, and press the hotkey.
 * **H** 			- Horizontally center the part. Place the part, hover over it with the mouse, and press the hotkey.
 * **U** 			- Place the strut, then hover over the base/start of the strut (the first end placed) with the mouse, and press the hotkey.
-* **X, Shift+X** 	- Increase/Decrease symmetry level
-* **Alt+X** 		- Reset symmetry level
-* **C, Shift+C** 	- Increase/Decrease angle snap
-* **Alt+C**			- Reset angle snap
+* **X, Shift+X** 	- Increase/Decrease symmetry level (Based on KSP's key map)
+* **Alt+X** 		- Reset symmetry level (Based on KSP's key map)
+* **C, Shift+C** 	- Increase/Decrease angle snap (Based on KSP's key map)
+* **Alt+C**			- Reset angle snap (Based on KSP's key map)
 * **T** 			- Attachment mode: Toggle between surface and node attachment modes for all parts, and when a part is selected, will toggle surface attachment even when that part's config usually does not allow it.
 * **Alt+Z** 		- Toggle part clipping (CAUTION: This is a cheat option)
 * **Space** 		- When no part is selected, resets camera pitch and heading (straight ahead and level)

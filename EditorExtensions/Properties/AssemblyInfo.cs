@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Editor Extensions")]
-[assembly: AssemblyCopyright("MachXXV 2014")]
+[assembly: AssemblyCopyright("MachXXV 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
