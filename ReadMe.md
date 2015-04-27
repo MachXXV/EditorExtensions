@@ -1,7 +1,8 @@
 ## Editor Extensions v2.6
-13 February 2015
+27 April 2015
 
 ### Changes in v2.6
+* Recompile against KSP 1.0 libraries
 * Changed angle snap (C) and symmetry (X) functions to use game's current key mapping
 * Modifier keys Alt/Mod/Shift now use game's key mapping for better Linux support
 * On screen messages now use the stock font/layout
