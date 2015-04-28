@@ -14,12 +14,8 @@ namespace EditorExtensions
 		const string texPathOn = "EditorExtensions/Textures/AppLauncherIcon-On";
 		const string texPathOff = "EditorExtensions/Textures/AppLauncherIcon-Off";
 
-		private void Start ()
-		{
-			if (button == null) {
-				OnGuiAppLauncherReady ();
-			}
-		}
+
+
 
 		private void Awake ()
 		{
@@ -35,8 +31,7 @@ namespace EditorExtensions
 			}
 		}
 
-		private void ButtonState (bool state)
-		{
+		private void ButtonState(bool state) {
 			Log.Debug ("ApplicationLauncher on" + state.ToString ());
 			EditorExtensions.Instance.Visible = state;
 		}
@@ -45,10 +40,10 @@ namespace EditorExtensions
 		{
 			try {
 				this.button = ApplicationLauncher.Instance.AddModApplication (
-					() => { EditorExtensions.Instance.Show (); }, 	//RUIToggleButton.onTrue
-					() => { EditorExtensions.Instance.Hide (); },	//RUIToggleButton.onFalse
-					() => { EditorExtensions.Instance.ShowMenu (); }, //RUIToggleButton.OnHover
-					() => { EditorExtensions.Instance.HideMenu (); }, //RUIToggleButton.onHoverOut
+					() => {EditorExtensions.Instance.Show();}, 	//RUIToggleButton.onTrue
+					() => {EditorExtensions.Instance.Hide();},	//RUIToggleButton.onFalse
+					() => {EditorExtensions.Instance.ShowMenu();}, //RUIToggleButton.OnHover
+					() => {EditorExtensions.Instance.HideMenu();}, //RUIToggleButton.onHoverOut
 					null, //RUIToggleButton.onEnable
 					null, //RUIToggleButton.onDisable
 					ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, //visibleInScenes
@@ -60,6 +55,8 @@ namespace EditorExtensions
 			}
 
 		}
+
+
 
 		private void Update ()
 		{
