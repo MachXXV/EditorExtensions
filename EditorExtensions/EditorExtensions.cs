@@ -31,7 +31,7 @@ namespace EditorExtensions
 
 		SettingsWindow _settingsWindow = null;
 		PartInfoWindow _partInfoWindow = null;
-		StrutWindow _strutWindow = null;
+		//StrutWindow _strutWindow = null;
 
 		bool enableHotkeys = true;
 		//bool _gizmoActive = false;
@@ -442,7 +442,7 @@ namespace EditorExtensions
 
 			_partInfoWindow = this.gameObject.AddComponent<PartInfoWindow> ();
 
-			_strutWindow = this.gameObject.AddComponent<StrutWindow> ();
+			//_strutWindow = this.gameObject.AddComponent<StrutWindow> ();
 
 			osdLabelStyle = new GUIStyle () {
 				stretchWidth = true,
@@ -495,8 +495,9 @@ namespace EditorExtensions
 
 		bool _showMenu = false;
 		Rect _menuRect = new Rect ();
-		float _menuWidth = 100.0f;
-		float _menuHeight = 100.0f;
+		const float _menuWidth = 100.0f;
+		const float _menuHeight = 70.0f;
+		const int _toolbarHeight = 40; //37
 
 		public void ShowMenu ()
 		{
@@ -505,8 +506,8 @@ namespace EditorExtensions
 			_menuRect = new Rect () {
 				xMin = position.x - _menuWidth / 2,
 				xMax = position.x + _menuWidth / 2,
-				yMin = Screen.height - 37 - _menuHeight,
-				yMax = Screen.height - 37
+				yMin = Screen.height - _toolbarHeight - _menuHeight,
+				yMax = Screen.height - _toolbarHeight
 			};
 			_showMenu = true;
 		}
@@ -541,9 +542,7 @@ namespace EditorExtensions
 				this.Visible = true;
 			}
 
-
-			_strutWindow.enabled = GUILayout.Toggle (_strutWindow.enabled, "Strut Tool", "Button");
-
+			//_strutWindow.enabled = GUILayout.Toggle (_strutWindow.enabled, "Strut Tool", "Button");
 			//if (GUILayout.Button ("Strut tool")) {
 			//	_strutWindow.Show ();
 			//	this.Visible = true;
@@ -564,7 +563,6 @@ namespace EditorExtensions
 		}
 
 		#region Snap labels
-
 
 		string symmetryLabelValue = string.Empty;
 		//symmetry & angle sprite/label size and position
