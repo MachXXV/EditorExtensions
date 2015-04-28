@@ -1,5 +1,5 @@
-## Editor Extensions v2.6
-27 April 2015
+## Editor Extensions v2.6 For KSP v1.0
+28 April 2015
 
 ### Changes in v2.6
 * Recompile against KSP 1.0 libraries
