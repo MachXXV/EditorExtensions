@@ -71,9 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EditorExtensions.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
+    <Compile Include="EditorExtensions.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="AppLauncherButton.cs" />
