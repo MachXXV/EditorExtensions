@@ -7,7 +7,7 @@
 * Modifier keys Alt/Mod/Shift now use game's key mapping for better Linux support
 * On screen messages now use the stock font/layout
 
-####[Download v2.6 for KSP 0.90](https://github.com/MachXXV/EditorExtensions/releases/download/v2.6/EditorExtensions_v2.6.zip)
+####[Download v2.6](https://github.com/MachXXV/EditorExtensions/releases/download/v2.6/EditorExtensions_v2.6.zip)
 
 ### Features
 * Allows custom levels of radial symmetry beyond the stock limitations.
