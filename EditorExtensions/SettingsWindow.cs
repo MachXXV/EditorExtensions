@@ -111,6 +111,7 @@ namespace EditorExtensions
 
 #if DEBUG
 				GUILayout.Label ("Debug Build");
+				GUILayout.Label ("_lastKeyPressed: " + _lastKeyPressed.ToString ());
 #endif
 
 				GUILayout.BeginHorizontal ();
@@ -135,20 +136,11 @@ namespace EditorExtensions
 				}
 				GUILayout.EndHorizontal ();
 
-				//GUILayout.BeginHorizontal ();
-				//GUILayout.Label ("Show debug info:", settingsLabelLayout);
-				//_config.ShowDebugInfo = GUILayout.Toggle(_config.ShowDebugInfo, _config.ShowDebugInfo ? "Yep" : "Nope");
-				//GUILayout.EndHorizontal ();
-
 				if (keyMapToUpdate == string.Empty) {
 					GUILayout.Label ("Click button and press key to change");
 				} else {
 					GUILayout.Label ("Waiting for key");
 				}
-
-				#if DEBUG
-				GUILayout.Label ("_lastKeyPressed: " + _lastKeyPressed.ToString ());
-				#endif
 
 				GUILayout.BeginHorizontal ();
 				GUILayout.Label ("Surface attachment:", settingsLabelLayout);
@@ -216,9 +208,6 @@ namespace EditorExtensions
 			if (toolbarInt == 1) {
 
 				try {
-					//float[] tmpAngles;
-					//_config.AngleSnapValues.CopyTo (tmpAngles);
-
 					lock (anglesLock) {
 						foreach (float a in _config.AngleSnapValues) {
 							if (a != 0.0f) {
@@ -259,7 +248,7 @@ namespace EditorExtensions
 				}
 				#else
 				catch(Exception){
-				//just ignore the error and continue since it's non-critical
+					//just ignore the error and continue since it's non-critical
 				}
 				#endif
 			}
@@ -270,6 +259,7 @@ namespace EditorExtensions
 
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Close")) {
+				//reload config to reset any unsaved changes?
 				//_config = ConfigManager.LoadConfig (_configFilePath);
 				CloseWindow ();
 			}
@@ -288,6 +278,5 @@ namespace EditorExtensions
 		}
 
 	}
-//end class
 }
 

@@ -20,7 +20,7 @@ namespace EditorExtensions
 		#region member vars
 
 		const string ConfigFileName = "config.xml";
-		const string degreesSymbol = "\u00B0";
+		const string DegreesSymbol = "\u00B0";
 
 		EditorLogic editor;
 		Version pluginVersion;
@@ -47,9 +47,6 @@ namespace EditorExtensions
 			Instance = this;
 			InitConfig ();
 			InitializeGUI ();
-
-			//part.parent.Modules.Contains("WingManipulator")
-			//bool FARactive = AssemblyLoader.loadedAssemblies.Any(a => a.assembly.GetName().Name.Equals("FerramAerospaceResearch", StringComparison.InvariantCultureIgnoreCase));
 		}
 
 		void InitConfig ()
@@ -124,36 +121,250 @@ namespace EditorExtensions
 			//	_partInfoWindow.enabled = false;
 		}
 
-		bool GizmoActive ()
+
+
+//		void HighlightPart(Part p){
+//			// old highlighter. Not necessary, but looks nice in combination
+//			p.SetHighlightDefault();
+//			p.SetHighlightType(Part.HighlightType.AlwaysOn);
+//			p.SetHighlight(true, false);
+//			p.SetHighlightColor(Color.red);
+//
+//			// New highlighter
+//			HighlightingSystem.Highlighter hl; // From Assembly-CSharp-firstpass.dll
+//			hl = p.FindModelTransform("model").gameObject.AddComponent<HighlightingSystem.Highlighter>();
+//			hl.ConstantOn(XKCDColors.Rust);
+//			hl.SeeThroughOn();
+//		}
+
+
+
+		//Unity update
+		void Update ()
 		{
-			try {
-				if (HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset> ().Length > 0 || HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate> ().Length > 0) {
-					return true;
-				} else {
-					return false;
+			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
+				return;
+
+			//ignore hotkeys while settings window is open
+			//if (_settingsWindow != null && _settingsWindow.enabled)
+			//	return;
+
+			//hotkeyed editor functions
+			if (enableHotkeys) {
+
+				//check for the configured modifier key
+				bool modKeyDown = GameSettings.MODIFIER_KEY.GetKey();
+				//check for configured editor fine key
+				bool fineKeyDown = GameSettings.Editor_fineTweak.GetKey();
+
+				// P - strut/fuel line alignment
+				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
+					Part p = Utility.GetPartUnderCursor ();
+					if (p != null && p.GetType () == typeof(CompoundPart)) {
+						AlignCompoundPart ((CompoundPart)p);
+					}
 				}
-#if DEBUG
-			} catch (Exception ex) {
-				Log.Error ("Error getting active Gizmos: " + ex.Message);
-#else
-			} catch (Exception) {
-#endif
-				return false;
-			}
+			
+				// V - Vertically align part under cursor with the part it is attached to
+				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
+					VerticalAlign ();
+					return;
+				}
+
+				// H - Horizontally align part under cursor with the part it is attached to
+				if (Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
+					HorizontalAlign ();
+					return;
+				}     
+
+				//Space - when no part is selected, reset camera
+				if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
+					ResetCamera ();
+					return;
+				}
+	
+				// T: Surface attachment toggle
+				if (Input.GetKeyDown (cfg.KeyMap.AttachmentMode)) {
+					SurfaceAttachToggle ();
+					return;
+				}
+	
+				// ALT+Z : Toggle part clipping (From cheat options)
+				if (modKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
+					return;
+				}
+
+				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.AngleSnap)
+				// C, Shift+C : Increment/Decrement Angle snap
+				if (GameSettings.Editor_toggleAngleSnap.GetKeyDown()) {
+					AngleSnapCycle (modKeyDown, fineKeyDown);
+					return;	
+				}
+	
+				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.Symmetry)
+				// X, Shift+X : Increment/decrement symmetry mode
+				if (GameSettings.Editor_toggleSymMode.GetKeyDown()) {
+					SymmetryModeCycle (modKeyDown, fineKeyDown);
+					return;
+				}
+
+			}//end if(enableHotKeys)
 		}
 
-		void HighlightPart(Part p){
-			// old highlighter. Not necessary, but looks nice in combination
-			p.SetHighlightDefault();
-			p.SetHighlightType(Part.HighlightType.AlwaysOn);
-			p.SetHighlight(true, false);
-			p.SetHighlightColor(Color.red);
+		#region Editor Actions
 
-			// New highlighter
-			HighlightingSystem.Highlighter hl; // From Assembly-CSharp-firstpass.dll
-			hl = p.FindModelTransform("model").gameObject.AddComponent<HighlightingSystem.Highlighter>();
-			hl.ConstantOn(XKCDColors.Rust);
-			hl.SeeThroughOn();
+		void VerticalAlign(){
+			try {
+				Part sp = Utility.GetPartUnderCursor ();
+
+				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
+
+					List<Part> symParts = sp.symmetryCounterparts;
+
+					Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
+
+					//move hovered part
+					sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, 0f, sp.transform.localPosition.z);
+					sp.attPos0.y = 0f;
+
+					//move any symmetry siblings/counterparts
+					foreach (Part symPart in symParts) {
+						symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, 0f, symPart.transform.localPosition.z);
+						symPart.attPos0.y = 0f;
+					}
+
+					//need to verify this is the right way, it does seem to work
+					//Add edit to undo history
+					editor.SetBackup ();
+				}
+			} catch (Exception ex) {
+				Log.Error ("Error trying to vertically align: " + ex.Message);
+			}
+
+			return;
+		}
+
+		void HorizontalAlign(){
+			try {
+				Part sp = Utility.GetPartUnderCursor ();
+
+				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
+
+					//Part ap = sp.srfAttachNode.attachedPart;
+					List<Part> symParts = sp.symmetryCounterparts;
+
+					Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
+
+					//move selected part
+					sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, sp.transform.localPosition.y, 0f);
+					sp.attPos0.z = 0f;
+
+					//move any symmetry siblings/counterparts
+					foreach (Part symPart in symParts) {
+						symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, symPart.transform.localPosition.y, 0f);
+						symPart.attPos0.z = 0f;
+					}
+
+					//Add edit to undo history
+					editor.SetBackup ();
+				}
+			} catch (Exception ex) {
+				Log.Error ("Error trying to Horizontally align: " + ex.Message);
+			}
+			return;
+		}
+
+		void ResetCamera(){
+			if (!GizmoActive()) {
+				VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
+				VABcam.camPitch = 0;
+				VABcam.camHdg = 0;
+
+				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera> ();
+				SPHcam.camPitch = 0;
+				SPHcam.camHdg = 0;
+			}
+			return;
+		}
+
+		void SurfaceAttachToggle(){
+			if (EditorLogic.SelectedPart) {
+				//Toggle surface attachment for selected part
+				EditorLogic.SelectedPart.attachRules.srfAttach ^= true;
+
+				Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
+				OSDMessage (String.Format ("Surface attachment {0} for {1}"
+					, EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"
+					, EditorLogic.SelectedPart.name
+				));
+			}
+			return;
+		}
+
+		void PartClippingToggle(){
+			CheatOptions.AllowPartClipping ^= true;
+			Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
+			OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
+			return;
+		}
+
+		void SymmetryModeCycle(bool modKeyDown, bool fineKeyDown){
+			//only inc/dec symmetry in radial mode, mirror is just 1&2
+			if (editor.symmetryMethod == SymmetryMethod.Radial) {
+				if (modKeyDown || (_symmetryMode < 2 && fineKeyDown)) {
+					//Alt+X or Symmetry is at 1(index 2) or lower
+					_symmetryMode = 0;
+				} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !fineKeyDown) {
+					//Stop adding at max symmetry
+					_symmetryMode = cfg.MaxSymmetry - 1;
+				} else {
+					//inc/dec symmetry
+					_symmetryMode = _symmetryMode + (fineKeyDown ? -1 : 1);
+				}
+				editor.symmetryMode = _symmetryMode;
+				Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
+			} else {
+				//editor.symmetryMethod == SymmetryMethod.Mirror
+				//update var with stock action's result
+				_symmetryMode = editor.symmetryMode;
+			}
+			return;
+		}
+
+		void AngleSnapCycle(bool modKeyDown, bool fineKeyDown){
+			if (!modKeyDown) {
+				Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
+
+				int currentAngleIndex = cfg.AngleSnapValues.IndexOf (editor.srfAttachAngleSnap);
+
+				Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
+
+				//rotate through the angle snap values
+				float newAngle;
+				if (fineKeyDown) {
+					//lower snap
+					newAngle = cfg.AngleSnapValues [currentAngleIndex == 0 ? cfg.AngleSnapValues.Count - 1 : currentAngleIndex - 1];
+				} else {
+					//higher snap
+					newAngle = cfg.AngleSnapValues [currentAngleIndex == cfg.AngleSnapValues.Count - 1 ? 0 : currentAngleIndex + 1];
+				}
+
+				Log.Debug ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
+				editor.srfAttachAngleSnap = newAngle;
+			} else {
+				Log.Debug ("Resetting srfAttachAngleSnap to 0");
+				editor.srfAttachAngleSnap = 0;
+			}
+
+			//at angle snap 0, turn off angle snap and show stock circle sprite
+			if (editor.srfAttachAngleSnap == 0) {
+				GameSettings.VAB_USE_ANGLE_SNAP = false;
+			} else {
+				GameSettings.VAB_USE_ANGLE_SNAP = true;
+			}
+
+			Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
+			return;
 		}
 
 		void AlignCompoundPart(CompoundPart part)
@@ -195,240 +406,25 @@ namespace EditorExtensions
 			editor.SetBackup ();
 		}
 
-		//Unity update
-		void Update ()
+		bool GizmoActive ()
 		{
-			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
-				return;
-
-			//ignore hotkeys while settings window is open
-			//if (_settingsWindow != null && _settingsWindow.enabled)
-			//	return;
-
-			//EditorFacility facility = EditorLogic.fetch.ship.shipFacility;
-
-			//hotkeyed editor functions
-			if (enableHotkeys) {
-
-				//check for the configured modifier key
-				bool modKeyDown = GameSettings.MODIFIER_KEY.GetKey();
-				//check for configured editor fine key
-				bool fineKeyDown = GameSettings.Editor_fineTweak.GetKey();
-
-				// P - strut/fuel line alignment
-				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
-					Part p = Utility.GetPartUnderCursor ();
-					if (p != null && p.GetType () == typeof(CompoundPart)) {
-						AlignCompoundPart ((CompoundPart)p);
-					}
+			try {
+				if (HighLogic.FindObjectsOfType<EditorGizmos.GizmoOffset> ().Length > 0 || HighLogic.FindObjectsOfType<EditorGizmos.GizmoRotate> ().Length > 0) {
+					return true;
+				} else {
+					return false;
 				}
-			
-				// V - Vertically align part under cursor with the part it is attached to
-				if (Input.GetKeyDown (cfg.KeyMap.VerticalSnap)) {
-					try {
-						Part sp = Utility.GetPartUnderCursor ();
-
-						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
-
-							List<Part> symParts = sp.symmetryCounterparts;
-
-							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
-
-							//move hovered part
-							sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, 0f, sp.transform.localPosition.z);
-							sp.attPos0.y = 0f;
-
-							//move any symmetry siblings/counterparts
-							foreach (Part symPart in symParts) {
-								symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, 0f, symPart.transform.localPosition.z);
-								symPart.attPos0.y = 0f;
-							}
-
-							//need to verify this is the right way, it does seem to work
-							//Add edit to undo history
-							editor.SetBackup ();
-						}
-					} catch (Exception ex) {
-						Log.Error ("Error trying to vertically align: " + ex.Message);
-					}
-
-					//OSDMessage ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"), 1);
-					//Log.Debug ("Vertical snap " + (GameSettings.VAB_ANGLE_SNAP_INCLUDE_VERTICAL ? "enabled" : "disabled"));
-					return;
-				}
-
-				// H - Horizontally align part under cursor with the part it is attached to
-				if (Input.GetKeyDown (cfg.KeyMap.HorizontalSnap)) {
-
-					try {
-						Part sp = Utility.GetPartUnderCursor ();
-
-						if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
-
-							//Part ap = sp.srfAttachNode.attachedPart;
-							List<Part> symParts = sp.symmetryCounterparts;
-
-							Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
-
-							//move selected part
-							sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, sp.transform.localPosition.y, 0f);
-							sp.attPos0.z = 0f;
-
-							//move any symmetry siblings/counterparts
-							foreach (Part symPart in symParts) {
-								symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, symPart.transform.localPosition.y, 0f);
-								symPart.attPos0.z = 0f;
-							}
-
-							//Add edit to undo history
-							editor.SetBackup ();
-						}
-					} catch (Exception ex) {
-						Log.Error ("Error trying to Horizontally align: " + ex.Message);
-					}
-					return;
-				}     
-
-				//Space - when no part is selected, reset camera
-				if (Input.GetKeyDown (cfg.KeyMap.ResetCamera) && !EditorLogic.SelectedPart) {
-
-					if (!GizmoActive()) {
-					VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
-					VABcam.camPitch = 0;
-					VABcam.camHdg = 0;
-					//VABcam.ResetCamera ();
-
-					SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera> ();
-					SPHcam.camPitch = 0;
-					SPHcam.camHdg = 0;
-					//SPHcam.ResetCamera();
-					}
-				}
-	
-				// T: Surface attachment toggle
-				if (Input.GetKeyDown (cfg.KeyMap.AttachmentMode)) {
-
-					if (EditorLogic.SelectedPart) {
-						//Toggle surface attachment for selected part
-						EditorLogic.SelectedPart.attachRules.srfAttach ^= true;
-
-						Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
-						OSDMessage (String.Format ("Surface attachment {0} for {1}"
-							, EditorLogic.SelectedPart.attachRules.srfAttach ? "enabled" : "disabled"
-							, EditorLogic.SelectedPart.name
-						));
-					}
-
-					/* avoiding this approach of messing with global toggles for now
-					Part selectedPart = EditorLogic.SelectedPart;
-					if (selectedPart) {
-						//Toggle surface attachment for selected part
-						selectedPart.attachRules.srfAttach ^= true;
-
-						//set global toggling to match
-						editor.allowSrfAttachment = selectedPart.attachRules.srfAttach;
-						editor.allowNodeAttachment = !selectedPart.attachRules.srfAttach;
-
-						Log.Debug ("Toggling srfAttach for " + EditorLogic.SelectedPart.name);
-						OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1} \n for {2}"
-						, selectedPart.attachRules.srfAttach ? "enabled" : "disabled"
-						, editor.allowNodeAttachment ? "enabled" : "disabled"
-						, selectedPart.name
-						), 1);
-					}
-					else {
-						//just toggle global surface attachment, parts whose config do not allow it are unaffected
-						editor.allowSrfAttachment ^= true;
-						editor.allowNodeAttachment = !editor.allowSrfAttachment;
-						OSDMessage (String.Format ("Surface attachment {0} \n Node attachment {1}"
-						, editor.allowSrfAttachment ? "enabled" : "disabled"
-						, editor.allowNodeAttachment ? "enabled" : "disabled"
-						), 1);
-					}
-					*/
-				}
-	
-				// ALT+Z : Toggle part clipping (From cheat options)
-				if (modKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
-					CheatOptions.AllowPartClipping ^= true;
-					Log.Debug ("AllowPartClipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
-					OSDMessage ("Part clipping " + (CheatOptions.AllowPartClipping ? "enabled" : "disabled"));
-					return;
-				}
-
-				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.AngleSnap)
-				// C, Shift+C : Increment/Decrement Angle snap
-				if (GameSettings.Editor_toggleAngleSnap.GetKeyDown()) {
-	
-					if (!modKeyDown) {
-						Log.Debug ("Starting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
-	
-						int currentAngleIndex = cfg.AngleSnapValues.IndexOf (editor.srfAttachAngleSnap);
-	
-						Log.Debug ("currentAngleIndex: " + currentAngleIndex.ToString ());
-	
-						//rotate through the angle snap values
-						float newAngle;
-						if (fineKeyDown) {
-							//lower snap
-							newAngle = cfg.AngleSnapValues [currentAngleIndex == 0 ? cfg.AngleSnapValues.Count - 1 : currentAngleIndex - 1];
-						} else {
-							//higher snap
-							//Log.Debug ("new AngleIndex: " + (currentAngleIndex == angleSnapValues.Length - 1 ? 0 : currentAngleIndex + 1).ToString ());
-							newAngle = cfg.AngleSnapValues [currentAngleIndex == cfg.AngleSnapValues.Count - 1 ? 0 : currentAngleIndex + 1];
-						}
-	
-						Log.Debug ("Setting srfAttachAngleSnap to " + newAngle.ToString ());
-						editor.srfAttachAngleSnap = newAngle;
-					} else {
-						Log.Debug ("Resetting srfAttachAngleSnap to 0");
-						editor.srfAttachAngleSnap = 0;
-					}
-	
-					//at angle snap 0, turn off angle snap and show stock circle sprite
-					if (editor.srfAttachAngleSnap == 0) {
-						GameSettings.VAB_USE_ANGLE_SNAP = false;
-						//set playanim index and unhide stock sprite
-						//editor.angleSnapSprite.PlayAnim (0);
-						//editor.angleSnapSprite.Hide (false);
-					} else {
-						GameSettings.VAB_USE_ANGLE_SNAP = true;
-						//angle snap is on, re-hide stock sprite
-						//editor.angleSnapSprite.Hide (true);
-					}
-	
-					Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
-					return;
-	
-				}
-	
-				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.Symmetry)
-				// X, Shift+X : Increment/decrement symmetry mode
-				if (GameSettings.Editor_toggleSymMode.GetKeyDown()) {
-
-					//only inc/dec symmetry in radial mode, mirror is just 1&2
-					if (editor.symmetryMethod == SymmetryMethod.Radial) {
-						if (modKeyDown || (_symmetryMode < 2 && fineKeyDown)) {
-							//Alt+X or Symmetry is at 1(index 2) or lower
-							_symmetryMode = 0;
-						} else if (_symmetryMode > cfg.MaxSymmetry - 2 && !fineKeyDown) {
-							//Stop adding at max symmetry
-							_symmetryMode = cfg.MaxSymmetry - 1;
-						} else {
-							//inc/dec symmetry
-							_symmetryMode = _symmetryMode + (fineKeyDown ? -1 : 1);
-						}
-						editor.symmetryMode = _symmetryMode;
-						Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
-					} else {
-						//editor.symmetryMethod == SymmetryMethod.Mirror
-						//update var with stock action's result
-						_symmetryMode = editor.symmetryMode;
-					}
-				}
-
-			}//end if(enableHotKeys)
+				#if DEBUG
+			} catch (Exception ex) {
+				Log.Error ("Error getting active Gizmos: " + ex.Message);
+				#else
+				} catch (Exception) {
+				#endif
+				return false;
+			}
 		}
+
+		#endregion
 
 		#region GUI
 
@@ -497,7 +493,7 @@ namespace EditorExtensions
 		Rect _menuRect = new Rect ();
 		const float _menuWidth = 100.0f;
 		const float _menuHeight = 70.0f;
-		const int _toolbarHeight = 40; //37
+		const int _toolbarHeight = 42; //37
 
 		public void ShowMenu ()
 		{
@@ -520,9 +516,6 @@ namespace EditorExtensions
 		//Unity GUI loop
 		void OnGUI ()
 		{
-			//show on-screen messages
-			//DisplayOSD ();
-
 			//show and update the angle snap and symmetry mode labels
 			ShowSnapLabels ();
 
@@ -558,7 +551,6 @@ namespace EditorExtensions
 
 		void OSDMessage (string message)
 		{
-			//ScreenMessage msg = new ScreenMessage (message, cfg.OnScreenMessageTime, false, ScreenMessageStyle.LOWER_CENTER);
 			ScreenMessages.PostScreenMessage (message, cfg.OnScreenMessageTime, ScreenMessageStyle.LOWER_CENTER);
 		}
 
@@ -631,7 +623,7 @@ namespace EditorExtensions
 				if (GameSettings.VAB_USE_ANGLE_SNAP) {
 					//editor.angleSnapSprite.Hide (true);
 					editor.angleSnapSprite.gameObject.SetActive (false);
-					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + degreesSymbol, symmetryLabelStyle);
+					GUI.Label (angleSnapLabelRect, editor.srfAttachAngleSnap + DegreesSymbol, symmetryLabelStyle);
 
 				} else {
 					//angle snap is off, show stock sprite
