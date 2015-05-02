@@ -1,5 +1,9 @@
-## Editor Extensions v2.6 For KSP v1.0
-28 April 2015
+## Editor Extensions v2.7 For KSP v1.0
+2 May 2015
+
+### Changes in v2.7
+* Updated KSP-AVC version file to include wildcard for minor 1.0.* KSP versions
+* Otherwise no changes from v2.6, not nessesary to download if you are not getting messages from version-aware plugins.
 
 ### Changes in v2.6
 * Recompile against KSP 1.0 libraries
@@ -7,7 +11,7 @@
 * Modifier keys Alt/Mod/Shift now use game's key mapping for better Linux support
 * On screen messages now use the stock font/layout
 
-####[Download v2.6](https://github.com/MachXXV/EditorExtensions/releases/download/v2.6/EditorExtensions_v2.6.zip)
+####[Download v2.7](https://github.com/MachXXV/EditorExtensions/releases/download/v2.7/EditorExtensions_v2.7.zip)
 
 ### Features
 * Allows custom levels of radial symmetry beyond the stock limitations.

@@ -1,1 +1,27 @@
-{"NAME":"Editor Extensions","URL":"http://ksp-avc.cybutek.net/version.php?id=99","DOWNLOAD":"https://github.com/MachXXV/EditorExtensions/releases/latest","CHANGE_LOG_URL":"https://raw.githubusercontent.com/MachXXV/EditorExtensions/master/ReadMe.md","VERSION":{"MAJOR":2,"MINOR":6,"PATCH":0,"BUILD":0},"KSP_VERSION":{"MAJOR":0,"MINOR":90,"PATCH":0},"KSP_VERSION_MIN":{"MAJOR":0,"MINOR":90,"PATCH":0}}
+{
+  "NAME": "Editor Extensions",
+  "URL": "http://ksp-avc.cybutek.net/version.php?id=99",
+  "DOWNLOAD": "https://github.com/MachXXV/EditorExtensions/releases/latest",
+  "CHANGE_LOG_URL": "https://raw.githubusercontent.com/MachXXV/EditorExtensions/master/ReadMe.md",
+  "VERSION": {
+    "MAJOR": 2,
+    "MINOR": 7,
+    "PATCH": 0,
+    "BUILD": 0
+  },
+  "KSP_VERSION": {
+    "MAJOR": 1,
+    "MINOR": 0,
+    "PATCH": 2
+  },
+  "KSP_VERSION_MIN": {
+    "MAJOR": 1,
+    "MINOR": 0,
+    "PATCH": 0
+  },
+  "KSP_VERSION_MAX": {
+    "MAJOR": 1,
+    "MINOR": 0,
+    "PATCH": -1
+  }
+}
