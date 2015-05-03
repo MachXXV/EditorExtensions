@@ -1,5 +1,12 @@
 ﻿### Previous Version History
 
+### Changes in v2.6 - 28 April 2015
+* KSP v1.0 support
+* Recompile against KSP 1.0 libraries
+* Changed angle snap (C) and symmetry (X) functions to use game's current key mapping
+* Modifier keys Alt/Mod/Shift now use game's key mapping for better Linux support
+* On screen messages now use the stock font/layout
+
 ### Changes in v2.5 - 27 December 2014
 * Added strut & fuel line alignment options
 
