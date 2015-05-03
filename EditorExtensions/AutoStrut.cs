@@ -18,24 +18,25 @@ namespace EditorExtensions
 
 		public static void AttachStrut (Part startPart, Part destPart)
 		{
-			foreach (Part p in EditorLogic.fetch.ship.parts) {
-				Log.Debug(string.Format("ship part: name {0} partName {1} id {2}", p.name, p.partName, p.gameObject.GetInstanceID().ToString()));
-			}
+//			foreach (Part p in EditorLogic.fetch.ship.parts) {
+//				Log.Debug(string.Format("ship part: name {0} partName {1} id {2}", p.name, p.partName, p.gameObject.GetInstanceID().ToString()));
+//			}
 
 			// Make a new strut object
 			AvailablePart ap = PartLoader.getPartInfoByName (strutPartName);
 			UnityEngine.Object obj = UnityEngine.Object.Instantiate (ap.partPrefab);
 
-//			CompoundPart strut = (CompoundPart)obj;
-//			strut.gameObject.SetActive(true);
-//			strut.gameObject.name = ap.name;
-//			strut.partInfo = ap;
-
 			CompoundPart strut = (CompoundPart)obj;
 			strut.gameObject.SetActive (true);
-			strut.gameObject.name = strutPartName;
+			strut.gameObject.name = ap.name;
 			strut.partInfo = ap;
-			strut.attachMode = AttachModes.SRF_ATTACH;
+			//strut.attachMode = AttachModes.SRF_ATTACH;
+			//strut.attachMethod = AttachNodeMethod.FIXED_JOINT;
+			//strut.attachState = CompoundPart.AttachState.Attached;
+			//strut.SetMirror(Vector3.one);
+			//strut.maxLength = 10f; //default
+
+			Log.Debug ("Created new strut");
 
 			// set position in space, relative to source tank
 			strut.transform.localScale = startPart.transform.localScale;
@@ -49,47 +50,17 @@ namespace EditorExtensions
 			Log.Debug ("dist: " + (Vector3.Distance (startPart.transform.position, midway)).ToString ("F2"));
 			Log.Debug ("dist: " + (Vector3.Distance (destPart.transform.position, midway)).ToString ("F2"));
 
-			float adjustmentincrement = 0.5f; // how much to move the midpoint
-			float adjustment = 0.0f;
-			bool flcollide = isFLpathObstructed (startPart, destPart, midway);
-			while ((flcollide) && (adjustment < 3)) {
-				Vector3 newmidway = new Vector3 (midway.x, midway.y, midway.z);
-				adjustment = adjustment + adjustmentincrement;
-				adjustmentincrement = adjustmentincrement * 2f;
-
-				foreach (float yinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
-					newmidway.y = midway.y + yinc;
-					foreach (float xinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
-						newmidway.x = midway.x + xinc;
-						foreach (float zinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
-							newmidway.z = midway.z + zinc;
-							flcollide = isFLpathObstructed (startPart, destPart, newmidway);
-							if (!flcollide) {
-								midway = newmidway;
-								break;
-							}
-						}
-						if (!flcollide) {
-							midway = newmidway;
-							break;
-						}
-					}
-					if (!flcollide) {
-						midway = newmidway;
-						break;
-					}
-				}
-			}
-			//ASPConsoleStuff .printVector3 ("New midway is", midway);
 			getStartDestPositions (startPart, destPart, midway, out startPosition, out destPosition);
 
 			strut.transform.position = startPosition;
+			Log.Debug ("set strut transform position");
 
 			// Aim the fuel node starting position at the destination position so we can calculate the direction later
 			strut.transform.up = startPart.transform.up;
 			strut.transform.forward = startPart.transform.forward;
 			strut.transform.LookAt (destPart.transform);
 			strut.transform.Rotate (0, 90, 0);
+			Log.Debug ("set strut transform");
 
 			// attach to source part
 			AttachNode an = new AttachNode ();
@@ -98,97 +69,58 @@ namespace EditorExtensions
 			an.attachMethod = AttachNodeMethod.HINGE_JOINT;
 			an.nodeType = AttachNode.NodeType.Surface;
 			an.size = 1;  // found from inspecting fuel lines
-			an.orientation = new Vector3 (0.12500000f, 0.0f, 0.0f); // seems to be a magic number
+			an.orientation = new Vector3 (0.125f, 0.0f, 0.0f); // seems to be a magic number
+			Log.Debug ("created attachnode");
 			strut.srfAttachNode = an;
+			Log.Debug ("set strut attachnode");
 
 			// attach to destination part
-			//strut.target = destPart;
-			//strut.targetPosition = destPosition;
+			strut.target = destPart;
+			strut.targetPosition = destPosition;
+			strut.targetRotation = destPart.transform.rotation;
 
 			//strut.direction=(strut.transform.position - destPart.transform.position).normalized;
 			//strut.direction = strut.transform.localRotation * strut.transform.localPosition;  // only works if destPart is parent
 			//strut.direction = (strut.transform.InverseTransformPoint(destPart.transform.position) - strut.transform.localPosition).normalized;  // works but crooked
 			//strut.direction = (strut.transform.InverseTransformPoint(destPosition) - strut.transform.localPosition).normalized; // doesn't connect
 			//strut.direction = (strut.transform.InverseTransformPoint(destPosition) - strut.transform.localPosition); // doesn't connect
-			//strut.direction = strut.transform.InverseTransformPoint (destPart.transform.position).normalized;  // correct!
-
-
-			strut.raycastTarget(strut.transform.InverseTransformPoint (destPart.transform.position).normalized);
+			strut.direction = strut.transform.InverseTransformPoint (destPart.transform.position).normalized;  // correct!
+			Log.Debug ("strut direction");
 
 			// add to ship
 			startPart.addChild (strut);
+			Log.Debug ("added strut as child of start part");
 
 			EditorLogic.fetch.ship.Add (strut);
+			Log.Debug ("added strut to ship");
+
+			strut.raycastTarget(strut.transform.InverseTransformPoint (destPart.transform.position).normalized);
+			Log.Debug ("strut raycastTarget");
+
 			EditorLogic.fetch.SetBackup ();
 		}
 
 		public static void CenterStrut (CompoundPart strut)
 		{
-
 			Part startPart = strut.parent;
 			Part destPart = strut.target;
-
-			// set position in space, relative to source tank
-			strut.transform.localScale = startPart.transform.localScale;
-			strut.transform.parent = startPart.transform; // must be BEFORE localposition!
 
 			Vector3 midway = Vector3.Lerp (startPart.transform.position, destPart.transform.position, 0.5f);
 
 			Vector3 startPosition = new Vector3 ();
 			Vector3 destPosition = new Vector3 ();
 
-			Log.Debug ("dist: " + (Vector3.Distance (startPart.transform.position, midway)).ToString ("F2"));
-			Log.Debug ("dist: " + (Vector3.Distance (destPart.transform.position, midway)).ToString ("F2"));
-
-			float adjustmentincrement = 0.5f; // how much to move the midpoint
-			float adjustment = 0.0f;
-			bool flcollide = isFLpathObstructed (startPart, destPart, midway);
-			while ((flcollide) && (adjustment < 3)) {
-				Vector3 newmidway = new Vector3 (midway.x, midway.y, midway.z);
-				adjustment = adjustment + adjustmentincrement;
-				adjustmentincrement = adjustmentincrement * 2f;
-
-				foreach (float yinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
-					newmidway.y = midway.y + yinc;
-					foreach (float xinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
-						newmidway.x = midway.x + xinc;
-						foreach (float zinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
-							newmidway.z = midway.z + zinc;
-							flcollide = isFLpathObstructed (startPart, destPart, newmidway);
-							if (!flcollide) {
-								midway = newmidway;
-								break;
-							}
-						}
-						if (!flcollide) {
-							midway = newmidway;
-							break;
-						}
-					}
-					if (!flcollide) {
-						midway = newmidway;
-						break;
-					}
-				}
-			}
-
 			getStartDestPositions (startPart, destPart, midway, out startPosition, out destPosition);
 
 			strut.transform.position = startPosition;
 
-			// Aim the fuel node starting position at the destination position so we can calculate the direction later
 			strut.transform.up = startPart.transform.up;
 			strut.transform.forward = startPart.transform.forward;
 			strut.transform.LookAt (destPart.transform);
 			strut.transform.Rotate (0, 90, 0);
 
-			// attach to destination part
-			strut.target = destPart;
-
-			strut.targetPosition = destPosition;
-
-			strut.direction = strut.transform.InverseTransformPoint (destPart.transform.position).normalized;  // correct!
-
+			strut.raycastTarget(strut.transform.InverseTransformPoint (destPart.transform.position).normalized);
+			EditorLogic.fetch.SetBackup ();
 		}
 
 		private static Boolean isFLpathObstructed (Part startPart, Part destPart, Vector3 midway)

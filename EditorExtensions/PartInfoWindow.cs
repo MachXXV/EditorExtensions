@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace EditorExtensions
 {
@@ -8,12 +9,14 @@ namespace EditorExtensions
 		//public static SettingsWindow Instance { get; private set; }
 		//public bool Visible { get; set; }
 
-		public delegate void WindowDisabledEventHandler();
+		public delegate void WindowDisabledEventHandler ();
+
 		public event WindowDisabledEventHandler WindowDisabled;
-		protected virtual void OnWindowDisabled() 
+
+		protected virtual void OnWindowDisabled ()
 		{
 			if (WindowDisabled != null)
-				WindowDisabled();
+				WindowDisabled ();
 		}
 
 		string _windowTitle = "Part Position Info";
@@ -44,12 +47,14 @@ namespace EditorExtensions
 		{
 		}
 
-		void CloseWindow(){
+		void CloseWindow ()
+		{
 			this.enabled = false;
 			OnWindowDisabled ();
 		}
 
-		void OnDisable(){
+		void OnDisable ()
+		{
 		}
 
 
@@ -76,7 +81,8 @@ namespace EditorExtensions
 		const string vectorFormat = "F3";
 		//GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
 		private int _toolbarInt = 0;
-		private string[] _toolbarStrings = { "Part", "strut"};
+		private string[] _toolbarStrings = { "Part", "strut", "srfAttach", "attachNodes" };
+
 		void WindowContent (int windowID)
 		{
 			_toolbarInt = GUILayout.Toolbar (_toolbarInt, _toolbarStrings);
@@ -96,8 +102,6 @@ namespace EditorExtensions
 			if (sp == null)
 				sp = Utility.GetPartUnderCursor ();
 
-
-
 			if (sp != null) {
 
 				GUILayout.BeginHorizontal ();
@@ -110,6 +114,10 @@ namespace EditorExtensions
 				if (_toolbarInt == 0) {
 
 					PartInfoLabels (sp);
+
+
+
+
 
 					if (sp.srfAttachNode != null) {
 						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString (vectorFormat));
@@ -124,10 +132,16 @@ namespace EditorExtensions
 
 				if (_toolbarInt == 1) {
 					if (sp.GetType () == typeof(CompoundPart)) {
-
 						CompoundPartInfo ((CompoundPart)sp);
-
 					}
+				}
+
+				if (_toolbarInt == 2) {
+					SrfAttaches (sp);
+				}
+
+				if (_toolbarInt == 3) {
+					AttachNodeLabels (sp);
 				}
 
 
@@ -144,7 +158,64 @@ namespace EditorExtensions
 			GUI.DragWindow ();
 		}
 
-		void PartInfoLabels(Part part){
+		void SrfAttaches (Part part)
+		{
+			List<Part> children = part.children;
+
+
+
+			if (children == null) {
+				GUILayout.Label ("children null");
+				return;
+			}
+
+			for (int i = 0; i < children.Count; i++) {
+				GUILayout.Label ("child srfAttachNode #" + i.ToString ());
+
+				GUILayout.Label ("position " + children [i].srfAttachNode.position.ToString (vectorFormat));
+
+				if (children [i].srfAttachNode.attachedPart != null)
+					GUILayout.Label ("attached part " + children [i].srfAttachNode.attachedPart.name);
+
+				GUILayout.Label ("offset " + children [i].srfAttachNode.offset.ToString (vectorFormat));
+				GUILayout.Label ("orientation " + children [i].srfAttachNode.orientation.ToString (vectorFormat));
+				GUILayout.Label ("nodeType " + children [i].srfAttachNode.nodeType.ToString ());
+				if (children [i].srfAttachNode.nodeTransform != null) {
+					GUILayout.Label ("nodeTransform.position " + children [i].srfAttachNode.nodeTransform.position.ToString (vectorFormat));
+					GUILayout.Label ("nodeTransform.up " + children [i].srfAttachNode.nodeTransform.up.ToString (vectorFormat));
+				} else {
+					GUILayout.Label ("nodeTransform null");
+				}
+			}
+		}
+
+		void AttachNodeLabels (Part part)
+		{
+			List<AttachNode> nodes = part.attachNodes;
+
+			if (nodes == null) {
+				GUILayout.Label ("nodes null");
+				return;
+			}
+
+			for (int i = 0; i < nodes.Count; i++) {
+				GUILayout.Label ("Attach Node #" + i.ToString ());
+				if (nodes [i].position != null)
+					GUILayout.Label ("position " + nodes [i].position.ToString (vectorFormat));
+
+				if (nodes [i].attachedPart != null)
+					GUILayout.Label ("attached part " + nodes [i].attachedPart.name);
+
+				if (nodes [i].offset != null)
+					GUILayout.Label ("offset " + nodes [i].offset.ToString (vectorFormat));
+
+				if (nodes [i].orientation != null)
+					GUILayout.Label ("orientation " + nodes [i].orientation.ToString (vectorFormat));
+			}
+		}
+
+		void PartInfoLabels (Part part)
+		{
 
 			//GUILayout.Label ("allowSrfAttach " + (EditorLogic.SelectedPart.attachRules.allowSrfAttach ? "enabled" : "disabled"));
 			GUILayout.Label ("srfAttach: " + (part.attachRules.srfAttach ? "enabled" : "disabled"));
@@ -182,21 +253,21 @@ namespace EditorExtensions
 			GUILayout.Label ("right " + part.transform.right.ToString (vectorFormat));
 			GUILayout.Label ("up " + part.transform.up.ToString (vectorFormat));
 
-			//				try{
-			//					GUILayout.Label ("bounds.size " + part.renderer.bounds.extents.ToString (vectorFormat));
-			//				} catch(Exception){
-			//				}
-			//
-			//				try{
-			//					GUILayout.Label ("bounds.extents " + part.renderer.bounds.extents.ToString (vectorFormat));
-			//				} catch(Exception){
-			//				}
+			GUILayout.Label ("extents " + part.GetPartRendererBound ().extents.ToString (vectorFormat));
+			GUILayout.Label ("size " + part.GetPartRendererBound ().size.ToString (vectorFormat));
+
+			try {				
+				//GUILayout.Label ("GetPartRendererBound() extents " + part.GetPartRendererBound().extents.ToString(vectorFormat));
+			} catch (Exception) {
+				//GUILayout.Label ("bounds.extents error");
+			}
+
 
 			GUILayout.Label ("orgPos: " + part.orgPos.ToString (vectorFormat));
 		}
 
-		void CompoundPartInfo(CompoundPart part){
-		
+		void CompoundPartInfo (CompoundPart part)
+		{
 
 			GUILayout.Label ("name: " + part.name);
 			GUILayout.Label ("direction: " + part.direction.ToString (vectorFormat));
