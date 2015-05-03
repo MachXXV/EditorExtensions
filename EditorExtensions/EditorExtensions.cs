@@ -157,8 +157,8 @@ namespace EditorExtensions
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
 					Part p = Utility.GetPartUnderCursor ();
 					if (p != null && p.GetType () == typeof(CompoundPart)) {
-						//AlignCompoundPart ((CompoundPart)p);
-						NewAutoStrut((CompoundPart)p);
+						AlignCompoundPart ((CompoundPart)p);
+						//NewAutoStrut((CompoundPart)p);
 					}
 				}
 			
@@ -216,29 +216,37 @@ namespace EditorExtensions
 
 				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
 
-					List<Part> symParts = sp.symmetryCounterparts;
-
-					Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
-
 					//move hovered part
-					sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, 0f, sp.transform.localPosition.z);
-					sp.attPos0.y = 0f;
+					//sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, 0f, sp.transform.localPosition.z);
+					//sp.attPos0.y = 0f;
+					CenterVerticallyOnParent(sp);
 
 					//move any symmetry siblings/counterparts
-					foreach (Part symPart in symParts) {
-						symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, 0f, symPart.transform.localPosition.z);
-						symPart.attPos0.y = 0f;
+					foreach (Part symPart in sp.symmetryCounterparts) {
+						//symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, 0f, symPart.transform.localPosition.z);
+						//symPart.attPos0.y = 0f;
+						CenterVerticallyOnParent(symPart);
 					}
 
-					//need to verify this is the right way, it does seem to work
-					//Add edit to undo history
-					editor.SetBackup ();
+					AddUndo();
 				}
 			} catch (Exception ex) {
 				Log.Error ("Error trying to vertically align: " + ex.Message);
 			}
 
 			return;
+		}
+
+		void AddUndo()
+		{
+			//need to verify this is the right way, it does seem to work
+			editor.SetBackup();
+		}
+
+		void CenterVerticallyOnParent(Part p)
+		{
+			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, 0f, p.transform.localPosition.z);
+			p.attPos0.y = 0f;
 		}
 
 		void HorizontalAlign(){
@@ -386,12 +394,12 @@ namespace EditorExtensions
 
 			hasHit = part.raycastTarget (newDirection);
 
-			if (!hasHit){
-				//try just leveling the strut
-				Log.Debug ("Original align failed, Aligning compoundPart level");
-				part.direction = new Vector3 (dir.x, 0.0f, dir.z);
-				hasHit = part.raycastTarget (newDirection);
-			}
+//			if (!hasHit){
+//				//try just leveling the strut
+//				Log.Debug ("Original align failed, Aligning compoundPart level");
+//				part.direction = new Vector3 (dir.x, 0.0f, dir.z);
+//				hasHit = part.raycastTarget (newDirection);
+//			}
 
 			List<Part> symParts = part.symmetryCounterparts;
 			//move any symmetry siblings/counterparts
