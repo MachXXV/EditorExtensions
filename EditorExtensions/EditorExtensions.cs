@@ -157,8 +157,8 @@ namespace EditorExtensions
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
 					Part p = Utility.GetPartUnderCursor ();
 					if (p != null && p.GetType () == typeof(CompoundPart)) {
-						AlignCompoundPart ((CompoundPart)p);
-						//NewAutoStrut((CompoundPart)p);
+						//AlignCompoundPart ((CompoundPart)p);
+						NewAutoStrut((CompoundPart)p);
 					}
 				}
 			
@@ -217,14 +217,10 @@ namespace EditorExtensions
 				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
 
 					//move hovered part
-					//sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, 0f, sp.transform.localPosition.z);
-					//sp.attPos0.y = 0f;
 					CenterVerticallyOnParent(sp);
 
 					//move any symmetry siblings/counterparts
 					foreach (Part symPart in sp.symmetryCounterparts) {
-						//symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, 0f, symPart.transform.localPosition.z);
-						//symPart.attPos0.y = 0f;
 						CenterVerticallyOnParent(symPart);
 					}
 
@@ -249,6 +245,25 @@ namespace EditorExtensions
 			p.attPos0.y = 0f;
 		}
 
+		void CenterOnParent(Part p)
+		{
+			//check for orientation of parent, if it's on the end of the parent, center on the end
+			//on the surface, center lengthwise
+			AttachNode an = p.parent.findAttachNodeByPart (p);
+			if (an.nodeType == AttachNode.NodeType.Surface) {
+				
+			} else if (an.nodeType == AttachNode.NodeType.Stack) {
+				
+			} else if (an.nodeType == AttachNode.NodeType.Dock) {
+				
+			}
+		}
+
+		void CenterHorizontallyOnParent(Part p) {
+			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, p.transform.localPosition.y, 0f);
+			p.attPos0.z = 0f;
+		}
+
 		void HorizontalAlign(){
 			try {
 				Part sp = Utility.GetPartUnderCursor ();
@@ -261,17 +276,15 @@ namespace EditorExtensions
 					Log.Debug ("symmetryCounterparts to move: " + symParts.Count.ToString ());
 
 					//move selected part
-					sp.transform.localPosition = new Vector3 (sp.transform.localPosition.x, sp.transform.localPosition.y, 0f);
-					sp.attPos0.z = 0f;
+					CenterHorizontallyOnParent(sp);
 
 					//move any symmetry siblings/counterparts
 					foreach (Part symPart in symParts) {
-						symPart.transform.localPosition = new Vector3 (symPart.transform.localPosition.x, symPart.transform.localPosition.y, 0f);
-						symPart.attPos0.z = 0f;
+						CenterHorizontallyOnParent(symPart);
 					}
 
 					//Add edit to undo history
-					editor.SetBackup ();
+					AddUndo();
 				}
 			} catch (Exception ex) {
 				Log.Error ("Error trying to Horizontally align: " + ex.Message);
@@ -425,8 +438,11 @@ namespace EditorExtensions
 //			}
 
 			if (targetPart != null) {
-				AutoStrut.AttachStrut (parentPart, targetPart);
+				//AutoStrut.AttachStrut (parentPart, targetPart);
 				//AutoStrut.CenterStrut(part);
+				CompoundPartUtil.AlignCompoundPart(part);
+
+
 			}
 		}
 

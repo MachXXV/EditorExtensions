@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace EditorExtensions
 {
-	public static class AutoStrut
+	public static class CompoundPartUtil
 	{
-		static AutoStrut ()
+		static CompoundPartUtil ()
 		{
 		}
 
@@ -120,6 +120,38 @@ namespace EditorExtensions
 			strut.transform.Rotate (0, 90, 0);
 
 			strut.raycastTarget(strut.transform.InverseTransformPoint (destPart.transform.position).normalized);
+			EditorLogic.fetch.SetBackup ();
+		}
+
+		/// <summary>
+		/// Align compount part, leave in starting position but center and level to target
+		/// </summary>
+		/// <param name="part">Part</param>
+		public static void AlignCompoundPart (CompoundPart part)
+		{
+			Part startPart = part.parent;
+			Part destPart = part.target;
+
+			Vector3 midway = Vector3.Lerp (startPart.transform.position, destPart.transform.position, 0.5f);
+
+			Vector3 startPosition = new Vector3 ();
+			Vector3 destPosition = new Vector3 ();
+
+			getStartDestPositions (startPart, destPart, midway, out startPosition, out destPosition);
+
+			Vector3 orgPosition = part.transform.position;
+			part.transform.position = new Vector3(startPosition.x, orgPosition.y, startPosition.z);
+
+			part.transform.up = startPart.transform.up;
+			part.transform.forward = startPart.transform.forward;
+			part.transform.LookAt (destPart.transform);
+			part.transform.Rotate (0, 90, 0);
+
+			Vector3 dirToTarget = part.transform.InverseTransformPoint (destPart.transform.position).normalized;
+			//level veritically
+			dirToTarget.y = 0f;
+
+			part.raycastTarget(dirToTarget);
 			EditorLogic.fetch.SetBackup ();
 		}
 

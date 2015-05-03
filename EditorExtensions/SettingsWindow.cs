@@ -102,7 +102,7 @@ namespace EditorExtensions
 
 			GUILayout.BeginVertical ("box");
 
-			# region Settings
+			#region Settings
 			if (toolbarInt == 0) {
 
 				GUILayout.BeginHorizontal ();

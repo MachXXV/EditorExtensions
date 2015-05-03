@@ -115,10 +115,6 @@ namespace EditorExtensions
 
 					PartInfoLabels (sp);
 
-
-
-
-
 					if (sp.srfAttachNode != null) {
 						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString (vectorFormat));
 						GUILayout.BeginVertical ("box");
@@ -162,8 +158,6 @@ namespace EditorExtensions
 		{
 			List<Part> children = part.children;
 
-
-
 			if (children == null) {
 				GUILayout.Label ("children null");
 				return;
@@ -200,17 +194,15 @@ namespace EditorExtensions
 
 			for (int i = 0; i < nodes.Count; i++) {
 				GUILayout.Label ("Attach Node #" + i.ToString ());
-				if (nodes [i].position != null)
-					GUILayout.Label ("position " + nodes [i].position.ToString (vectorFormat));
+
+				GUILayout.Label ("position " + nodes [i].position.ToString (vectorFormat));
 
 				if (nodes [i].attachedPart != null)
 					GUILayout.Label ("attached part " + nodes [i].attachedPart.name);
 
-				if (nodes [i].offset != null)
-					GUILayout.Label ("offset " + nodes [i].offset.ToString (vectorFormat));
+				GUILayout.Label ("offset " + nodes [i].offset.ToString (vectorFormat));
 
-				if (nodes [i].orientation != null)
-					GUILayout.Label ("orientation " + nodes [i].orientation.ToString (vectorFormat));
+				GUILayout.Label ("orientation " + nodes [i].orientation.ToString (vectorFormat));
 			}
 		}
 
@@ -245,6 +237,7 @@ namespace EditorExtensions
 
 			GUILayout.Label ("localPosition " + part.transform.localPosition.ToString (vectorFormat));
 			GUILayout.Label ("position " + part.transform.position.ToString (vectorFormat));
+			GUILayout.Label ("localRotation " + part.transform.localRotation.ToString (vectorFormat));
 			GUILayout.Label ("rotation " + part.transform.rotation.ToString (vectorFormat));
 
 
@@ -262,13 +255,11 @@ namespace EditorExtensions
 				//GUILayout.Label ("bounds.extents error");
 			}
 
-
 			GUILayout.Label ("orgPos: " + part.orgPos.ToString (vectorFormat));
 		}
 
 		void CompoundPartInfo (CompoundPart part)
 		{
-
 			GUILayout.Label ("name: " + part.name);
 			GUILayout.Label ("direction: " + part.direction.ToString (vectorFormat));
 

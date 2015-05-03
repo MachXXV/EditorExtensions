@@ -51,6 +51,8 @@
 In your KSP GameData folder, delete any existing EditorExtensions folder.
 Download the zip file to your KSP GameData folder and unzip.
 
+[KSP Forum Thread](http://forum.kerbalspaceprogram.com/threads/38768)
+
 Released under MIT license.
 Source available at GitHub: [https://github.com/MachXXV/EditorExtensions](https://github.com/MachXXV/EditorExtensions)
 

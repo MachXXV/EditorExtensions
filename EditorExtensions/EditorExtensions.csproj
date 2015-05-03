@@ -79,7 +79,7 @@
     <Compile Include="Utility.cs" />
     <Compile Include="GUIWindow.cs" />
     <Compile Include="StrutWindow.cs" />
-    <Compile Include="AutoStrut.cs" />
+    <Compile Include="CompoundPartUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
