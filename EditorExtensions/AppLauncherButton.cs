@@ -71,10 +71,10 @@ namespace EditorExtensions
 				if (EditorLogic.fetch != null) {
 					if (EditorExtensions.Instance.Visible && this.button.State != RUIToggleButton.ButtonState.TRUE) {
 						this.button.SetTrue ();
-						this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOn, false));
+						//this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOn, false));
 					} else if (!EditorExtensions.Instance.Visible && this.button.State != RUIToggleButton.ButtonState.FALSE) {
 						this.button.SetFalse ();
-						this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOff, false));
+						//this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOff, false));
 					}
 				} else if (this.button.State != RUIToggleButton.ButtonState.DISABLED) {
 					this.button.Disable ();

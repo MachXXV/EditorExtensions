@@ -18,18 +18,28 @@ namespace EditorExtensions
 
 		public static void AttachStrut (Part startPart, Part destPart)
 		{
+			foreach (Part p in EditorLogic.fetch.ship.parts) {
+				Log.Debug(string.Format("ship part: name {0} partName {1} id {2}", p.name, p.partName, p.gameObject.GetInstanceID().ToString()));
+			}
+
 			// Make a new strut object
 			AvailablePart ap = PartLoader.getPartInfoByName (strutPartName);
 			UnityEngine.Object obj = UnityEngine.Object.Instantiate (ap.partPrefab);
-			CompoundPart f = (CompoundPart)obj;
-			f.gameObject.SetActive (true);
-			f.gameObject.name = strutPartName;
-			f.partInfo = ap;
-			f.attachMode = AttachModes.SRF_ATTACH;
+
+//			CompoundPart strut = (CompoundPart)obj;
+//			strut.gameObject.SetActive(true);
+//			strut.gameObject.name = ap.name;
+//			strut.partInfo = ap;
+
+			CompoundPart strut = (CompoundPart)obj;
+			strut.gameObject.SetActive (true);
+			strut.gameObject.name = strutPartName;
+			strut.partInfo = ap;
+			strut.attachMode = AttachModes.SRF_ATTACH;
 
 			// set position in space, relative to source tank
-			f.transform.localScale = startPart.transform.localScale;
-			f.transform.parent = startPart.transform; // must be BEFORE localposition!
+			strut.transform.localScale = startPart.transform.localScale;
+			strut.transform.parent = startPart.transform; // must be BEFORE localposition!
 
 			Vector3 midway = Vector3.Lerp (startPart.transform.position, destPart.transform.position, 0.5f);
 
@@ -70,16 +80,16 @@ namespace EditorExtensions
 					}
 				}
 			}
-			//ASPConsoleStuff.printVector3 ("New midway is", midway);
+			//ASPConsoleStuff .printVector3 ("New midway is", midway);
 			getStartDestPositions (startPart, destPart, midway, out startPosition, out destPosition);
 
-			f.transform.position = startPosition;
+			strut.transform.position = startPosition;
 
 			// Aim the fuel node starting position at the destination position so we can calculate the direction later
-			f.transform.up = startPart.transform.up;
-			f.transform.forward = startPart.transform.forward;
-			f.transform.LookAt (destPart.transform);
-			f.transform.Rotate (0, 90, 0);
+			strut.transform.up = startPart.transform.up;
+			strut.transform.forward = startPart.transform.forward;
+			strut.transform.LookAt (destPart.transform);
+			strut.transform.Rotate (0, 90, 0);
 
 			// attach to source part
 			AttachNode an = new AttachNode ();
@@ -89,24 +99,95 @@ namespace EditorExtensions
 			an.nodeType = AttachNode.NodeType.Surface;
 			an.size = 1;  // found from inspecting fuel lines
 			an.orientation = new Vector3 (0.12500000f, 0.0f, 0.0f); // seems to be a magic number
-			f.srfAttachNode = an;
+			strut.srfAttachNode = an;
 
 			// attach to destination part
-			f.target = destPart;
+			//strut.target = destPart;
+			//strut.targetPosition = destPosition;
 
-			f.targetPosition = destPosition;
+			//strut.direction=(strut.transform.position - destPart.transform.position).normalized;
+			//strut.direction = strut.transform.localRotation * strut.transform.localPosition;  // only works if destPart is parent
+			//strut.direction = (strut.transform.InverseTransformPoint(destPart.transform.position) - strut.transform.localPosition).normalized;  // works but crooked
+			//strut.direction = (strut.transform.InverseTransformPoint(destPosition) - strut.transform.localPosition).normalized; // doesn't connect
+			//strut.direction = (strut.transform.InverseTransformPoint(destPosition) - strut.transform.localPosition); // doesn't connect
+			//strut.direction = strut.transform.InverseTransformPoint (destPart.transform.position).normalized;  // correct!
 
-			//f.direction=(f.transform.position - destPart.transform.position).normalized;
-			//f.direction = f.transform.localRotation * f.transform.localPosition;  // only works if destPart is parent
-			//f.direction = (f.transform.InverseTransformPoint(destPart.transform.position) - f.transform.localPosition).normalized;  // works but crooked
-			//f.direction = (f.transform.InverseTransformPoint(destPosition) - f.transform.localPosition).normalized; // doesn't connect
-			//f.direction = (f.transform.InverseTransformPoint(destPosition) - f.transform.localPosition); // doesn't connect
-			f.direction = f.transform.InverseTransformPoint (destPart.transform.position).normalized;  // correct!
+
+			strut.raycastTarget(strut.transform.InverseTransformPoint (destPart.transform.position).normalized);
 
 			// add to ship
-			startPart.addChild (f);
+			startPart.addChild (strut);
 
-			EditorLogic.fetch.ship.Add (f);
+			EditorLogic.fetch.ship.Add (strut);
+			EditorLogic.fetch.SetBackup ();
+		}
+
+		public static void CenterStrut (CompoundPart strut)
+		{
+
+			Part startPart = strut.parent;
+			Part destPart = strut.target;
+
+			// set position in space, relative to source tank
+			strut.transform.localScale = startPart.transform.localScale;
+			strut.transform.parent = startPart.transform; // must be BEFORE localposition!
+
+			Vector3 midway = Vector3.Lerp (startPart.transform.position, destPart.transform.position, 0.5f);
+
+			Vector3 startPosition = new Vector3 ();
+			Vector3 destPosition = new Vector3 ();
+
+			Log.Debug ("dist: " + (Vector3.Distance (startPart.transform.position, midway)).ToString ("F2"));
+			Log.Debug ("dist: " + (Vector3.Distance (destPart.transform.position, midway)).ToString ("F2"));
+
+			float adjustmentincrement = 0.5f; // how much to move the midpoint
+			float adjustment = 0.0f;
+			bool flcollide = isFLpathObstructed (startPart, destPart, midway);
+			while ((flcollide) && (adjustment < 3)) {
+				Vector3 newmidway = new Vector3 (midway.x, midway.y, midway.z);
+				adjustment = adjustment + adjustmentincrement;
+				adjustmentincrement = adjustmentincrement * 2f;
+
+				foreach (float yinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
+					newmidway.y = midway.y + yinc;
+					foreach (float xinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
+						newmidway.x = midway.x + xinc;
+						foreach (float zinc in new float[] {0f, adjustmentincrement, -adjustmentincrement}) {
+							newmidway.z = midway.z + zinc;
+							flcollide = isFLpathObstructed (startPart, destPart, newmidway);
+							if (!flcollide) {
+								midway = newmidway;
+								break;
+							}
+						}
+						if (!flcollide) {
+							midway = newmidway;
+							break;
+						}
+					}
+					if (!flcollide) {
+						midway = newmidway;
+						break;
+					}
+				}
+			}
+
+			getStartDestPositions (startPart, destPart, midway, out startPosition, out destPosition);
+
+			strut.transform.position = startPosition;
+
+			// Aim the fuel node starting position at the destination position so we can calculate the direction later
+			strut.transform.up = startPart.transform.up;
+			strut.transform.forward = startPart.transform.forward;
+			strut.transform.LookAt (destPart.transform);
+			strut.transform.Rotate (0, 90, 0);
+
+			// attach to destination part
+			strut.target = destPart;
+
+			strut.targetPosition = destPosition;
+
+			strut.direction = strut.transform.InverseTransformPoint (destPart.transform.position).normalized;  // correct!
 
 		}
 
@@ -120,17 +201,16 @@ namespace EditorExtensions
 			ShipConstruct ship = editor.ship;
 			List<Part> parts = ship.parts;
 
-			//ASPConsoleStuff.printVector3 ("testing midway", midway);
+			//ASPConsoleStuff .printVector3 ("testing midway", midway);
 			Vector3 collisionpoint = new Vector3 ();
 			foreach (Part p in parts) {
 				if ((p == startPart) || (p == destPart)) {
 					continue;
 				}
 				if (fireRayAt (p, startPosition, destPosition, out collisionpoint)) {
-					//ASPConsoleStuff.printPart ("**** fuel line is obstructed at " + collisionpoint.ToString ("F2") + " by", p);
+					//ASPConsoleStuff .printPart ("**** fuel line is obstructed at " + collisionpoint.ToString ("F2") + " by", p);
 					return true;
 				}
-
 			}
 
 			return false;
@@ -155,7 +235,7 @@ namespace EditorExtensions
 				return true;
 			} else {
 				collisionpoint = origin;
-				//ASPConsoleStuff.printPart ("!! ray failed aiming at", p);
+				//ASPConsoleStuff . printPart ("!! ray failed aiming at", p);
 				return false;
 			}
 		}

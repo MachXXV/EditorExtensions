@@ -208,13 +208,7 @@ namespace EditorExtensions
 				GUILayout.Label ("targetRotation: " + part.targetRotation.ToString (vectorFormat));
 
 			}
-			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
-			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
-			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
-			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
-			GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
-
-
+			//GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
 		}
 
 	}

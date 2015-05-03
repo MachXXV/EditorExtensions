@@ -121,8 +121,6 @@ namespace EditorExtensions
 			//	_partInfoWindow.enabled = false;
 		}
 
-
-
 //		void HighlightPart(Part p){
 //			// old highlighter. Not necessary, but looks nice in combination
 //			p.SetHighlightDefault();
@@ -136,8 +134,6 @@ namespace EditorExtensions
 //			hl.ConstantOn(XKCDColors.Rust);
 //			hl.SeeThroughOn();
 //		}
-
-
 
 		//Unity update
 		void Update ()
@@ -157,11 +153,12 @@ namespace EditorExtensions
 				//check for configured editor fine key
 				bool fineKeyDown = GameSettings.Editor_fineTweak.GetKey();
 
-				// P - strut/fuel line alignment
+				// U - strut/fuel line alignment
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
 					Part p = Utility.GetPartUnderCursor ();
 					if (p != null && p.GetType () == typeof(CompoundPart)) {
-						AlignCompoundPart ((CompoundPart)p);
+						//AlignCompoundPart ((CompoundPart)p);
+						NewAutoStrut((CompoundPart)p);
 					}
 				}
 			
@@ -404,6 +401,25 @@ namespace EditorExtensions
 
 			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
 			editor.SetBackup ();
+		}
+
+		void NewAutoStrut(CompoundPart part)
+		{
+			//Debug.ClearDeveloperConsole ();
+			Part targetPart = part.target;
+			Part parentPart = part.parent;
+
+//			RaycastHit hit;
+//			Ray strutRay = new Ray (part.transform.position, part.direction);
+//			if (Physics.Raycast (strutRay, out hit)) {
+//				Part hitPart = editor.ship.Parts.Find (p => p.gameObject == hit.transform.gameObject);
+//				Log.Debug ("strut ray part: " + hitPart.name);
+//			}
+
+			if (targetPart != null) {
+				AutoStrut.AttachStrut (parentPart, targetPart);
+				//AutoStrut.CenterStrut(part);
+			}
 		}
 
 		bool GizmoActive ()
