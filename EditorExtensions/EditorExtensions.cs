@@ -245,6 +245,27 @@ namespace EditorExtensions
 			p.attPos0.y = 0f;
 		}
 
+		void AlignToTopOfParent(Part p)
+		{
+			if (p.parent.GetPartRendererBound ().extents.y == p.GetPartRendererBound ().extents.y) {
+				CenterVerticallyOnParent (p);
+				return;
+			}
+
+			float newHeight = 0f;
+
+			if(p.transform.localPosition.y > 0)
+				newHeight = p.parent.GetPartRendererBound ().extents.y - p.GetPartRendererBound ().extents.y;
+			else
+				newHeight = -(p.parent.GetPartRendererBound ().extents.y - p.GetPartRendererBound ().extents.y);
+			
+			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, newHeight, p.transform.localPosition.z);
+			p.attPos0.y = newHeight;
+
+			throw new NotImplementedException ();
+		}
+
+
 		void CenterOnParent(Part p)
 		{
 			//check for orientation of parent, if it's on the end of the parent, center on the end
@@ -257,6 +278,8 @@ namespace EditorExtensions
 			} else if (an.nodeType == AttachNode.NodeType.Dock) {
 				
 			}
+
+			throw new NotImplementedException ();
 		}
 
 		void CenterHorizontallyOnParent(Part p) {

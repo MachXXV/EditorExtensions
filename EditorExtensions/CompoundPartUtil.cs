@@ -18,9 +18,6 @@ namespace EditorExtensions
 
 		public static void AttachStrut (Part startPart, Part destPart)
 		{
-//			foreach (Part p in EditorLogic.fetch.ship.parts) {
-//				Log.Debug(string.Format("ship part: name {0} partName {1} id {2}", p.name, p.partName, p.gameObject.GetInstanceID().ToString()));
-//			}
 
 			// Make a new strut object
 			AvailablePart ap = PartLoader.getPartInfoByName (strutPartName);
@@ -137,6 +134,37 @@ namespace EditorExtensions
 			Vector3 startPosition = new Vector3 ();
 			Vector3 destPosition = new Vector3 ();
 
+			//lengthwise position on parent (extents, +/- from center)
+			float localHeight = part.transform.localPosition.y;
+			float parentHeight = part.parent.GetPartRendererBound ().extents.y;
+
+			//offset strut when attaching to top/bottom of parent
+			const float strutOffset = 0.1f;
+			//threshold for small parent parts
+			const float parentSizeCutoff = 0.5f;
+
+			float heightPct = localHeight / parentHeight;
+			Log.Debug ("heightPct: " + heightPct.ToString ());
+
+			Log.Debug ("Original localHeight: " + localHeight.ToString ());
+			if (parentHeight < parentSizeCutoff) {
+				//for small parts, just center on them
+				localHeight = 0f;
+			} else if (Math.Abs (localHeight) < parentHeight / 2) {
+				//middle 50% of parent, snap to center
+				localHeight = 0f;
+			} else {
+				if(localHeight < 0)
+					localHeight = -(parentHeight - strutOffset);
+				if (localHeight > 0)
+					localHeight = parentHeight - strutOffset;
+			}
+
+			//position vertically
+			part.transform.localPosition = new Vector3 (part.transform.localPosition.x, localHeight, part.transform.localPosition.z);
+
+			Log.Debug ("new localHeight: " + localHeight.ToString ());
+
 			getStartDestPositions (startPart, destPart, midway, out startPosition, out destPosition);
 
 			Vector3 orgPosition = part.transform.position;
@@ -144,7 +172,7 @@ namespace EditorExtensions
 
 			part.transform.up = startPart.transform.up;
 			part.transform.forward = startPart.transform.forward;
-			part.transform.LookAt (destPart.transform);
+			part.transform.LookAt (destPart.transform); //this rotates the strut base towards the target, need to keep it flush with the parent
 			part.transform.Rotate (0, 90, 0);
 
 			Vector3 dirToTarget = part.transform.InverseTransformPoint (destPart.transform.position).normalized;
