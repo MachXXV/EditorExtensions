@@ -12,13 +12,25 @@ namespace EditorExtensions
 
 			EditorLogic ed = EditorLogic.fetch;
 
-			//Physics.Raycast(this.transform.position, this.transform.TransformDirection(dir), out this.\u0001\u0002, this.maxLength, EditorLogic.LayerMask)
-
 			if (ed != null && Physics.Raycast (ray, out hit)) {
 				return ed.ship.Parts.Find (p => p.gameObject == hit.transform.gameObject);
 			}
 			return null;
 		}
 	}
+
+	//		void HighlightPart(Part p){
+	//			// old highlighter. Not necessary, but looks nice in combination
+	//			p.SetHighlightDefault();
+	//			p.SetHighlightType(Part.HighlightType.AlwaysOn);
+	//			p.SetHighlight(true, false);
+	//			p.SetHighlightColor(Color.red);
+	//
+	//			// New highlighter
+	//			HighlightingSystem.Highlighter hl; // From Assembly-CSharp-firstpass.dll
+	//			hl = p.FindModelTransform("model").gameObject.AddComponent<HighlightingSystem.Highlighter>();
+	//			hl.ConstantOn(XKCDColors.Rust);
+	//			hl.SeeThroughOn();
+	//		}
 }
 

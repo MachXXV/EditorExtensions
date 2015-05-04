@@ -121,19 +121,7 @@ namespace EditorExtensions
 			//	_partInfoWindow.enabled = false;
 		}
 
-//		void HighlightPart(Part p){
-//			// old highlighter. Not necessary, but looks nice in combination
-//			p.SetHighlightDefault();
-//			p.SetHighlightType(Part.HighlightType.AlwaysOn);
-//			p.SetHighlight(true, false);
-//			p.SetHighlightColor(Color.red);
-//
-//			// New highlighter
-//			HighlightingSystem.Highlighter hl; // From Assembly-CSharp-firstpass.dll
-//			hl = p.FindModelTransform("model").gameObject.AddComponent<HighlightingSystem.Highlighter>();
-//			hl.ConstantOn(XKCDColors.Rust);
-//			hl.SeeThroughOn();
-//		}
+
 
 		//Unity update
 		void Update ()
@@ -208,63 +196,34 @@ namespace EditorExtensions
 			}//end if(enableHotKeys)
 		}
 
-		#region Editor Actions
-
-		void VerticalAlign(){
-			try {
-				Part sp = Utility.GetPartUnderCursor ();
-
-				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
-
-					//move hovered part
-					CenterVerticallyOnParent(sp);
-
-					//move any symmetry siblings/counterparts
-					foreach (Part symPart in sp.symmetryCounterparts) {
-						CenterVerticallyOnParent(symPart);
-					}
-
-					AddUndo();
-				}
-			} catch (Exception ex) {
-				Log.Error ("Error trying to vertically align: " + ex.Message);
-			}
-
-			return;
-		}
-
-		void AddUndo()
-		{
-			//need to verify this is the right way, it does seem to work
-			editor.SetBackup();
-		}
-
-		void CenterVerticallyOnParent(Part p)
-		{
-			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, 0f, p.transform.localPosition.z);
-			p.attPos0.y = 0f;
-		}
+		#region Alignments
 
 		void AlignToTopOfParent(Part p)
 		{
-			if (p.parent.GetPartRendererBound ().extents.y == p.GetPartRendererBound ().extents.y) {
+			if (p.parent.GetPartRendererBound ().extents.y >= p.GetPartRendererBound ().extents.y) {
 				CenterVerticallyOnParent (p);
 				return;
 			}
 
-			float newHeight = 0f;
+			float newHeight = p.parent.GetPartRendererBound ().extents.y - p.GetPartRendererBound ().extents.y;
+			if (p.transform.localPosition.y < 0)
+				newHeight = -newHeight;
 
-			if(p.transform.localPosition.y > 0)
-				newHeight = p.parent.GetPartRendererBound ().extents.y - p.GetPartRendererBound ().extents.y;
-			else
-				newHeight = -(p.parent.GetPartRendererBound ().extents.y - p.GetPartRendererBound ().extents.y);
-			
-			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, newHeight, p.transform.localPosition.z);
-			p.attPos0.y = newHeight;
+			VertialPositionOnParent (p, newHeight);
 
 			throw new NotImplementedException ();
 		}
 
+		void CenterVerticallyOnParent(Part p)
+		{
+			VertialPositionOnParent (p, 0f);
+		}
+
+		void VertialPositionOnParent(Part p, float position)
+		{
+			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, position, p.transform.localPosition.z);
+			p.attPos0.y = position;
+		}
 
 		void CenterOnParent(Part p)
 		{
@@ -272,11 +231,11 @@ namespace EditorExtensions
 			//on the surface, center lengthwise
 			AttachNode an = p.parent.findAttachNodeByPart (p);
 			if (an.nodeType == AttachNode.NodeType.Surface) {
-				
+
 			} else if (an.nodeType == AttachNode.NodeType.Stack) {
-				
+
 			} else if (an.nodeType == AttachNode.NodeType.Dock) {
-				
+
 			}
 
 			throw new NotImplementedException ();
@@ -313,6 +272,39 @@ namespace EditorExtensions
 				Log.Error ("Error trying to Horizontally align: " + ex.Message);
 			}
 			return;
+		}
+
+		#endregion
+
+		#region Editor Actions
+
+		void VerticalAlign(){
+			try {
+				Part sp = Utility.GetPartUnderCursor ();
+
+				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
+
+					//move hovered part
+					CenterVerticallyOnParent(sp);
+
+					//move any symmetry siblings/counterparts
+					foreach (Part symPart in sp.symmetryCounterparts) {
+						CenterVerticallyOnParent(symPart);
+					}
+
+					AddUndo();
+				}
+			} catch (Exception ex) {
+				Log.Error ("Error trying to vertically align: " + ex.Message);
+			}
+
+			return;
+		}
+
+		void AddUndo()
+		{
+			//need to verify this is the right way, it does seem to work
+			editor.SetBackup();
 		}
 
 		void ResetCamera(){
@@ -451,7 +443,7 @@ namespace EditorExtensions
 		{
 			//Debug.ClearDeveloperConsole ();
 			Part targetPart = part.target;
-			Part parentPart = part.parent;
+			//Part parentPart = part.parent;
 
 //			RaycastHit hit;
 //			Ray strutRay = new Ray (part.transform.position, part.direction);
@@ -461,9 +453,9 @@ namespace EditorExtensions
 //			}
 
 			if (targetPart != null) {
-				//AutoStrut.AttachStrut (parentPart, targetPart);
-				//AutoStrut.CenterStrut(part);
-				CompoundPartUtil.AlignCompoundPart(part);
+				//CompoundPartUtil.AttachStrut (parentPart, targetPart);
+				CompoundPartUtil.CenterStrut(part);
+				//CompoundPartUtil.AlignCompoundPart(part);
 
 
 			}
