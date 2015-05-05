@@ -105,6 +105,7 @@ namespace EditorExtensions
 
 		public static void CenterStrut (CompoundPart strut)
 		{
+			Log.Debug ("Centering strut");
 			Part startPart = strut.parent;
 			Part destPart = strut.target;
 
@@ -140,40 +141,20 @@ namespace EditorExtensions
 			Part startPart = part.parent;
 			Part targetPart = part.target;
 
+			Log.Debug("Getting parentLocalHeight");
 			float parentLocalHeight = GetCompoundPartPositionHeight(part, part.parent);
-			//float targetLocalHeight = GetCompoundPartPositionHeight(part, part.target);
+			//float parentLocalHeight = SnapCompoundPartHeight(part, part.parent);
+			Log.Debug("Getting targetLocalHeight");
+			float targetLocalHeight = GetCompoundPartPositionHeight(part, part.target);
+			//float targetLocalHeight = SnapCompoundPartHeight(part, part.target);
 
-			//position vertically on parent
-			//part.transform.localPosition = new Vector3 (part.transform.localPosition.x, parentLocalHeight, part.transform.localPosition.z);
-
-			//Vector3 startPartPosition = startPart.transform.position;
-			//translate start position along major axis
-			//startPartPosition = startPart.transform.Translate(0, 0, parentLocalHeight, startPart.transform);
-
-			//new target position
-			Vector3 targetPartPosition = targetPart.transform.position;
-			//add target local height to dest position along up axis
-			//maybe try up and down to find shortest?
-
-			Vector3 midway = Vector3.Lerp(part.transform.position, targetPartPosition, 0.5f);
-
-			Vector3 startPosition = new Vector3 ();
-			Vector3 destPosition = new Vector3 ();
+			Vector3 startPosition = startPart.transform.position;
+			Vector3 destPosition = targetPart.transform.position;
 			//center to center
-			GetEndpoints(startPart, targetPart, midway, out startPosition, out destPosition);
+			//GetEndpoints(startPart, targetPart, midway, out startPosition, out destPosition);
 
-			//Vector3 orgPosition = part.transform.position;
-			//part.transform.position = new Vector3 (startPosition.x, orgPosition.y, startPosition.z);
-
-			Vector3 originPos = new Vector3 (0, parentLocalHeight, 0);
-			Log.Debug("Local origin position: " + originPos.ToString(VectorFormat));
-
-			GetCollisionPointOnAxis(startPart, originPos,
-				startPart.transform.InverseTransformPoint(targetPart.transform.position),
-				out startPosition);
-			Log.Debug("Collided local start position: " + startPosition.ToString(VectorFormat));
-
-			startPosition = startPart.transform.TransformPoint(startPosition);
+			GetCollisionPointOnAxis(startPart, targetPart.transform.position, parentLocalHeight, out startPosition);
+			GetCollisionPointOnAxis(targetPart, startPart.transform.position, targetLocalHeight, out destPosition);
 
 			Log.Debug("Collided global start position: " + startPosition.ToString(VectorFormat));
 			
@@ -183,10 +164,9 @@ namespace EditorExtensions
 			part.transform.LookAt(targetPart.transform); //this rotates the strut base towards the target, need to keep it flush with the parent
 			part.transform.Rotate(0, 90, 0);
 
-			//Vector3 dirToTarget = part.transform.InverseTransformPoint(targetPart.transform.position).normalized;
-			Vector3 dirToTarget = part.transform.InverseTransformPoint(destPosition).normalized;
-			//level vertically
-			dirToTarget.y = 0f;
+			//Vector3 dirToTarget = part.transform.InverseTransformPoint(destPosition).normalized;
+			Vector3 dirToTarget = (destPosition - startPosition).normalized;
+			Log.Debug("final direction: " + startPosition.ToString(VectorFormat));
 
 			part.raycastTarget(dirToTarget);
 			EditorLogic.fetch.SetBackup();
@@ -199,6 +179,59 @@ namespace EditorExtensions
 			//lengthwise position on parent (extents, +/- from center)
 			float localHeight = part.transform.localPosition.y;
 			float parentHeight = part.parent.GetPartRendererBound().extents.y;
+			//float parentHeight = target.GetPartRendererBound().extents.y;
+
+			//offset strut when attaching to top/bottom of parent
+			const float strutOffset = 0.1f;
+			//threshold for small parent parts
+			const float parentSizeCutoff = 0.5f;
+
+			float heightPct = localHeight / parentHeight;
+			Log.Debug("Attachment height%: " + (heightPct * 100f).ToString("F0"));
+
+			Log.Debug("Original localHeight: " + localHeight.ToString());
+
+			//+1 up, -1 down
+			float upOrDown = 1f;
+			if (localHeight < 0f)
+				upOrDown = -1f;
+
+			if (parentHeight < parentSizeCutoff) {
+				//for small parts, just center on them
+				Log.Debug("Parent is small, defaulting to center");
+				localHeight = 0f;
+			} else if (Math.Abs(localHeight) < parentHeight * 0.1f) {
+				//middle 20% of parent, snap to center (10% of extent(
+				Log.Debug("Centering on parent");
+				localHeight = 0f;
+			} else if (Math.Abs(localHeight) < parentHeight * 0.6f) {
+				//top/bottom quarter (60% of extent)
+				Log.Debug("Centering quarter on parent");
+				localHeight = parentHeight / 2 * upOrDown;
+			} else {
+				//top/bottom edge
+				Log.Debug("Aligning to edge of parent");
+				localHeight = (parentHeight - strutOffset) * upOrDown;
+			}
+			Log.Debug("new localHeight: " + localHeight.ToString());
+			return localHeight;
+		}
+
+		static float SnapCompoundPartHeight (CompoundPart part, Part attachedPart)
+		{
+			float localHeight = 0f;
+			float parentHeight = attachedPart.GetPartRendererBound().extents.y;
+
+			if (part.parent == attachedPart) {
+				localHeight = part.transform.localPosition.y;
+				Log.Debug ("Parent localHeight: " + localHeight.ToString (VectorFormat));
+			} else if (part.target == attachedPart) {
+				localHeight = part.targetPosition.y;
+				Log.Debug ("Target localHeight: " + localHeight.ToString (VectorFormat));
+			} else {
+				Log.Warn ("Unable to identify part as parent or target of compound part");
+				return 0f;
+			}
 
 			//offset strut when attaching to top/bottom of parent
 			const float strutOffset = 0.1f;
@@ -271,19 +304,36 @@ namespace EditorExtensions
 				return false;
 		}
 
-
-
 		/// <summary>
-		/// Gets the collision point towards destination, perpendicular to part's axis (first to edge of collider, then to target: \_ )
+		/// get coll point
 		/// </summary>
-		private static bool GetCollisionPointOnAxis (Part part, Vector3 origin, Vector3 target, out Vector3 collisionPoint)
+		/// <returns><c>true</c>, if collision point on axis2 was gotten, <c>false</c> otherwise.</returns>
+		/// <param name="part">Part to get surface attachment point</param>
+		/// <param name="externalPoint">Other part for direction</param>
+		/// <param name="partHeight">Height to attach on part</param>
+		/// <param name="collisionPoint">Collision point on part</param>
+		private static bool GetCollisionPointOnAxis (Part part, Vector3 externalPoint, float partHeight, out Vector3 collisionPoint)
 		{
-			Vector3 targetDirection = (target - origin).normalized;
+			//(to - from).normalized;
+			Log.Debug ("partHeight " + partHeight.ToString ("F3"));
+			Vector3 internalTarget = part.transform.TransformPoint (new Vector3 (0f, partHeight, 0f));
+			Log.Debug ("internalTarget " + internalTarget.ToString (VectorFormat));
+			//localize external point
+			externalPoint = part.transform.InverseTransformPoint (externalPoint);
+			Log.Debug ("local externalPoint " + externalPoint.ToString (VectorFormat));
+			//level to same height
+			externalPoint.y = 0f;
+			Log.Debug ("levelled local externalPoint " + externalPoint.ToString (VectorFormat));
+			//back to global
+			externalPoint = part.transform.TransformPoint (externalPoint);
+			Log.Debug ("global externalPoint " + externalPoint.ToString (VectorFormat));
 
-			targetDirection = new Vector3 (targetDirection.x, 0f, targetDirection.z);
+			Vector3 direction = (internalTarget - externalPoint).normalized;
+			Log.Debug ("direction " + direction.ToString (VectorFormat));
 
-			return GetPartCollisionPoint(part, origin, targetDirection, out collisionPoint);
+			return GetPartCollisionPointByDirection(part, externalPoint, direction, out collisionPoint);
 		}
+			
 
 		/// <summary>
 		/// Gets the collision point on the part's collider, from origin inside part.
@@ -291,7 +341,7 @@ namespace EditorExtensions
 		private static bool GetPartCollisionPoint (Part part, Vector3 origin, Vector3 target, out Vector3 collisionPoint)
 		{
 			Vector3 targetDirection = (target - origin).normalized;
-			return GetPartCollisionPoint(part, origin, targetDirection, out collisionPoint);
+			return GetPartCollisionPointByDirection(part, origin, targetDirection, out collisionPoint);
 		}
 
 		/// <summary>
@@ -299,14 +349,20 @@ namespace EditorExtensions
 		/// </summary>
 		private static bool GetPartCollisionPointByDirection (Part part, Vector3 origin, Vector3 targetDirection, out Vector3 collisionPoint)
 		{
+			Log.Debug (string.Format("GetPartCollisionPointByDirection: collider raycast from {0} in direction {1}", origin.ToString (VectorFormat), targetDirection.ToString (VectorFormat)));
 			//using this method becuase Physics.RayCast ignores hits originating from inside the collider
 			Ray r = new Ray (origin, targetDirection);
+
+			//collider property is deprecated, removed in 5.0 - use GetComponent<Collider>, but need to identify collider type, eg BoxCollider
+
 			RaycastHit hit = new RaycastHit ();
 			if (part.collider.Raycast(r, out hit, CompoundPartMaxLength)) {
 				collisionPoint = hit.point;
+				Log.Debug ("Collider hit: " + collisionPoint.ToString (VectorFormat));
 				return true;
 			} else {
 				collisionPoint = origin;
+				Log.Debug ("Collider miss");
 				return false;
 			}
 		}

@@ -454,8 +454,8 @@ namespace EditorExtensions
 
 			if (targetPart != null) {
 				//CompoundPartUtil.AttachStrut (parentPart, targetPart);
-				CompoundPartUtil.CenterStrut(part);
-				//CompoundPartUtil.AlignCompoundPart(part);
+				//CompoundPartUtil.CenterStrut(part);
+				CompoundPartUtil.AlignCompoundPart(part);
 
 
 			}
