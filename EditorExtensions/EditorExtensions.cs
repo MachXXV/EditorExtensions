@@ -122,7 +122,8 @@ namespace EditorExtensions
 		}
 
 
-
+		Vector3 cameraLookAt = new Vector3(0,15,0);
+		bool zoomSelected = false;
 		//Unity update
 		void Update ()
 		{
@@ -140,6 +141,25 @@ namespace EditorExtensions
 				bool modKeyDown = GameSettings.MODIFIER_KEY.GetKey();
 				//check for configured editor fine key
 				bool fineKeyDown = GameSettings.Editor_fineTweak.GetKey();
+
+				//Zoom selected part - rotate camera around part
+				if (Input.GetKeyDown (cfg.KeyMap.ZoomSelected)) {
+					Part p = Utility.GetPartUnderCursor ();
+					if (p != null) {
+						zoomSelected = true;
+						cameraLookAt = p.transform.position;
+						OSDMessage (string.Format ("Zoom Camera on {0}", p.name));
+					} else {
+						cameraLookAt = new Vector3(0,15,0);
+						OSDMessage ("Default Camera");
+						ResetCamera ();
+						zoomSelected = false;
+					}
+				}
+
+				if (zoomSelected) {
+					Camera.main.transform.LookAt (cameraLookAt);
+				}					
 
 				// U - strut/fuel line alignment
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {

@@ -201,6 +201,18 @@ namespace EditorExtensions
 					keyMapToUpdate = "rc";
 				}
 				GUILayout.EndHorizontal ();
+
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label ("Zoom Selected:", settingsLabelLayout);
+				if (keyMapToUpdate == "zs" && _lastKeyPressed != KeyCode.None) {
+					_config.KeyMap.ZoomSelected = _lastKeyPressed;
+					keyMapToUpdate = string.Empty;
+				}
+				if (GUILayout.Button (_config.KeyMap.ZoomSelected.ToString ())) {
+					_lastKeyPressed = KeyCode.None;
+					keyMapToUpdate = "zs";
+				}
+				GUILayout.EndHorizontal ();
 			}
 			#endregion
 

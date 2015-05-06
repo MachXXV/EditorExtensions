@@ -40,6 +40,9 @@ namespace EditorExtensions
 		[XmlElement("ResetCamera")]
 		public KeyCode ResetCamera { get; set; }
 
+		[XmlElement("ZoomSelected")]
+		public KeyCode ZoomSelected { get;set; }
+
 		[XmlElement("AttachmentMode")]
 		public KeyCode AttachmentMode { get; set; }
 
