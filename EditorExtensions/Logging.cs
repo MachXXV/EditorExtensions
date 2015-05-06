@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using System.Diagnostics;
 
 namespace EditorExtensions
 {
@@ -7,11 +8,10 @@ namespace EditorExtensions
 	{
 		const string MessagePrefix = "EditorExtensions: ";
 
+		[Conditional("DEBUG")]
 		public static void Debug (string message)
 		{
-#if DEBUG
 			UnityEngine.Debug.Log (MessagePrefix + message);
-#endif
 		}
 
 		public static void Info(string message)
