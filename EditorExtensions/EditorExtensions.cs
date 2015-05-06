@@ -122,6 +122,7 @@ namespace EditorExtensions
 		}
 
 
+
 		Vector3 cameraLookAt = new Vector3(0,15,0);
 		bool zoomSelected = false;
 		//Unity update
@@ -148,6 +149,7 @@ namespace EditorExtensions
 					if (p != null) {
 						zoomSelected = true;
 						cameraLookAt = p.transform.position;
+						editor.editorCamera.transform.position = new Vector3 (Camera.main.transform.position.x, p.transform.position.y ,Camera.main.transform.position.z);
 						OSDMessage (string.Format ("Zoom Camera on {0}", p.name));
 					} else {
 						cameraLookAt = new Vector3(0,15,0);
@@ -158,7 +160,8 @@ namespace EditorExtensions
 				}
 
 				if (zoomSelected) {
-					Camera.main.transform.LookAt (cameraLookAt);
+					editor.editorCamera.transform.LookAt(cameraLookAt);
+
 				}					
 
 				// U - strut/fuel line alignment
@@ -329,13 +332,18 @@ namespace EditorExtensions
 
 		void ResetCamera(){
 			if (!GizmoActive()) {
+
+				//editor.editorCamera
+
 				VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
 				VABcam.camPitch = 0;
 				VABcam.camHdg = 0;
+				//VABcam.transform.position.y = 9f;
 
 				SPHCamera SPHcam = Camera.main.GetComponent<SPHCamera> ();
 				SPHcam.camPitch = 0;
 				SPHcam.camHdg = 0;
+				//SPHcam.transform.position.y = 9f;
 			}
 			return;
 		}

@@ -81,7 +81,7 @@ namespace EditorExtensions
 		const string vectorFormat = "F3";
 		//GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
 		private int _toolbarInt = 0;
-		private string[] _toolbarStrings = { "Part", "strut", "srfAttach", "attachNodes" };
+		private string[] _toolbarStrings = { "Part", "strut", "srfAttach", "attachNodes", "camera" };
 
 		void WindowContent (int windowID)
 		{
@@ -141,8 +141,14 @@ namespace EditorExtensions
 				}
 
 
+
+
 			} else {
 				GUILayout.Label ("No part selected");
+			}
+
+			if (_toolbarInt == 4) {
+				CameraInfoLabels (EditorLogic.fetch.editorCamera);
 			}
 
 			GUILayout.EndVertical ();//end main content
@@ -271,6 +277,40 @@ namespace EditorExtensions
 
 			}
 			//GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
+		}
+
+		void CameraInfoLabels(Camera cam)
+		{
+			GUILayout.Label ("name: " + cam.name);
+			GUILayout.Label ("position: " + cam.transform.position.ToString(vectorFormat));
+			GUILayout.Label ("aspect: " + cam.aspect.ToString("F3"));
+			GUILayout.Label ("orthographic: " + cam.orthographic.ToString());
+			GUILayout.Label ("rotation: " + cam.transform.rotation.ToString());
+			AddLabel ("projectionMatrix", cam.projectionMatrix.ToString ());
+			AddLabel ("cameraToWorldMatrix", cam.cameraToWorldMatrix.ToString ());
+			AddLabel ("worldToCameraMatrix", cam.worldToCameraMatrix.ToString ());
+
+			AddLabel ("editor transform", EditorLogic.fetch.transform.ToString ());
+			AddLabel ("editor position", EditorLogic.fetch.transform.position.ToString ());
+
+			//VABCamera VABcam = Camera.main.GetComponent<VABCamera> ();
+			AddLabel("dragPlaneCenter", EditorLogic.fetch.dragPlaneCenter.ToString("F3"));
+			EditorCameraOffset offset = cam.GetComponent<EditorCameraOffset> ();
+
+			AddLabel ("offset SidebarPixelWidth", offset.SidebarPixelWidth.ToString ());
+
+			UnityEngine.Component[] comps = cam.GetComponents<UnityEngine.Component>();
+
+			AddLabel ("selPartGrabOffset", EditorLogic.fetch.selPartGrabOffset.ToString (vectorFormat));
+
+			foreach (UnityEngine.Object c in comps) {
+				AddLabel ("comp", c.GetType ().ToString ());
+			}
+		}
+
+		void AddLabel(string label, string value)
+		{
+			GUILayout.Label (string.Format("{0}: {1}", label, value));
 		}
 
 	}

@@ -32,11 +32,14 @@ namespace EditorExtensions
 			strut.gameObject.SetActive(true);
 			strut.gameObject.name = ap.name;
 			strut.partInfo = ap;
+			strut.InitializeModules (); //!!
 			//strut.attachMode = AttachModes.SRF_ATTACH;
 			//strut.attachMethod = AttachNodeMethod.FIXED_JOINT;
 			//strut.attachState = CompoundPart.AttachState.Attached;
 			//strut.SetMirror(Vector3.one);
 			//strut.maxLength = CompoundPartMaxLength; //default
+
+			//Part part = (Part) UnityEngine.Object.Instantiate((UnityEngine.Object) partInfo.partPrefab);
 
 			Log.Debug("Created new strut");
 
