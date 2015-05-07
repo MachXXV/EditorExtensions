@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace EditorExtensions
 {
-
 	[KSPAddon (KSPAddon.Startup.EditorAny, false)]
 	public class EditorExtensions : MonoBehaviour
 	{
@@ -36,6 +35,8 @@ namespace EditorExtensions
 		bool enableHotkeys = true;
 		//bool _gizmoActive = false;
 
+		Vector3 cameraLookAt = new Vector3(0,15,0);
+		bool zoomSelected = false;
 		#endregion
 
 		public EditorExtensions (){}
@@ -122,9 +123,6 @@ namespace EditorExtensions
 		}
 
 
-
-		Vector3 cameraLookAt = new Vector3(0,15,0);
-		bool zoomSelected = false;
 		//Unity update
 		void Update ()
 		{
@@ -161,7 +159,6 @@ namespace EditorExtensions
 
 				if (zoomSelected) {
 					editor.editorCamera.transform.LookAt(cameraLookAt);
-
 				}					
 
 				// U - strut/fuel line alignment
@@ -693,9 +690,6 @@ namespace EditorExtensions
 				}
 
 				//always hide stock symmetry and mirror sprites
-				//editor.symmetrySprite.Hide (true);
-				//editor.mirrorSprite.Hide (true);
-				//KSP code appears to use this method
 				editor.symmetrySprite.gameObject.SetActive (false);
 				editor.mirrorSprite.gameObject.SetActive (false);
 
