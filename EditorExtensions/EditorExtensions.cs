@@ -196,6 +196,7 @@ namespace EditorExtensions
 	
 				// ALT+Z : Toggle part clipping (From cheat options)
 				if (modKeyDown && Input.GetKeyDown (cfg.KeyMap.PartClipping)) {
+					PartClippingToggle ();
 					return;
 				}
 
