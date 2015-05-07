@@ -19,7 +19,6 @@ namespace EditorExtensions
 		const string strutPartName = "strutConnector";
 		const string fuelLinePartName = "fuelLine";
 		const float CompoundPartMaxLength = 10f;
-		static bool snapToQuarter = false;
 
 		/// <summary>
 		/// Align compount part, leave in starting position but center and level to target
@@ -106,14 +105,10 @@ namespace EditorExtensions
 				//for small parts, just center on them
 				Log.Debug("Parent is small, defaulting to center");
 				localHeight = 0f;
-			} else if (Math.Abs(localHeight) < parentHeight * 0.1f) {
-				//middle 20% of parent, snap to center (10% of extent(
+			} else if (Math.Abs(localHeight) < parentHeight * 0.5f) {
+				//middle 50% of parent, snap to center
 				Log.Debug("Centering on parent");
 				localHeight = 0f;
-			} else if (snapToQuarter && Math.Abs(localHeight) < parentHeight * 0.6f) {
-				//top/bottom quarter (60% of extent)
-				Log.Debug("Centering quarter on parent");
-				localHeight = parentHeight / 2 * upOrDown;
 			} else {
 				//top/bottom edge
 				Log.Debug("Aligning to edge of parent");
