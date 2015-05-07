@@ -141,13 +141,14 @@ namespace EditorExtensions
 				//check for configured editor fine key
 				bool fineKeyDown = GameSettings.Editor_fineTweak.GetKey();
 
+				Camera cam = editor.editorCamera;
 				//Zoom selected part - rotate camera around part
 				if (Input.GetKeyDown (cfg.KeyMap.ZoomSelected)) {
 					Part p = Utility.GetPartUnderCursor ();
 					if (p != null) {
 						zoomSelected = true;
 						cameraLookAt = p.transform.position;
-						editor.editorCamera.transform.position = new Vector3 (Camera.main.transform.position.x, p.transform.position.y ,Camera.main.transform.position.z);
+						cam.transform.position = new Vector3 (cam.transform.position.x, p.transform.position.y, cam.transform.position.z);
 						OSDMessage (string.Format ("Zoom Camera on {0}", p.name));
 					} else {
 						cameraLookAt = new Vector3(0,15,0);
@@ -158,15 +159,14 @@ namespace EditorExtensions
 				}
 
 				if (zoomSelected) {
-					editor.editorCamera.transform.LookAt(cameraLookAt);
+					cam.transform.LookAt(cameraLookAt);
 				}					
 
 				// U - strut/fuel line alignment
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
 					Part p = Utility.GetPartUnderCursor ();
 					if (p != null && p.GetType () == typeof(CompoundPart)) {
-						//AlignCompoundPart ((CompoundPart)p);
-						NewAutoStrut((CompoundPart)p);
+						AlignCompoundPart ((CompoundPart)p);
 					}
 				}
 			
@@ -426,7 +426,8 @@ namespace EditorExtensions
 			return;
 		}
 
-		void AlignCompoundPart(CompoundPart part)
+		[Obsolete]
+		void AlignCompoundPart_old(CompoundPart part)
 		{
 			bool hasHit = false;
 			Vector3 dir = part.direction;
@@ -465,25 +466,19 @@ namespace EditorExtensions
 			editor.SetBackup ();
 		}
 
-		void NewAutoStrut(CompoundPart part)
+		void AlignCompoundPart(CompoundPart part)
 		{
-			//Debug.ClearDeveloperConsole ();
-			Part targetPart = part.target;
-			//Part parentPart = part.parent;
-
-//			RaycastHit hit;
-//			Ray strutRay = new Ray (part.transform.position, part.direction);
-//			if (Physics.Raycast (strutRay, out hit)) {
-//				Part hitPart = editor.ship.Parts.Find (p => p.gameObject == hit.transform.gameObject);
-//				Log.Debug ("strut ray part: " + hitPart.name);
-//			}
-
-			if (targetPart != null) {
-				//CompoundPartUtil.AttachStrut (parentPart, targetPart);
+			if (part.target != null && part.parent != null) {
+				//CompoundPartUtil.AttachStrut (part.parent, part.target);
 				//CompoundPartUtil.CenterStrut(part);
 				CompoundPartUtil.AlignCompoundPart(part);
 
-
+				List<Part> symParts = part.symmetryCounterparts;
+				//move any symmetry siblings/counterparts
+				foreach (CompoundPart symPart in symParts) {
+					CompoundPartUtil.AlignCompoundPart(symPart);
+				}
+				AddUndo ();
 			}
 		}
 

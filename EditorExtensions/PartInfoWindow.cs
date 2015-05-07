@@ -78,7 +78,7 @@ namespace EditorExtensions
 			this.enabled = true;
 		}
 
-		const string vectorFormat = "F3";
+		const string vectFormat = "F3";
 		//GUILayoutOption[] settingsLabelLayout = new GUILayoutOption[] { GUILayout.MinWidth (150) };
 		private int _toolbarInt = 0;
 		private string[] _toolbarStrings = { "Part", "strut", "srfAttach", "attachNodes", "camera" };
@@ -116,7 +116,7 @@ namespace EditorExtensions
 					PartInfoLabels (sp);
 
 					if (sp.srfAttachNode != null) {
-						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString (vectorFormat));
+						GUILayout.Label ("srfAttachNode.position: " + sp.srfAttachNode.position.ToString (vectFormat));
 						GUILayout.BeginVertical ("box");
 						GUILayout.Label ("Attached part:");
 						if (sp.srfAttachNode.attachedPart != null) {
@@ -172,17 +172,17 @@ namespace EditorExtensions
 			for (int i = 0; i < children.Count; i++) {
 				GUILayout.Label ("child srfAttachNode #" + i.ToString ());
 
-				GUILayout.Label ("position " + children [i].srfAttachNode.position.ToString (vectorFormat));
+				GUILayout.Label ("position " + children [i].srfAttachNode.position.ToString (vectFormat));
 
 				if (children [i].srfAttachNode.attachedPart != null)
 					GUILayout.Label ("attached part " + children [i].srfAttachNode.attachedPart.name);
 
-				GUILayout.Label ("offset " + children [i].srfAttachNode.offset.ToString (vectorFormat));
-				GUILayout.Label ("orientation " + children [i].srfAttachNode.orientation.ToString (vectorFormat));
+				GUILayout.Label ("offset " + children [i].srfAttachNode.offset.ToString (vectFormat));
+				GUILayout.Label ("orientation " + children [i].srfAttachNode.orientation.ToString (vectFormat));
 				GUILayout.Label ("nodeType " + children [i].srfAttachNode.nodeType.ToString ());
 				if (children [i].srfAttachNode.nodeTransform != null) {
-					GUILayout.Label ("nodeTransform.position " + children [i].srfAttachNode.nodeTransform.position.ToString (vectorFormat));
-					GUILayout.Label ("nodeTransform.up " + children [i].srfAttachNode.nodeTransform.up.ToString (vectorFormat));
+					GUILayout.Label ("nodeTransform.position " + children [i].srfAttachNode.nodeTransform.position.ToString (vectFormat));
+					GUILayout.Label ("nodeTransform.up " + children [i].srfAttachNode.nodeTransform.up.ToString (vectFormat));
 				} else {
 					GUILayout.Label ("nodeTransform null");
 				}
@@ -201,14 +201,14 @@ namespace EditorExtensions
 			for (int i = 0; i < nodes.Count; i++) {
 				GUILayout.Label ("Attach Node #" + i.ToString ());
 
-				GUILayout.Label ("position " + nodes [i].position.ToString (vectorFormat));
+				GUILayout.Label ("position " + nodes [i].position.ToString (vectFormat));
 
 				if (nodes [i].attachedPart != null)
 					GUILayout.Label ("attached part " + nodes [i].attachedPart.name);
 
-				GUILayout.Label ("offset " + nodes [i].offset.ToString (vectorFormat));
+				GUILayout.Label ("offset " + nodes [i].offset.ToString (vectFormat));
 
-				GUILayout.Label ("orientation " + nodes [i].orientation.ToString (vectorFormat));
+				GUILayout.Label ("orientation " + nodes [i].orientation.ToString (vectFormat));
 			}
 		}
 
@@ -236,53 +236,54 @@ namespace EditorExtensions
 			}
 
 			GUILayout.Label ("isAttached " + part.isAttached.ToString ());
-			GUILayout.Label ("attRotation: " + part.attRotation.ToString (vectorFormat));
-			GUILayout.Label ("attRotation0: " + part.attRotation0.ToString (vectorFormat));
-			GUILayout.Label ("attPos: " + part.attPos.ToString (vectorFormat));
-			GUILayout.Label ("attPos0: " + part.attPos0.ToString (vectorFormat));
+			GUILayout.Label ("attRotation: " + part.attRotation.ToString (vectFormat));
+			GUILayout.Label ("attRotation0: " + part.attRotation0.ToString (vectFormat));
+			GUILayout.Label ("attPos: " + part.attPos.ToString (vectFormat));
+			GUILayout.Label ("attPos0: " + part.attPos0.ToString (vectFormat));
 
-			GUILayout.Label ("localPosition " + part.transform.localPosition.ToString (vectorFormat));
-			GUILayout.Label ("position " + part.transform.position.ToString (vectorFormat));
-			GUILayout.Label ("localRotation " + part.transform.localRotation.ToString (vectorFormat));
-			GUILayout.Label ("rotation " + part.transform.rotation.ToString (vectorFormat));
+			GUILayout.Label ("localPosition " + part.transform.localPosition.ToString (vectFormat));
+			GUILayout.Label ("position " + part.transform.position.ToString (vectFormat));
+			GUILayout.Label ("localRotation " + part.transform.localRotation.ToString (vectFormat));
+			GUILayout.Label ("rotation " + part.transform.rotation.ToString (vectFormat));
 
 
-			GUILayout.Label ("localScale " + part.transform.localScale.ToString (vectorFormat));
-			GUILayout.Label ("lossyScale " + part.transform.lossyScale.ToString (vectorFormat));
-			GUILayout.Label ("right " + part.transform.right.ToString (vectorFormat));
-			GUILayout.Label ("up " + part.transform.up.ToString (vectorFormat));
+			GUILayout.Label ("localScale " + part.transform.localScale.ToString (vectFormat));
+			GUILayout.Label ("lossyScale " + part.transform.lossyScale.ToString (vectFormat));
+			GUILayout.Label ("right " + part.transform.right.ToString (vectFormat));
+			GUILayout.Label ("up " + part.transform.up.ToString (vectFormat));
 
-			GUILayout.Label ("extents " + part.GetPartRendererBound ().extents.ToString (vectorFormat));
-			GUILayout.Label ("size " + part.GetPartRendererBound ().size.ToString (vectorFormat));
+			GUILayout.Label ("extents " + part.GetPartRendererBound ().extents.ToString (vectFormat));
+			GUILayout.Label ("size " + part.GetPartRendererBound ().size.ToString (vectFormat));
 
 			try {				
-				//GUILayout.Label ("GetPartRendererBound() extents " + part.GetPartRendererBound().extents.ToString(vectorFormat));
+				//GUILayout.Label ("GetPartRendererBound() extents " + part.GetPartRendererBound().extents.ToString(vectFormat));
 			} catch (Exception) {
 				//GUILayout.Label ("bounds.extents error");
 			}
 
-			GUILayout.Label ("orgPos: " + part.orgPos.ToString (vectorFormat));
+			GUILayout.Label ("orgPos: " + part.orgPos.ToString (vectFormat));
 		}
 
 		void CompoundPartInfo (CompoundPart part)
 		{
-			GUILayout.Label ("name: " + part.name);
-			GUILayout.Label ("direction: " + part.direction.ToString (vectorFormat));
+			AddLabel("name", part.name);
+			AddLabel("direction", part.direction.ToString(vectFormat));
+			AddLabel("position", part.transform.position.ToString(vectFormat));
+			AddLabel("localPosition", part.transform.localPosition.ToString(vectFormat));
+			AddLabel ("maxLength", part.maxLength.ToString ("F3"));
+			AddLabel ("attachState", part.attachState.ToString ());
 
-			GUILayout.Label ("attachState: " + part.attachState.ToString ());
 			if (part.target != null) {
-				GUILayout.Label ("target: " + part.target.name);
-				GUILayout.Label ("targetPosition: " + part.targetPosition.ToString (vectorFormat));
-				GUILayout.Label ("targetRotation: " + part.targetRotation.ToString (vectorFormat));
-
+				AddLabel("target", part.target.name);
+				AddLabel("targetPosition", part.targetPosition.ToString(vectFormat));
+				AddLabel("targetRotation", part.targetRotation.ToString(vectFormat));
 			}
-			//GUILayout.Label ("xxx: " + part.direction.ToString (vectorFormat));
 		}
 
 		void CameraInfoLabels(Camera cam)
 		{
 			GUILayout.Label ("name: " + cam.name);
-			GUILayout.Label ("position: " + cam.transform.position.ToString(vectorFormat));
+			GUILayout.Label ("position: " + cam.transform.position.ToString(vectFormat));
 			GUILayout.Label ("aspect: " + cam.aspect.ToString("F3"));
 			GUILayout.Label ("orthographic: " + cam.orthographic.ToString());
 			GUILayout.Label ("rotation: " + cam.transform.rotation.ToString());
@@ -301,7 +302,7 @@ namespace EditorExtensions
 
 			UnityEngine.Component[] comps = cam.GetComponents<UnityEngine.Component>();
 
-			AddLabel ("selPartGrabOffset", EditorLogic.fetch.selPartGrabOffset.ToString (vectorFormat));
+			AddLabel ("selPartGrabOffset", EditorLogic.fetch.selPartGrabOffset.ToString (vectFormat));
 
 			foreach (UnityEngine.Object c in comps) {
 				AddLabel ("comp", c.GetType ().ToString ());
