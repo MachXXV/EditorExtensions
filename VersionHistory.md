@@ -1,5 +1,10 @@
 ﻿### Previous Version History
 
+### Changes in v2.7 - 2 May 2015
+* Recompile against KSP v1.0.2 binaries
+* Updated KSP-AVC version file to include wildcard for minor 1.0.* KSP versions
+* Otherwise no changes from v2.6, not necessary to download if you are not getting messages from version-aware plugins.
+
 ### Changes in v2.6 - 28 April 2015
 * KSP v1.0 support
 * Recompile against KSP 1.0 libraries

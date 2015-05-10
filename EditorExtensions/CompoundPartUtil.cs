@@ -23,13 +23,21 @@ namespace EditorExtensions
 		/// Align compount part, leave in starting position but center and level to target
 		/// </summary>
 		/// <param name="part">Part</param>
-		public static void AlignCompoundPart (CompoundPart part)
+		public static void AlignCompoundPart (CompoundPart part, bool snapHeights)
 		{
 			if (part.parent == null || part.target == null) {
 				Log.Debug("Part is not fully connected");
 				return;
 			}
 
+			if (snapHeights)
+				AlignCompoundPartSnapped(part);
+			else
+				AlignCompoundPartLevel(part);
+		}
+
+		static void AlignCompoundPartSnapped(CompoundPart part)
+		{
 			Part startPart = part.parent;
 			Part targetPart = part.target;
 
@@ -49,6 +57,30 @@ namespace EditorExtensions
 			GetCollisionPointOnAxis(targetPart, startPosition, targetLocalHeight, out destPosition);
 			Log.Debug(string.Format("new collider startPosition: {0} destPosition: {1}", startPosition.ToString(), destPosition.ToString()));
 
+			RepositionPart(part, startPart, startPosition, destPosition);
+		}
+
+		static void AlignCompoundPartLevel(CompoundPart part)
+		{
+			Part startPart = part.parent;
+			Part targetPart = part.target;
+
+			Vector3 startPosition = startPart.transform.position;
+			Vector3 destPosition = targetPart.transform.position;
+
+			GetCollisionPointOnAxis(startPart, destPosition, part.transform.localPosition.y, out startPosition);
+
+			destPosition = startPart.transform.InverseTransformPoint(destPosition); //get local pos
+			destPosition.y = part.transform.localPosition.y; //level out
+			destPosition = startPart.transform.TransformPoint(destPosition); //back to global pos
+
+			Log.Debug(string.Format("new level startPosition: {0} destPosition: {1}", startPosition.ToString(), destPosition.ToString()));
+
+			RepositionPart(part, startPart, startPosition, destPosition);
+		}
+
+		static void RepositionPart(CompoundPart part, Part startPart, Vector3 startPosition, Vector3 destPosition)
+		{
 			part.transform.position = startPosition;
 			part.transform.up = startPart.transform.up;
 			part.transform.forward = startPart.transform.forward;

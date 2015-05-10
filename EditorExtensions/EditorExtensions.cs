@@ -122,7 +122,6 @@ namespace EditorExtensions
 			//	_partInfoWindow.enabled = false;
 		}
 
-
 		//Unity update
 		void Update ()
 		{
@@ -163,10 +162,12 @@ namespace EditorExtensions
 				}					
 
 				// U - strut/fuel line alignment
+				// U - snap heights on both parts
+				// mod-U level/perpendicular to parent part
 				if (Input.GetKeyDown (cfg.KeyMap.CompoundPartAlign)) {
 					Part p = Utility.GetPartUnderCursor ();
 					if (p != null && p.GetType () == typeof(CompoundPart)) {
-						AlignCompoundPart ((CompoundPart)p);
+						AlignCompoundPart ((CompoundPart)p, !modKeyDown);
 					}
 				}
 			
@@ -466,17 +467,15 @@ namespace EditorExtensions
 			editor.SetBackup ();
 		}
 
-		void AlignCompoundPart(CompoundPart part)
+		void AlignCompoundPart(CompoundPart part, bool snapHeights)
 		{
 			if (part.target != null && part.parent != null) {
-				//CompoundPartUtil.AttachStrut (part.parent, part.target);
-				//CompoundPartUtil.CenterStrut(part);
-				CompoundPartUtil.AlignCompoundPart(part);
+				CompoundPartUtil.AlignCompoundPart(part, snapHeights);
 
 				List<Part> symParts = part.symmetryCounterparts;
 				//move any symmetry siblings/counterparts
 				foreach (CompoundPart symPart in symParts) {
-					CompoundPartUtil.AlignCompoundPart(symPart);
+					CompoundPartUtil.AlignCompoundPart(symPart, snapHeights);
 				}
 				AddUndo ();
 			}

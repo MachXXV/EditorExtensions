@@ -1,23 +1,15 @@
-## Editor Extensions v2.7 For KSP v1.0.2
-2 May 2015
+## Editor Extensions v2.8 For KSP v1.0.2
+10 May 2015
 
-### Changes in v2.7
-* Recompile against KSP v1.0.2 binaries
-* Updated KSP-AVC version file to include wildcard for minor 1.0.* KSP versions
-* Otherwise no changes from v2.6, not necessary to download if you are not getting messages from version-aware plugins.
+### Changes in v2.8
+* New strut and fuel line alignment logic
 
-### Changes in v2.6
-* Recompile against KSP 1.0 libraries
-* Changed angle snap (C) and symmetry (X) functions to use game's current key mapping
-* Modifier keys Alt/Mod/Shift now use game's key mapping for better Linux support
-* On screen messages now use the stock font/layout
-
-####[Download v2.7](https://github.com/MachXXV/EditorExtensions/releases/download/v2.7/EditorExtensions_v2.7.zip)
+####[Download v2.8](https://github.com/MachXXV/EditorExtensions/releases/download/v2.8/EditorExtensions_v2.8.zip)
 
 ### Features
 * Allows custom levels of radial symmetry beyond the stock limitations.
 * Horizontally and vertically center parts.
-* Align struts and fuel lines radially from parent and vertically at 0° and 45°
+* Re-Align placed struts and fuel lines between parts 
 * Adds radial/angle snapping at 1°,5°,15°,22.5°,30°,45°,60°, and 90°. Angles are customizable.
 * Toggle part clipping (From the cheat options)
 * Toggle radial and node attachment of parts
@@ -31,14 +23,14 @@
 
 #### Strut & Fuel line alignment
 * Place the strut, then hover over the base/start of the strut (the first end placed) with the mouse, and press the hotkey.
-* Addon will align the strut's direction perpendicular from the part's surface.
-* If the strut is close to level, it will be aligned flat at 0°
-* if the strut is more than +/- 22.5° from level, strut will be aligned to +/- 45°
+* Strut/FL start and end with be snapped to the closest of either the middle, quarter, or end of the part, aligned directly between the two parts.
+* Mod/Alt-U will reposition the strut/FL directly between the parts, but only level out the strut from the start/parent part.
 
 ### Default Keybindings
 * **V** 			- Vertically center a part. Place the part, hover over it with the mouse, and press the hotkey.
 * **H** 			- Horizontally center the part. Place the part, hover over it with the mouse, and press the hotkey.
 * **U** 			- Place the strut, then hover over the base/start of the strut (the first end placed) with the mouse, and press the hotkey.
+* **Mod/Alt-U**		- Strut will be aligned level with its starting position
 * **X, Shift+X** 	- Increase/Decrease symmetry level (Based on KSP's key map)
 * **Alt+X** 		- Reset symmetry level (Based on KSP's key map)
 * **C, Shift+C** 	- Increase/Decrease angle snap (Based on KSP's key map)
@@ -46,6 +38,8 @@
 * **T** 			- Attachment mode: Toggle between surface and node attachment modes for all parts, and when a part is selected, will toggle surface attachment even when that part's config usually does not allow it.
 * **Alt+Z** 		- Toggle part clipping (CAUTION: This is a cheat option)
 * **Space** 		- When no part is selected, resets camera pitch and heading (straight ahead and level)
+
+In this version there is also a still-incomplete feature: A part-zoom/part camera orbit - the numpad . key will focus and orbit the camera around the part under the mouse. hitting numpad . again with no part under the mouse will reset the camera back to normal. Currently in the focus mode dragging parts gets skewed so it is only good for viewing the part from another perspective, and not editing or moving parts.
 
 ###Installation
 In your KSP GameData folder, delete any existing EditorExtensions folder.
