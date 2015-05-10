@@ -8,17 +8,16 @@ namespace EditorExtensions
 	public static class CompoundPartUtil
 	{
 		const string VectorFormat = "F3";
+		const string strutPartName = "strutConnector";
+		const string fuelLinePartName = "fuelLine";
+		const float CompoundPartMaxLength = 10f;
 
 		static CompoundPartUtil()
 		{
 		}
 
 		//get distance: Vector3.Distance(object1.transform.position, object2.transform.position);
-		//Physics.Raycast(this.transform.position, this.transform.TransformDirection(dir), out this.\u0001\u0002, this.maxLength, EditorLogic.LayerMask)
-
-		const string strutPartName = "strutConnector";
-		const string fuelLinePartName = "fuelLine";
-		const float CompoundPartMaxLength = 10f;
+		//Physics.Raycast(part.transform.position, part.transform.TransformDirection(dir), out HIT, this.maxLength, EditorLogic.LayerMask)
 
 		/// <summary>
 		/// Align compount part, leave in starting position but center and level to target
@@ -45,25 +44,21 @@ namespace EditorExtensions
 			Vector3 destPosition = targetPart.transform.position;
 
 			Log.Debug(string.Format("startPosition: {0} destPosition: {1}", startPosition.ToString(), destPosition.ToString()));
-			//center to center
-			//GetEndpoints(startPart, targetPart, midway, out startPosition, out destPosition);
 
 			GetCollisionPointOnAxis(startPart, destPosition, parentLocalHeight, out startPosition);
 			GetCollisionPointOnAxis(targetPart, startPosition, targetLocalHeight, out destPosition);
 			Log.Debug(string.Format("new collider startPosition: {0} destPosition: {1}", startPosition.ToString(), destPosition.ToString()));
-			
+
 			part.transform.position = startPosition;
 			part.transform.up = startPart.transform.up;
 			part.transform.forward = startPart.transform.forward;
-			part.transform.LookAt(targetPart.transform); //this rotates the strut base towards the target, need to keep it flush with the parent
+			part.transform.LookAt(destPosition); //this rotates the strut base towards the target, need to keep it flush with the parent
 			part.transform.Rotate(0, 90, 0);
 
-			//Vector3 dirToTarget = part.transform.InverseTransformPoint(destPosition).normalized;
-			//Vector3 dirToTarget = (destPosition - startPosition).normalized;
-			Vector3 dirToTarget = part.transform.InverseTransformPoint(destPosition).normalized;
-			Log.Debug("final direction: " + startPosition.ToString(VectorFormat));
+			Vector3 localDirToTarget = part.transform.InverseTransformDirection((destPosition - startPosition).normalized);
+			Log.Debug("final direction: " + localDirToTarget.ToString());
 
-			part.raycastTarget(dirToTarget);
+			part.raycastTarget(localDirToTarget);
 		}
 
 		static float GetCompoundPartPositionHeight (CompoundPart part, Part target)
@@ -103,8 +98,24 @@ namespace EditorExtensions
 
 			if (parentHeight < parentSizeCutoff) {
 				//for small parts, just center on them
-				Log.Debug("Parent is small, defaulting to center");
+				Log.Debug ("Parent is small, defaulting to center");
 				localHeight = 0f;
+			} else if (parentHeight >= 1.5f) {
+				//only do quarter snapping for parts >= 3.0 total height
+				if (Math.Abs(localHeight) < parentHeight * 0.125f) {
+					//middle 25% of parent, snap to center (12.5% of extent)
+					Log.Debug("Centering on parent");
+					localHeight = 0f;
+				} else if (Math.Abs(localHeight) < parentHeight * 0.7f) {
+					//top/bottom quarter (70% of extent)
+					Log.Debug("Centering quarter on parent");
+					localHeight = parentHeight / 2 * upOrDown;
+				} else {
+					//top/bottom edge
+					Log.Debug("Aligning to edge of parent");
+					localHeight = (parentHeight - strutOffset) * upOrDown;
+				}
+			
 			} else if (Math.Abs(localHeight) < parentHeight * 0.5f) {
 				//middle 50% of parent, snap to center
 				Log.Debug("Centering on parent");
@@ -114,6 +125,8 @@ namespace EditorExtensions
 				Log.Debug("Aligning to edge of parent");
 				localHeight = (parentHeight - strutOffset) * upOrDown;
 			}
+
+
 			Log.Debug("new localHeight: " + localHeight.ToString());
 			return localHeight;
 		}
@@ -136,7 +149,7 @@ namespace EditorExtensions
 			externalPoint = part.transform.InverseTransformPoint (externalPoint);
 			Log.Debug ("local externalPoint " + externalPoint.ToString (VectorFormat));
 			//level to same height
-			externalPoint.y = 0f;
+			externalPoint.y = partHeight;
 			Log.Debug ("levelled local externalPoint " + externalPoint.ToString (VectorFormat));
 			//back to global
 			externalPoint = part.transform.TransformPoint (externalPoint);
