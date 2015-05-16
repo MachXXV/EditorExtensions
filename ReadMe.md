@@ -3,6 +3,7 @@
 
 ### Changes in v2.8
 * New strut and fuel line alignment logic
+* Vertical/Horizontal alignment takes no action if part is currently attached to a node (green ball)
 
 ####[Download v2.8](https://github.com/MachXXV/EditorExtensions/releases/download/v2.8/EditorExtensions_v2.8.zip)
 

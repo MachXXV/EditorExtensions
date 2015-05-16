@@ -40,21 +40,57 @@ namespace EditorExtensions
 		#endregion
 
 		public EditorExtensions (){}
-		
-		//Unity initialization call
+
+		//Unity initialization call, called first
 		public void Awake ()
 		{
+			Log.Debug ("Awake()");
+			Log.Debug ("launchSiteName: " + EditorLogic.fetch.launchSiteName);
 			//Fix for KSP bug #3838 via FW Industries
 			//Part picking/dragging is on incorrect plane when vabcamera is redirected
 			//http://bugs.kerbalspaceprogram.com/issues/3838#note-17
-			EditorLogic.fetch.enabled = false;
-			EditorLogic.fetch.enabled = true;
+			//EditorLogic.fetch.enabled = false;
+			//EditorLogic.fetch.enabled = true;
+		}
 
-
+		//Unity, called after Awake()
+		public void Start()
+		{
+			Log.Debug ("Start()");
 			editor = EditorLogic.fetch;
 			Instance = this;
 			InitConfig ();
 			InitializeGUI ();
+			GameEvents.onEditorPartEvent.Add (EditorPartEvent);
+		}
+
+		//Unity OnDestroy
+		void OnDestroy ()
+		{
+			Log.Debug ("OnDestroy()");
+			//if (_settingsWindow != null)
+			//	_settingsWindow.enabled = false;
+			//if (_partInfoWindow != null)
+			//	_partInfoWindow.enabled = false;
+
+			GameEvents.onEditorPartEvent.Remove (EditorPartEvent);
+		}
+
+		void EditorPartEvent(ConstructionEventType eventType, Part part)
+		{
+			if (eventType == ConstructionEventType.PartDragging || eventType == ConstructionEventType.PartRotating || eventType == ConstructionEventType.PartOffsetting)
+				return;
+
+			Log.Debug (string.Format ("EditorPartEvent {0} part {1}", eventType, part));
+
+			if (eventType == ConstructionEventType.PartAttached) {
+				if (part.parent != null) {
+					Log.Debug ("Part parent: " + part.parent.name);
+					Log.Debug ("Node attached: " + IsPartNodeAttached (part).ToString ());
+				} else {
+					Log.Debug ("Part parent is null");
+				}
+			}
 		}
 
 		void InitConfig ()
@@ -117,16 +153,6 @@ namespace EditorExtensions
 				//_abort = true;
 				return;
 			}
-		}
-
-		//Unity OnDestroy
-		void OnDestroy ()
-		{
-			Log.Debug ("OnDestroy()");
-			//if (_settingsWindow != null)
-			//	_settingsWindow.enabled = false;
-			//if (_partInfoWindow != null)
-			//	_partInfoWindow.enabled = false;
 		}
 
 		//Unity update
@@ -225,6 +251,21 @@ namespace EditorExtensions
 			}//end if(enableHotKeys)
 		}
 
+		bool IsPartNodeAttached(Part p)
+		{
+			if (p.parent == null || p == null)
+				return false;
+
+			foreach (AttachNode n in p.attachNodes) {
+				if (n.attachedPart == p.parent) {
+					Log.Debug (string.Format ("Part {0} is attached via node on parent {1}", p.name, p.parent.name));
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		#region Alignments
 
 		void AlignToTopOfParent(Part p)
@@ -250,8 +291,11 @@ namespace EditorExtensions
 
 		void VertialPositionOnParent(Part p, float position)
 		{
-			p.transform.localPosition = new Vector3 (p.transform.localPosition.x, position, p.transform.localPosition.z);
-			p.attPos0.y = position;
+			if (p.parent != null) {
+				Log.Debug (string.Format ("Positioning {0} vertically on parent {1}", p.name, p.parent.name));
+				p.transform.localPosition = new Vector3 (p.transform.localPosition.x, position, p.transform.localPosition.z);
+				p.attPos0.y = position;
+			}
 		}
 
 		void CenterOnParent(Part p)
@@ -275,11 +319,34 @@ namespace EditorExtensions
 			p.attPos0.z = 0f;
 		}
 
+		void VerticalAlign(){
+			try {
+				Part sp = Utility.GetPartUnderCursor ();
+
+				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive() && !IsPartNodeAttached(sp)) {
+
+					//move hovered part
+					CenterVerticallyOnParent(sp);
+
+					//move any symmetry siblings/counterparts
+					foreach (Part symPart in sp.symmetryCounterparts) {
+						CenterVerticallyOnParent(symPart);
+					}
+
+					AddUndo();
+				}
+			} catch (Exception ex) {
+				Log.Error ("Error trying to vertically align: " + ex.Message);
+			}
+
+			return;
+		}
+
 		void HorizontalAlign(){
 			try {
 				Part sp = Utility.GetPartUnderCursor ();
 
-				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
+				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive() && !IsPartNodeAttached(sp)) {
 
 					//Part ap = sp.srfAttachNode.attachedPart;
 					List<Part> symParts = sp.symmetryCounterparts;
@@ -303,32 +370,63 @@ namespace EditorExtensions
 			return;
 		}
 
+		[Obsolete]
+		void AlignCompoundPart_old(CompoundPart part)
+		{
+			bool hasHit = false;
+			Vector3 dir = part.direction;
+			Vector3 newDirection = Vector3.zero;
+
+			if (dir.y < -0.125f) {
+				//more than -22.5deg vert
+				newDirection = new Vector3 (-0.5f, -0.5f, 0.0f);
+				Log.Debug ("Aligning compoundPart 45deg down");
+			} else if (dir.y > 0.125f) {
+				//more than +22.5deg vert
+				newDirection = new Vector3 (-0.5f, 0.5f, 0.0f);
+				Log.Debug ("Aligning compoundPart 45deg up");
+			} else {
+				//straight ahead
+				newDirection = new Vector3 (-1.0f, 0.0f, 0.0f);
+				Log.Debug ("Aligning compoundPart level");
+			}
+
+			hasHit = part.raycastTarget (newDirection);
+
+			//			if (!hasHit){
+			//				//try just leveling the strut
+			//				Log.Debug ("Original align failed, Aligning compoundPart level");
+			//				part.direction = new Vector3 (dir.x, 0.0f, dir.z);
+			//				hasHit = part.raycastTarget (newDirection);
+			//			}
+
+			List<Part> symParts = part.symmetryCounterparts;
+			//move any symmetry siblings/counterparts
+			foreach (CompoundPart symPart in symParts) {
+				symPart.raycastTarget (newDirection);
+			}
+
+			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
+			editor.SetBackup ();
+		}
+
+		void AlignCompoundPart(CompoundPart part, bool snapHeights)
+		{
+			if (part.target != null && part.parent != null) {
+				CompoundPartUtil.AlignCompoundPart(part, snapHeights);
+
+				List<Part> symParts = part.symmetryCounterparts;
+				//move any symmetry siblings/counterparts
+				foreach (CompoundPart symPart in symParts) {
+					CompoundPartUtil.AlignCompoundPart(symPart, snapHeights);
+				}
+				AddUndo ();
+			}
+		}
+
 		#endregion
 
 		#region Editor Actions
-
-		void VerticalAlign(){
-			try {
-				Part sp = Utility.GetPartUnderCursor ();
-
-				if (sp != null && sp.srfAttachNode != null && sp.srfAttachNode.attachedPart != null && !GizmoActive()) {
-
-					//move hovered part
-					CenterVerticallyOnParent(sp);
-
-					//move any symmetry siblings/counterparts
-					foreach (Part symPart in sp.symmetryCounterparts) {
-						CenterVerticallyOnParent(symPart);
-					}
-
-					AddUndo();
-				}
-			} catch (Exception ex) {
-				Log.Error ("Error trying to vertically align: " + ex.Message);
-			}
-
-			return;
-		}
 
 		void AddUndo()
 		{
@@ -432,60 +530,6 @@ namespace EditorExtensions
 
 			Log.Debug ("Exiting srfAttachAngleSnap = " + editor.srfAttachAngleSnap.ToString ());
 			return;
-		}
-
-		[Obsolete]
-		void AlignCompoundPart_old(CompoundPart part)
-		{
-			bool hasHit = false;
-			Vector3 dir = part.direction;
-			Vector3 newDirection = Vector3.zero;
-
-			if (dir.y < -0.125f) {
-				//more than -22.5deg vert
-				newDirection = new Vector3 (-0.5f, -0.5f, 0.0f);
-				Log.Debug ("Aligning compoundPart 45deg down");
-			} else if (dir.y > 0.125f) {
-				//more than +22.5deg vert
-				newDirection = new Vector3 (-0.5f, 0.5f, 0.0f);
-				Log.Debug ("Aligning compoundPart 45deg up");
-			} else {
-				//straight ahead
-				newDirection = new Vector3 (-1.0f, 0.0f, 0.0f);
-				Log.Debug ("Aligning compoundPart level");
-			}
-
-			hasHit = part.raycastTarget (newDirection);
-
-//			if (!hasHit){
-//				//try just leveling the strut
-//				Log.Debug ("Original align failed, Aligning compoundPart level");
-//				part.direction = new Vector3 (dir.x, 0.0f, dir.z);
-//				hasHit = part.raycastTarget (newDirection);
-//			}
-
-			List<Part> symParts = part.symmetryCounterparts;
-			//move any symmetry siblings/counterparts
-			foreach (CompoundPart symPart in symParts) {
-				symPart.raycastTarget (newDirection);
-			}
-
-			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
-			editor.SetBackup ();
-		}
-
-		void AlignCompoundPart(CompoundPart part, bool snapHeights)
-		{
-			if (part.target != null && part.parent != null) {
-				CompoundPartUtil.AlignCompoundPart(part, snapHeights);
-
-				List<Part> symParts = part.symmetryCounterparts;
-				//move any symmetry siblings/counterparts
-				foreach (CompoundPart symPart in symParts) {
-					CompoundPartUtil.AlignCompoundPart(symPart, snapHeights);
-				}
-				AddUndo ();
-			}
 		}
 
 		bool GizmoActive ()
