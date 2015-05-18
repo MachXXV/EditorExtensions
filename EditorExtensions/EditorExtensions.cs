@@ -46,11 +46,6 @@ namespace EditorExtensions
 		{
 			Log.Debug ("Awake()");
 			Log.Debug ("launchSiteName: " + EditorLogic.fetch.launchSiteName);
-			//Fix for KSP bug #3838 via FW Industries
-			//Part picking/dragging is on incorrect plane when vabcamera is redirected
-			//http://bugs.kerbalspaceprogram.com/issues/3838#note-17
-			//EditorLogic.fetch.enabled = false;
-			//EditorLogic.fetch.enabled = true;
 		}
 
 		//Unity, called after Awake()
