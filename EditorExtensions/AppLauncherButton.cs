@@ -23,8 +23,10 @@ namespace EditorExtensions
 
 		private void Awake ()
 		{
-			GameEvents.onGUIApplicationLauncherReady.Add (this.OnGuiAppLauncherReady);
-			Instance = this;
+			if (AppLauncherButton.Instance == null) {
+				GameEvents.onGUIApplicationLauncherReady.Add (this.OnGuiAppLauncherReady);
+				Instance = this;
+			}
 		}
 
 		private void OnDestroy ()
@@ -66,6 +68,11 @@ namespace EditorExtensions
 			if (this.button == null) {
 				return;
 			}
+
+//			if(this.button.State != RUIToggleButton.ButtonState.TRUE)
+//				this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOn, false));
+//			else
+//				this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOff, false));
 
 			try {
 				if (EditorLogic.fetch != null) {
