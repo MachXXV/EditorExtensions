@@ -108,7 +108,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Content\DefaultKeys.txt" />
-    <None Include="Content\strut-alignment.jpg" />
     <None Include="Textures\AppLauncherIcon.pdn" />
   </ItemGroup>
   <ItemGroup>

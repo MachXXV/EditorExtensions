@@ -73,8 +73,12 @@ namespace EditorExtensions
 
 		void EditorPartEvent(ConstructionEventType eventType, Part part)
 		{
-			if (eventType == ConstructionEventType.PartDragging || eventType == ConstructionEventType.PartRotating || eventType == ConstructionEventType.PartOffsetting)
+			if (eventType == ConstructionEventType.PartRotating || eventType == ConstructionEventType.PartOffsetting)
 				return;
+
+			if (eventType == ConstructionEventType.PartDragging) {
+				return;
+			}			
 
 			Log.Debug (string.Format ("EditorPartEvent {0} part {1}", eventType, part));
 
