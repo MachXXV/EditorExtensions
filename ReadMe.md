@@ -1,9 +1,12 @@
 ## Editor Extensions v2.8 For KSP v1.0.2
-10 May 2015
+21 May 2015
 
 ### Changes in v2.8
 * New strut and fuel line alignment logic
+* U snaps strut/fuel line directly between parts, with each end at nearest top, bottom, middle or one-quarter position.
+* Alt/Mod-U aligns strut at current height straight between parts, does not snap height on either end.
 * Vertical/Horizontal alignment takes no action if part is currently attached to a node (green ball)
+* Numpad . (period) centers camera around part under cursor. Incomplete feature - while refocused part dragging is offset. Hitting period with no part under cursor resets back to normal.
 
 ####[Download v2.8](https://github.com/MachXXV/EditorExtensions/releases/download/v2.8/EditorExtensions_v2.8.zip)
 
