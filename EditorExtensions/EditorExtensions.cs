@@ -243,21 +243,17 @@ namespace EditorExtensions
 					return;
 				}
 
+				//KSP v1.0.3: Change angle snap and symmetry mode actions to GetKeyUp() so that it fires after internal editor actions
+
 				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.AngleSnap)
 				// C, Shift+C : Increment/Decrement Angle snap
-				if (GameSettings.Editor_toggleAngleSnap.GetKeyDown()) {
+				if (GameSettings.Editor_toggleAngleSnap.GetKeyUp()) {
 					AngleSnapCycle (modKeyDown, fineKeyDown);
 					return;	
 				}
 	
 				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.Symmetry)
 				// X, Shift+X : Increment/decrement symmetry mode
-				//if (GameSettings.Editor_toggleSymMode.GetKeyDown()) {
-				//	SymmetryModeCycle (modKeyDown, fineKeyDown);
-				//	return;
-				//}
-
-				//KSP v1.0.3 updated symmetryMode logic, need to fire after the default actions to override
 				if (GameSettings.Editor_toggleSymMode.GetKeyUp()) {
 					SymmetryModeCycle (modKeyDown, fineKeyDown);
 					return;
