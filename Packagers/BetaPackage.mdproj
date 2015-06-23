@@ -14,13 +14,17 @@
             </ChildEntries>
             <ExcludedFiles>
               <File>EditorExtensions,ProgramFiles,EditorExtensions.dll.mdb</File>
+              <File>EditorExtensions,ProgramFiles,UnityEngine.UI.dll</File>
+              <File>EditorExtensions,ProgramFiles,UnityEngine.dll</File>
+              <File>EditorExtensions,ProgramFiles,Assembly-CSharp-firstpass.dll</File>
+              <File>EditorExtensions,ProgramFiles,Assembly-CSharp.dll</File>
             </ExcludedFiles>
             <RootEntry path="..\EditorExtensions.sln" id=":root:" />
           </Builder>
         </Package>
       </Packages>
     </Packages>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug Beta Release</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ReleaseVersion>2.0</ReleaseVersion>
   </PropertyGroup>

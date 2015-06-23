@@ -23,7 +23,7 @@
         </Package>
       </Packages>
     </Packages>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug Beta Release</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ReleaseVersion>2.0</ReleaseVersion>
   </PropertyGroup>
