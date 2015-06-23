@@ -1,9 +1,10 @@
-## Editor Extensions v2.9 For KSP v1.0.3
+## Editor Extensions v2.11 For KSP v1.0.3
 22 Jun 2015
 
-### Changes in v2.9
+### Changes in v2.11
 * Fixed conflict with new symmetry mode behavior in KSP v1.0.3 editor. May introduce a flicker/twitch when changing symmetry modes 1-8, but has no negative effect.
 * Recompiled against KSP v1.0.3 binaries
+* skipped v2.9/.10 due to deployment/versioning issues
 
 ### Changes in v2.8
 * New strut and fuel line alignment logic
@@ -12,7 +13,7 @@
 * Vertical/Horizontal alignment takes no action if part is currently attached to a node (green ball)
 * Numpad . (period) centers camera around part under cursor. Incomplete feature - while refocused part dragging is offset. Hitting period with no part under cursor resets back to normal.
 
-####[Download v2.9 via GitHub](https://github.com/MachXXV/EditorExtensions/releases/download/v2.8/EditorExtensions_v2.9.zip)
+####[Download v2.11 via GitHub](https://github.com/MachXXV/EditorExtensions/releases/download/v2.8/EditorExtensions_v2.11.zip)
 
 ####Alternate Downloads
 * [KerbalStuff](https://kerbalstuff.com/mod/442)
