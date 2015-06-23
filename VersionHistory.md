@@ -1,5 +1,14 @@
 ﻿### Previous Version History
 
+### Changes in v2.12 - 23 June 2015
+* Fixed conflict with new angle snap behavior in KSP v1.0.3 editor. May introduce a flicker/twitch when changing angles, but has no negative effect.
+
+### Changes in v2.11 - 22 June 2015
+* Fixed conflict with new symmetry mode behavior in KSP v1.0.3 editor. May introduce a flicker/twitch when changing symmetry modes 1-8, but has no negative effect.
+* Recompiled against KSP v1.0.3 binaries
+
+v2.9/v2.10 not released due to deployment/versioning issues on 3rd party sites.
+
 ### Changes in v2.8 - 21 May 2015
 * New strut and fuel line alignment logic
 * U snaps strut/fuel line directly between parts, with each end at nearest top, bottom, middle or one-quarter position.
