@@ -58,9 +58,6 @@ namespace EditorExtensions
 			InitializeGUI ();
 			GameEvents.onEditorPartEvent.Add (EditorPartEvent);
 			GameEvents.onEditorSymmetryModeChange.Add (EditorSymmetryModeChange);
-
-
-
 		}
 
 		//Unity OnDestroy
@@ -379,46 +376,6 @@ namespace EditorExtensions
 				Log.Error ("Error trying to Horizontally align: " + ex.Message);
 			}
 			return;
-		}
-
-		[Obsolete]
-		void AlignCompoundPart_old(CompoundPart part)
-		{
-			bool hasHit = false;
-			Vector3 dir = part.direction;
-			Vector3 newDirection = Vector3.zero;
-
-			if (dir.y < -0.125f) {
-				//more than -22.5deg vert
-				newDirection = new Vector3 (-0.5f, -0.5f, 0.0f);
-				Log.Debug ("Aligning compoundPart 45deg down");
-			} else if (dir.y > 0.125f) {
-				//more than +22.5deg vert
-				newDirection = new Vector3 (-0.5f, 0.5f, 0.0f);
-				Log.Debug ("Aligning compoundPart 45deg up");
-			} else {
-				//straight ahead
-				newDirection = new Vector3 (-1.0f, 0.0f, 0.0f);
-				Log.Debug ("Aligning compoundPart level");
-			}
-
-			hasHit = part.raycastTarget (newDirection);
-
-			//			if (!hasHit){
-			//				//try just leveling the strut
-			//				Log.Debug ("Original align failed, Aligning compoundPart level");
-			//				part.direction = new Vector3 (dir.x, 0.0f, dir.z);
-			//				hasHit = part.raycastTarget (newDirection);
-			//			}
-
-			List<Part> symParts = part.symmetryCounterparts;
-			//move any symmetry siblings/counterparts
-			foreach (CompoundPart symPart in symParts) {
-				symPart.raycastTarget (newDirection);
-			}
-
-			Log.Debug ("CompoundPart target hit: " + hasHit.ToString ());
-			editor.SetBackup ();
 		}
 
 		void AlignCompoundPart(CompoundPart part, bool snapHeights)
