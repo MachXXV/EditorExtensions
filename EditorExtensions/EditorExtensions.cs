@@ -57,6 +57,10 @@ namespace EditorExtensions
 			InitConfig ();
 			InitializeGUI ();
 			GameEvents.onEditorPartEvent.Add (EditorPartEvent);
+			GameEvents.onEditorSymmetryModeChange.Add (EditorSymmetryModeChange);
+
+
+
 		}
 
 		//Unity OnDestroy
@@ -69,6 +73,7 @@ namespace EditorExtensions
 			//	_partInfoWindow.enabled = false;
 
 			GameEvents.onEditorPartEvent.Remove (EditorPartEvent);
+			GameEvents.onEditorSymmetryModeChange.Remove (EditorSymmetryModeChange);
 		}
 
 		void EditorPartEvent(ConstructionEventType eventType, Part part)
@@ -90,6 +95,11 @@ namespace EditorExtensions
 					Log.Debug ("Part parent is null");
 				}
 			}
+		}
+
+		void EditorSymmetryModeChange(int symMode)
+		{
+			Log.Debug ("EditorSymmetryModeChange: " + symMode.ToString ());
 		}
 
 		void InitConfig ()
@@ -242,7 +252,13 @@ namespace EditorExtensions
 	
 				//using gamesettings keybinding Input.GetKeyDown (cfg.KeyMap.Symmetry)
 				// X, Shift+X : Increment/decrement symmetry mode
-				if (GameSettings.Editor_toggleSymMode.GetKeyDown()) {
+				//if (GameSettings.Editor_toggleSymMode.GetKeyDown()) {
+				//	SymmetryModeCycle (modKeyDown, fineKeyDown);
+				//	return;
+				//}
+
+				//KSP v1.0.3 updated symmetryMode logic, need to fire after the default actions to override
+				if (GameSettings.Editor_toggleSymMode.GetKeyUp()) {
 					SymmetryModeCycle (modKeyDown, fineKeyDown);
 					return;
 				}
@@ -473,6 +489,10 @@ namespace EditorExtensions
 		}
 
 		void SymmetryModeCycle(bool modKeyDown, bool fineKeyDown){
+
+			//InputLockManager.SetControlLock (ControlTypes.EDITOR_SYM_SNAP_UI, "EEX-SymLock");
+
+			Log.Debug ("Starting symmetryMode: " + editor.symmetryMode.ToString ());
 			//only inc/dec symmetry in radial mode, mirror is just 1&2
 			if (editor.symmetryMethod == SymmetryMethod.Radial) {
 				if (modKeyDown || (_symmetryMode < 2 && fineKeyDown)) {
@@ -486,12 +506,17 @@ namespace EditorExtensions
 					_symmetryMode = _symmetryMode + (fineKeyDown ? -1 : 1);
 				}
 				editor.symmetryMode = _symmetryMode;
-				Log.Debug ("Setting symmetry to " + _symmetryMode.ToString ());
+				Log.Debug ("Setting symmetryMode to " + _symmetryMode.ToString ());
 			} else {
 				//editor.symmetryMethod == SymmetryMethod.Mirror
 				//update var with stock action's result
 				_symmetryMode = editor.symmetryMode;
 			}
+
+			//GameEvents.onEditorSymmetryModeChange.Fire(_symmetryMode);
+			//InputLockManager.RemoveControlLock("EEX-SymLock");
+
+			Log.Debug ("Returning symmetryMode: " + editor.symmetryMode.ToString ());
 			return;
 		}
 

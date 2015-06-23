@@ -1,5 +1,9 @@
-## Editor Extensions v2.8 For KSP v1.0.2
-21 May 2015
+## Editor Extensions v2.9 For KSP v1.0.3
+22 Jun 2015
+
+### Changes in v2.9
+* Fixed conflict with new symmetry mode behavior in KSP v1.0.3 editor. May introduce a flicker/twitch when changing symmetry modes 1-8, but has no negative effect.
+* Recompiled against KSP v1.0.3 binaries
 
 ### Changes in v2.8
 * New strut and fuel line alignment logic

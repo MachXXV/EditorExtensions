@@ -58,15 +58,15 @@
     <Reference Include="System.Xml" />
     <Reference Include="Assembly-CSharp">
       <HintPath>externals\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>externals\UnityEngine.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>externals\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>externals\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

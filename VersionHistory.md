@@ -1,5 +1,12 @@
 ﻿### Previous Version History
 
+### Changes in v2.8 - 21 May 2015
+* New strut and fuel line alignment logic
+* U snaps strut/fuel line directly between parts, with each end at nearest top, bottom, middle or one-quarter position.
+* Alt/Mod-U aligns strut at current height straight between parts, does not snap height on either end.
+* Vertical/Horizontal alignment takes no action if part is currently attached to a node (green ball)
+* Numpad . (period) centers camera around part under cursor. Incomplete feature - while refocused part dragging is offset. Hitting period with no part under cursor resets back to normal.
+
 ### Changes in v2.7 - 2 May 2015
 * Recompile against KSP v1.0.2 binaries
 * Updated KSP-AVC version file to include wildcard for minor 1.0.* KSP versions
