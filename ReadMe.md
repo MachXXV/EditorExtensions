@@ -13,7 +13,7 @@
 * Vertical/Horizontal alignment takes no action if part is currently attached to a node (green ball)
 * Numpad . (period) centers camera around part under cursor. Incomplete feature - while refocused part dragging is offset. Hitting period with no part under cursor resets back to normal.
 
-####[Download v2.11 via GitHub](https://github.com/MachXXV/EditorExtensions/releases/download/v2.8/EditorExtensions_v2.11.zip)
+####[Download v2.11 via GitHub](https://github.com/MachXXV/EditorExtensions/releases/download/v2.11/EditorExtensions_v2.11.zip)
 
 ####Alternate Downloads
 * [KerbalStuff](https://kerbalstuff.com/mod/442)
