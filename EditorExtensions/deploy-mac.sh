@@ -1,4 +1,6 @@
-mkdir -p /Applications/KSP_osx/GameData/EditorExtensions/Textures/
-cp bin/Debug/EditorExtensions.dll /Applications/KSP_osx/GameData/EditorExtensions/
-cp bin/Debug/Textures/*.png /Applications/KSP_osx/GameData/EditorExtensions/Textures/
-cp bin/Debug/EditorExtensions.version /Applications/KSP_osx/GameData/EditorExtensions/
+mkdir -p $HOME'/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/GameData/EditorExtensions/'
+cp bin/Debug/EditorExtensions.dll $HOME'/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/GameData/EditorExtensions/'
+cp bin/Debug/EditorExtensions.version $HOME'/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/GameData/EditorExtensions/'
+
+mkdir -p $HOME'/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/GameData/EditorExtensions/Textures/'
+cp bin/Debug/Textures/*.png $HOME'/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/GameData/EditorExtensions/Textures/'
