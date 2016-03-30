@@ -1,4 +1,7 @@
-## Editor Extensions v2.12 For KSP v1.0.3
+## Editor Extensions v3.0 For KSP v1.1
+
+### Changes in v3.0 - April 2016
+* Updated for KSP v1.1
 
 ### Changes in v2.12 - 23 June 2015
 * Fixed conflict with new angle snap behavior in KSP v1.0.3 editor. May introduce a flicker/twitch when changing angles, but has no negative effect.
@@ -15,10 +18,9 @@
 * Vertical/Horizontal alignment takes no action if part is currently attached to a node (green ball)
 * Numpad . (period) centers camera around part under cursor. Incomplete feature - while refocused part dragging is offset. Hitting period with no part under cursor resets back to normal.
 
-####[Download v2.12 via GitHub](https://github.com/MachXXV/EditorExtensions/releases/download/v2.12/EditorExtensions_v2.12.zip)
+####[Download v3.0 via GitHub](https://github.com/MachXXV/EditorExtensions/releases/download/v3.0/EditorExtensions_v3.0.zip)
 
 ####Alternate Downloads
-* [KerbalStuff](https://kerbalstuff.com/mod/442)
 * [Curseforge](http://kerbal.curseforge.com/ksp-mods/230776)
 * Via the [KSP CKAN Package Manager](http://forum.kerbalspaceprogram.com/threads/100067)
 

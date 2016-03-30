@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Editor Extensions")]
-[assembly: AssemblyCopyright("MachXXV 2015")]
+[assembly: AssemblyCopyright("MachXXV 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2.12.*")]
+[assembly: AssemblyVersion("3.0.*")]
 
