@@ -164,7 +164,7 @@ namespace EditorExtensions
 		//Unity update
 		void Update ()
 		{
-			if (editor.shipNameField.Focused || editor.shipDescriptionField.Focused)
+			if (editor.shipNameField.isFocused || editor.shipDescriptionField.isFocused)
 				return;
 
 			//ignore hotkeys while settings window is open
@@ -727,7 +727,7 @@ namespace EditorExtensions
 
 				} else {
 					//angle snap is off, show stock sprite
-					editor.angleSnapSprite.PlayAnim (0);
+					//editor.angleSnapSprite.PlayAnim (0);
 					//editor.angleSnapSprite.Hide (false);
 					editor.angleSnapSprite.gameObject.SetActive (true);
 				}
