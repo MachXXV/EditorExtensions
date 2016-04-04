@@ -557,7 +557,7 @@ namespace EditorExtensions
 				stretchWidth = true,
 				stretchHeight = true,
 				alignment = TextAnchor.MiddleCenter,
-				fontSize = 18,
+				fontSize = 14,
 				fontStyle = FontStyle.Bold,
 				name = "SymmetryLabel"
 			};
@@ -663,11 +663,11 @@ namespace EditorExtensions
 		//symmetry & angle sprite/label size and position
 		const int advancedModeOffset = 34;
 		const int angleSnapLabelSize = 43;
-		const int angleSnapLabelLeftOffset = 209;
-		const int angleSnapLabelBottomOffset = 61;
+		const int angleSnapLabelLeftOffset = 219;
+		const int angleSnapLabelBottomOffset = 55;
 		const int symmetryLabelSize = 56;
-		const int symmetryLabelLeftOffset = 152;
-		const int symmetryLabelBottomOffset = 63;
+		const int symmetryLabelLeftOffset = 162;
+		const int symmetryLabelBottomOffset = 58;
 		Rect angleSnapLabelRect = new Rect () {
 			xMin = angleSnapLabelLeftOffset,
 			xMax = angleSnapLabelLeftOffset + angleSnapLabelSize,
