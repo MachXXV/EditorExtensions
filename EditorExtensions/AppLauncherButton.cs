@@ -17,7 +17,7 @@ namespace EditorExtensions
 
 		private void Start ()
 		{
-			if (button == null) {
+			if (AppLauncherButton.Instance == null) {
 				OnGuiAppLauncherReady();
 			}
 		}
