@@ -1,6 +1,6 @@
-## Editor Extensions v3.0 For KSP v1.1
+## Editor Extensions v3.0 Beta For KSP v1.1
 
-### Changes in v3.0 - April 2016
+### Changes in v3.0 Beta - 4 April 2016
 * Updated for KSP v1.1
 
 ### Changes in v2.12 - 23 June 2015
