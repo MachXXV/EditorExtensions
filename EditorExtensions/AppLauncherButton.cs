@@ -53,9 +53,6 @@ namespace EditorExtensions
 				);
 					
 				Log.Debug("Added ApplicationLauncher button");
-
-				//this.button.onTrue = OnButtonTrue;
-				//this.button.onFalse = OnButtonFalse;
 			} catch (Exception ex) {
 				Log.Error("Error adding ApplicationLauncher button: " + ex.Message);
 			}
@@ -65,11 +62,13 @@ namespace EditorExtensions
 		private void OnButtonTrue ()
 		{
 			EditorExtensions.Instance.Show();
+			//this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOn, false));
 		}
 
 		private void OnButtonFalse ()
 		{
 			EditorExtensions.Instance.Hide();
+			//this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOff, false));
 		}
 
 		private void Update ()
@@ -77,27 +76,6 @@ namespace EditorExtensions
 			if (this.button == null) {
 				return;
 			}
-
-//			if(this.button.State != RUIToggleButton.ButtonState.TRUE)
-//				this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOn, false));
-//			else
-//				this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOff, false));
-
-//			try {
-//				if (EditorLogic.fetch != null) {
-//					if (EditorExtensions.Instance.Visible && this.button.State != RUIToggleButton.ButtonState.TRUE) {
-//						this.button.SetTrue ();
-//						//this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOn, false));
-//					} else if (!EditorExtensions.Instance.Visible && this.button.State != RUIToggleButton.ButtonState.FALSE) {
-//						this.button.SetFalse ();
-//						//this.button.SetTexture(GameDatabase.Instance.GetTexture (texPathOff, false));
-//					}
-//				} else if (this.button.State != RUIToggleButton.ButtonState.DISABLED) {
-//					this.button.Disable ();
-//				}
-//			} catch (Exception ex) {
-//				Log.Error ("Error updating ApplicationLauncher button: " + ex.Message);
-//			}
 		}
 	}
 }
