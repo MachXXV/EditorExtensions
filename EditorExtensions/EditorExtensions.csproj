@@ -56,33 +56,26 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine.UI">
-      <HintPath>externals\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>externals\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>externals\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>externals\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="KSPUtil">
-      <HintPath>externals\KSPUtil.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="KSPCore">
-      <HintPath>externals\KSPCore.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="KSPAssets">
       <HintPath>externals\KSPAssets.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="KSPCore">
+      <HintPath>externals\KSPCore.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>externals\KSPUtil.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>externals\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>externals\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
